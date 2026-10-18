@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>เกิดในเถ้า</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -650,6 +651,7 @@ details.minimap .map{margin-top:8px;cursor:default}
 </main>
 
 <script>
+// ---- engine.js ----
 // ===== ENGINE (no DOM) =====
 const R = (a, b) => a + Math.random() * (b - a);
 const pick = a => a[Math.floor(Math.random() * a.length)];
@@ -1296,7 +1298,6 @@ function statsFor(r, n) {
   ages.sort((x, y) => x - y);
   return { mean: sum / n, median: ages[n >> 1], s5: s5 / n, s15: s15 / n, s30: s30 / n, s50: s50 / n };
 }
-function worldStats(n = 500) { const out = {}; for (const r of REALMS) out[r.id] = statsFor(r, n); return out; }
 
 // ---------- legends ----------
 const LEGENDS = [
@@ -1319,8 +1320,27 @@ const LEGENDS = [
 ];
 function legendsFor(p, ws) { return LEGENDS.filter(l => { try { return l.c(p, ws); } catch (e) { return false; } }); }
 
+// ===== HOW LATER FILES EXTEND THE ENGINE =====
+// each system (family, housing, disease...) changes core behaviour by wrapping a global function.
+// every wrap goes through extend() so it is labelled and listed in LAYERS in load order:
+// type LAYERS in the browser console to see exactly what runs, outermost last.
+const LAYERS = [];
+function extend(name, label, make) {
+  const inner = globalThis[name];
+  if (typeof inner !== 'function') throw new Error('extend: no function ' + name);
+  globalThis[name] = make(inner);
+  LAYERS.push(name + ' · ' + label);
+}
+// join yearly text pieces; pieces can be strings, null, or arrays of strings
+const joinT = (...xs) => xs.flat().filter(Boolean).join(' · ') || null;
+// the common cases: add something after the core year, after a person is made, or adjust death risks
+function afterYear(label, fn) { extend('applyFocus', label, inner => function (p) { const t = inner(p); if (!p.alive) return t; return joinT(t, fn(p)); }); }
+function onBorn(label, fn) { extend('makePerson', label, inner => function (realm, parent) { const p = inner(realm, parent); fn(p, parent, realm); return p; }); }
+function modHazards(label, fn) { extend('hazards', label, inner => function (p) { const H = inner(p); fn(p, H); return H; }); }
 
 
+
+// ---- rpg.js ----
 // ===== RPG LAYER: attributes, skills, magic, levels, dice checks, careers =====
 const ATTRS = [
   { id: 'STR', n: 'พลัง', d: 'แรงกาย การต่อสู้ระยะประชิด งานหนัก' },
@@ -1706,6 +1726,7 @@ LEGENDS.push(
   { id: 'spellmaster', n: 'ผู้รอบรู้ทุกสำนัก', d: 'ฝึกเวทไฟ เวทรักษา และเวทมายาถึงขั้น 3 ทั้งหมด', c: p => ['fire', 'heal', 'illusion'].every(s => rank(p, s) >= 3) },
 );
 
+// ---- content.js ----
 // ===== CONTENT PACK 2: more events, choices, storylines, delayed consequences =====
 const eraActive = (p, id) => { const e = ERAS.find(x => x.id === id); const y = yearOf(p); return y >= e.from && y <= e.to; };
 const rural = p => !has(p, 'serenth', 'undercity', 'aurelis');
@@ -2046,6 +2067,7 @@ LEGENDS.push(
   { id: 'cat', n: 'แมวที่ตามกลับบ้าน', d: 'มีแมวจรมาอยู่ด้วยจนแก่', c: p => p.flags.cat === -1 },
 );
 
+// ---- content3.js ----
 // ===== CONTENT PACK 3: more variety so lives repeat less =====
 EVENTS.push(
   { w: 2, c: p => p.cls >= 2 && p.age > 6, t: () => 'คุณได้รองเท้าคู่ใหม่เป็นครั้งแรกในรอบหลายปี', f: p => { p.happy += 3; } },
@@ -2144,6 +2166,7 @@ LEGENDS.push(
   { id: 'festival', n: 'ดาวของเทศกาล', d: 'ได้รับบทนำในเทศกาลของหมู่บ้าน', c: p => p.flags.festival },
 );
 
+// ---- combat.js ----
 // ===== WEAPONS & COMBAT =====
 // --- new weapon skills (sword and bow already exist) ---
 (() => {
@@ -2159,10 +2182,9 @@ LEGENDS.push(
 })();
 function ensureSkills(p) { SKILLS.forEach(s => { if (!p.skills[s.id]) p.skills[s.id] = { r: 0, x: 0 }; }); gear(p); }
 
-const _access = access;
-access = function (p, sid) {
+extend('access', 'combat: who may train spear, axe, dagger and shield', inner => function (p, sid) {
   const no = why => ({ ok: false, why, mult: 0, cost: 0 });
-  if (!['spear', 'axe', 'dagger', 'shield'].includes(sid)) return _access(p, sid);
+  if (!['spear', 'axe', 'dagger', 'shield'].includes(sid)) return inner(p, sid);
   const s = SBY[sid], r = p.realm.id, f = p.flags;
   if (p.age < s.min) return no(`เริ่มฝึกได้ตอนอายุ ${s.min} ปี`);
   if (p.cls === 4) return no('ทาสห้ามจับอาวุธ');
@@ -2171,7 +2193,7 @@ access = function (p, sid) {
   if (sid === 'axe') return (r === 'kragmor' || p.race === 'ออร์ค' || p.race === 'คนแคระ') ? { ok: true, mult: 1.1, cost: 0, label: 'ขวานคืออาวุธประจำเผ่า' } : { ok: true, mult: .6, cost: 0, label: 'ฝึกจากการผ่าฟืน' };
   if (sid === 'dagger') return f.thiefGuild ? { ok: true, mult: 1.3, cost: 0, label: 'กลุ่มโจรสอนให้' } : r === 'undercity' ? { ok: true, mult: 1, cost: 0, label: 'ตรอกซอกซอยใต้กำแพง' } : { ok: true, mult: .6, cost: 0, label: 'ฝึกเอง' };
   if (sid === 'shield') return army ? { ok: true, mult: 1.2, cost: 0, label: 'ครูฝึกในกองทัพ' } : { ok: true, mult: .4, cost: 0, label: 'ไม่มีใครสอนใช้โล่' };
-};
+});
 
 // --- gear ---
 const WEAPONS = {
@@ -2337,11 +2359,9 @@ function autoFight(p) {
 function fightOpt(label, foeId, o) { return Object.assign(opt(label, p => { startFight(p, foeId, o); return o.intro || `${FOES[foeId].n}เข้ามาประชิดตัว`; }), { fight: foeId }); }
 
 // --- engine hooks ---
-const _resolveChoice = resolveChoice;
-resolveChoice = function (p, o) { let t = _resolveChoice(p, o); if (p.pendingFight && p.auto) { const e = autoFight(p); if (e) t += ' ' + e; } return t; };
-const _previewOption = previewOption;
-previewOption = function (p, o, n = 40) {
-  if (!o.fight) return _previewOption(p, o, n);
+extend('resolveChoice', 'combat: bots fight their own fights automatically', inner => function (p, o) { let t = inner(p, o); if (p.pendingFight && p.auto) { const e = autoFight(p); if (e) t += ' ' + e; } return t; });
+extend('previewOption', 'combat: preview a fight as win chance and risk', inner => function (p, o, n = 40) {
+  if (!o.fight) return inner(p, o, n);
   if (o.need && !o.need(p)) return null;
   const K = ['health', 'happy', 'know', 'wealth'], sum = { health: 0, happy: 0, know: 0, wealth: 0 }, lo = {}, hi = {};
   let dead = 0, alive = 0, won = 0;
@@ -2355,12 +2375,11 @@ previewOption = function (p, o, n = 40) {
   }
   const avg = {}; K.forEach(k => avg[k] = alive ? sum[k] / alive : 0);
   return { dead: dead / n, avg, lo, hi, down: 0, up: 0, moved: 0, late: 0, chance: null, win: won / n };
-};
+});
 
 // --- replace old one-roll fights with real fights ---
-const _buildFate = buildFate;
-buildFate = function (p, cause, kind) {
-  const F = _buildFate(p, cause, kind);
+extend('buildFate', 'combat: replace old one-roll fights with real fights', inner => function (p, cause, kind) {
+  const F = inner(p, cause, kind);
   const live = (q, t) => { q.flags.reprieves++; gainXP(q, 25); return t; };
   if (kind === 'beast') {
     const foe = beastFor(p);
@@ -2371,7 +2390,7 @@ buildFate = function (p, cause, kind) {
   }
   if (kind === 'war') F.options = F.options.map(o => o.label === 'สู้จนถึงที่สุด' ? fightOpt('สู้จนถึงที่สุด', 'veteran', { lethal: .9, death: cause, intro: 'ทหารผ่านศึกของข้าศึกตรงเข้ามาหาคุณ', onEnd: (q, r) => r === 'win' ? (q.wealth += 15, q.happy += 10, q.flags.hero = true, live(q, 'พอฝุ่นจางลง คุณยังยืนอยู่ ผู้คนเล่าเรื่องนี้กันไปอีกหลายปี')) : r === 'fled' ? live(q, 'คุณถอยออกมาจากแนวรบได้ทันเวลา') : r === 'lose' ? live(q, 'คุณล้มลงกลางสนามรบ แต่มีคนลากคุณกลับมาได้') : '' }) : o);
   return F;
-};
+});
 function patchChoice(id, label, mk) {
   const c = CHOICES.find(x => x.id === id); if (!c) return;
   const orig = c.options;
@@ -2430,35 +2449,20 @@ LEGENDS.push(
   { id: 'fists', n: 'มือเปล่า', d: 'ชนะการต่อสู้โดยไม่มีอาวุธ', c: p => p.flags.unarmedWin },
 );
 
-// --- auto play: let simulated lives pick a weapon and buy gear sometimes ---
-const _simLife = simLife;
-simLife = function (realm) {
-  const p = makePerson(realm); p.auto = true;
-  while (p.alive) {
-    if (p.age >= 7 && Math.random() < .15) p.focus = pick(FOCI);
-    if (p.age === 12 && !canArm(p)) setWeapon(p, pick(['sword', 'spear', 'axe', 'bow', 'dagger']));
-    if (p.age >= 14 && Math.random() < .1) { const s = shopList(p).filter(x => !x.why); if (s.length) buy(p, pick(s).id); }
-    const ch = checkChoice(p);
-    if (ch) { resolveChoice(p, autoChoose(p, ch)); if (!p.alive) { p.years.push({ h: p.happy }); break; } }
-    const r = finishYear(p);
-    if (r.fate) { resolveChoice(p, autoChoose(p, r.fate)); afterFate(p); }
-  }
-  return p;
-};
 
+// ---- careers.js ----
 // ===== CAREERS & TRAINING AREAS =====
 // new craft skill so the craft path has more than smithing
 (() => {
   const s = { id: 'craft', n: 'งานช่าง', a: 'DEX', g: 'งานฝีมือ', min: 10 };
   const i = SKILLS.findIndex(x => x.id === 'smith') + 1; SKILLS.splice(i, 0, s); SBY.craft = s;
 })();
-const _access2 = access;
-access = function (p, sid) {
-  if (sid !== 'craft') return _access2(p, sid);
+extend('access', 'careers: where the craft skill can be learned', inner => function (p, sid) {
+  if (sid !== 'craft') return inner(p, sid);
   if (p.age < 10) return { ok: false, why: 'เริ่มฝึกได้ตอนอายุ 10 ปี', mult: 0, cost: 0 };
   if (has(p, 'aurelis', 'serenth')) return { ok: true, mult: 1.1, cost: 2, label: 'โรงช่างในเมือง · ค่าเรียน 2/ปี' };
   return { ok: true, mult: p.cls === 4 ? .6 : .9, cost: 0, label: p.cls === 4 ? 'เรียนจากงานที่นายสั่ง' : 'ช่างในหมู่บ้านสอน' };
-};
+});
 
 // the training areas shown on the life screen
 const AREAS = [
@@ -2585,12 +2589,11 @@ function takeCareer(p, id) {
 const careerPay = (p, c) => c.pay[p.careerRank || 0] * (p.realm.wealth / 50 + .4) * .9 * incomeMod(p);
 
 // ---- the year at work ----
-const _applyFocus = applyFocus;
-applyFocus = function (p) {
-  if (p.age < 14 || p.focus !== 'work') return _applyFocus(p);
+extend('applyFocus', 'careers: a working year pays, tires, and can promote', inner => function (p) {
+  if (p.age < 14 || p.focus !== 'work') return inner(p);
   ensureCareer(p);
   const c = CBY[p.career];
-  if (c.id === 'slave') return _applyFocus(p);
+  if (c.id === 'slave') return inner(p);
   { const v = careerPay(p, c) * (.8 + Math.random() * .4); p.wealth = clampW(p.wealth + v); led(p, 'work', v); }
   p.health = clamp(p.health - c.phys);
   p.careerYears = (p.careerYears || 0) + 1;
@@ -2604,7 +2607,7 @@ applyFocus = function (p) {
   if (c.base && c.id === 'farmer' && rk === 0 && p.wealth >= 60) { p.careerRank = 2; return 'คุณเก็บเงินจนซื้อที่นาเป็นของตัวเองได้'; }
   if (c.base && c.id === 'laborer' && rk === 0 && p.careerYears >= 10 && (am(p, 'STR') >= 1 || am(p, 'CHA') >= 1) && roll(.25)) { p.careerRank = 2; return 'นายจ้างให้คุณคุมคนงานคนอื่น'; }
   return Math.random() < .5 ? pick(c.flav) : null;
-};
+});
 
 // ---- career risks and story beats ----
 CHOICES.push(
@@ -2651,22 +2654,7 @@ LEGENDS.push(
   { id: 'offland', n: 'พ้นจากที่ดิน', d: 'เกิดเป็นไพร่ แต่ได้ทำอาชีพที่ตัวเองเลือก', c: p => p.bornCls === 3 && p.career && !CBY[p.career].base },
 );
 
-// ---- auto play: occasionally pick a better career ----
-const _simLife2 = simLife;
-simLife = function (realm) {
-  const p = makePerson(realm); p.auto = true;
-  while (p.alive) {
-    if (p.age >= 7 && Math.random() < .15) p.focus = pick(['work', 'work', 'train', 'love', 'rest']);
-    if (p.age === 12 && !canArm(p)) setWeapon(p, pick(['sword', 'spear', 'axe', 'bow', 'dagger']));
-    if (p.age >= 14 && Math.random() < .1) { const s = shopList(p).filter(x => !x.why); if (s.length) buy(p, pick(s).id); }
-    if (p.age >= 14) { ensureCareer(p); if (Math.random() < .15) { const open = CAREERS.filter(c => !c.base && !careerMissing(p, c).length); if (open.length) takeCareer(p, pick(open).id); } }
-    const ch = checkChoice(p);
-    if (ch) { resolveChoice(p, autoChoose(p, ch)); if (!p.alive) { p.years.push({ h: p.happy }); break; } }
-    const r = finishYear(p);
-    if (r.fate) { resolveChoice(p, autoChoose(p, r.fate)); afterFate(p); }
-  }
-  return p;
-};
+// (the simulated bot life is defined once, in adventure.js, after every system exists)
 // when the army takes you, the army is your job
 (() => {
   const c = CHOICES.find(x => x.id === 'enlist'); if (!c) return;
@@ -2677,8 +2665,7 @@ CAREERS.push({ id: 'soldier', base: true, n: ['พลทหาร', 'นาย�
   flav: ['คุณฝึกซ้อมในค่ายทหารทุกเช้า', 'กองของคุณถูกส่งไปเฝ้าด่านชายแดน', 'คุณได้รับเงินเดือนทหารครบทั้งปี'] });
 CBY.soldier = CAREERS[CAREERS.length - 1];
 // army rank drives soldier title
-const _applyFocus2 = applyFocus;
-applyFocus = function (p) { if (p.career === 'soldier') { p.careerRank = Math.min(2, p.flags.armyRank || 0); if (!p.flags.enlisted) setCareer(p, defaultCareer(p)); } return _applyFocus2(p); };
+extend('applyFocus', 'careers: a soldier ranks by army rank', inner => function (p) { if (p.career === 'soldier') { p.careerRank = Math.min(2, p.flags.armyRank || 0); if (!p.flags.enlisted) setCareer(p, defaultCareer(p)); } return inner(p); });
 
 // ---- serfs and slaves can choose to try for freedom themselves ----
 const bondPrice = p => p.cls === 4 ? 60 : 35;
@@ -2695,8 +2682,7 @@ function bondChoice(p) {
       opt('ยังไม่ใช่ตอนนี้', () => 'คุณกลับไปนอน พรุ่งนี้ยังต้องทำงานเหมือนเดิม'),
     ] };
 }
-const _applyFocus3 = applyFocus;
-applyFocus = function (p) { if (p.age >= 14) ensureCareer(p); return _applyFocus3(p); };
+extend('applyFocus', 'careers: every adult has a career', inner => function (p) { if (p.age >= 14) ensureCareer(p); return inner(p); });
 
 // ===== REALISM PASS =====
 // 1) working at a trade teaches it, like an apprenticeship
@@ -2732,8 +2718,7 @@ function payLiving(p) {
   return null;
 }
 // 4) children of the poor work young, for a child's pay
-const _applyFocus4 = applyFocus;
-applyFocus = function (p) {
+extend('applyFocus', 'careers: child labour, learning on the job, cost of living', inner => function (p) {
   if (p.age >= 7 && p.age < 14 && p.focus === 'work') {
     if (p.cls === 4) { p.health = clamp(p.health - 1.5); return roll(.3) ? 'เด็กทาสอย่างคุณถูกใช้ให้ขนน้ำและเลี้ยงสัตว์ตั้งแต่เช้าจนค่ำ' : null; }
     const g = (p.cls >= 2 ? 1.2 : .5) * (p.realm.wealth / 50 + .4) * (p.age >= 10 ? 1 : .5);
@@ -2742,18 +2727,17 @@ applyFocus = function (p) {
     if (p.age >= 10 && access(p, sid).ok) { const sk = p.skills[sid]; sk.x += 8; if (sk.x >= 100) { sk.x = 0; sk.r++; return `คุณช่วยงานผู้ใหญ่มาหลายปี จน${SBY[sid].n}ขึ้นเป็นขั้น ${sk.r}`; } }
     return roll(.4) ? pick(p.cls >= 2 ? ['คุณช่วยพ่อแม่ทำงานตั้งแต่เช้ามืด แทนที่จะได้ไปเล่นกับเด็กคนอื่น', 'คุณรับจ้างไล่นกในนาของเพื่อนบ้าน ได้ข้าวกลับบ้านหนึ่งถุง', 'คุณแบกของที่ตลาดได้แค่ครึ่งหนึ่งของผู้ใหญ่ ค่าจ้างก็ได้แค่ครึ่งเดียว'] : ['คุณช่วยงานในร้านของครอบครัว นับเหรียญจนคล่อง', 'พ่อแม่ให้คุณนั่งดูผู้ใหญ่เจรจาการค้า']) : null;
   }
-  let t = _applyFocus4(p);
+  let t = inner(p);
   if (p.age >= 14 && p.focus === 'work') { const l = learnOnJob(p, 13); if (l) t = l; }
   const lv = payLiving(p); if (lv) t = t ? t + ' · ' + lv : lv;
   return t;
-};
+});
 // 3) a trade needs an entry fee and someone to vouch for you; apprentices are taken young
 const FEE = { scribe: 8, physician: 15, alchemist: 15, scholar: 6, priest: 6, envoy: 20, smith: 10, artisan: 8, healer: 6 };
 const OFFICIAL = ['guard', 'scribe', 'priest', 'envoy', 'physician'];
 const fee = (p, c) => FEE[c.id] ? Math.round(FEE[c.id] * (p.cls <= 1 ? .5 : 1)) : 0;
-const _careerMissing = careerMissing;
-careerMissing = function (p, c, rk = 0) {
-  const out = _careerMissing(p, c, rk);
+extend('careerMissing', 'careers: guild fee, fugitives barred from office, late starters must be better', inner => function (p, c, rk = 0) {
+  const out = inner(p, c, rk);
   if (c.base || rk > 0 || p.cls >= 3) return out;
   const f = fee(p, c); if (f && p.wealth < f) out.push(`ค่าเข้ากิลด์ ${money(f)}`);
   if (p.flags.fugitive && OFFICIAL.includes(c.id)) out.push('ต้องมีเอกสารตัวตน แต่คุณเป็นคนหนี');
@@ -2763,11 +2747,11 @@ careerMissing = function (p, c, rk = 0) {
     if (!ok) out.push('อายุเกิน 30 ไม่มีใครรับเป็นลูกมือ ต้องเก่งกว่าที่กำหนด 2 ขั้น');
   }
   return out;
-};
-const _takeCareer = takeCareer;
-takeCareer = function (p, id) { const c = CBY[id], f = fee(p, c); const ok = _takeCareer(p, id); if (ok && f) p.wealth = clampW(p.wealth - f); return ok; };
+});
+extend('takeCareer', 'careers: guild fees when taking a career', inner => function (p, id) { const c = CBY[id], f = fee(p, c); const ok = inner(p, id); if (ok && f) p.wealth = clampW(p.wealth - f); return ok; });
 LEGENDS.push({ id: 'hungry', n: 'ปากกัดตีนถีบ', d: 'อดอยากเพราะเงินไม่พอกินมาแล้ว 5 ปี', c: p => (p.flags.hungry || 0) >= 5 });
 
+// ---- family.js ----
 // ===== FAMILY: parents, siblings, spouse, children =====
 // member: { id, rel, name, sex, a0 (age when you were born; negative = born after you), realm, cls,
 //           alive, diedAge, dAge (your age when they died), cause, job, married, moved, fixedAt, fixedCause }
@@ -2918,11 +2902,9 @@ function famYear(p) {
 }
 
 // --- hooks ---
-const _makePerson = makePerson;
-makePerson = function (realm, parent) { const p = _makePerson(realm, parent); initFamily(p, parent); return p; };
-const _makeSibling = makeSibling;
-makeSibling = function (d) {
-  const p = _makeSibling(d);
+onBorn('family: parents and siblings', (p, parent) => initFamily(p, parent));
+extend('makeSibling', 'family: a younger sibling shares the same family', inner => function (d) {
+  const p = inner(d);
   if (d.fam) {
     p.fam = d.fam.map(m => Object.assign({}, m, { a0: m.a0 + 2, dAge: m.dAge != null ? m.dAge - 2 : m.dAge, fixedAt: m.fixedAt != null ? m.fixedAt - 2 : m.fixedAt }))
       .filter(m => !(m.rel === 'sibling' && m.a0 === 0) && m.rel !== 'spouse' && m.rel !== 'child');
@@ -2930,13 +2912,8 @@ makeSibling = function (d) {
     p.fam.sort((a, b) => b.a0 - a.a0);
   }
   return p;
-};
-const _applyFocus5 = applyFocus;
-applyFocus = function (p) {
-  const t = _applyFocus5(p);
-  const f = p.alive ? famYear(p) : null;
-  return [t, f].filter(Boolean).join(' · ') || null;
-};
+});
+afterYear('family: births, deaths, marriages', famYear);
 // the old one-line "a parent died" event is replaced by the family simulation
 (() => {
   const e = EVENTS.find(x => x.f && /done\.parent = 1/.test(x.f.toString()) && /จากไป/.test(x.t.toString()));
@@ -2974,6 +2951,7 @@ function famBirthLine(p) {
   return t;
 }
 
+// ---- economy.js ----
 // ===== MONEY, BUSINESS, MATERIALS, LOANS =====
 // ---- yearly ledger: where the money came from and went ----
 const LEDGER_L = { work: 'ค่าจ้างจากงาน', biz: 'กำไรจากกิจการ', rent: 'รายได้จากที่ดินของตระกูล', sales: 'ขายของ', living: 'ค่ากิน ค่าเช่า และภาษี', fees: 'ค่าเรียน', loan: 'ผ่อนหนี้', buy: 'ซื้อของและลงทุน', other: 'เหตุการณ์อื่นๆ' };
@@ -3187,10 +3165,9 @@ function loanYear(p) {
 }
 
 // ---- yearly hook ----
-const _applyFocus6 = applyFocus;
-applyFocus = function (p) {
+extend('applyFocus', 'economy: training fees, business, loans, finds; closes the yearly ledger', inner => function (p) {
   const fee = p.focus === 'train' && p.trainSkill && access(p, p.trainSkill).ok ? access(p, p.trainSkill).cost : 0;
-  const parts = [_applyFocus6(p)];
+  const parts = [inner(p)];
   if (fee && p.focus === 'train') led(p, 'fees', -fee);
   if (p.alive) {
     parts.push(bizYear(p));
@@ -3203,7 +3180,7 @@ applyFocus = function (p) {
   }
   rollLedger(p);
   return parts.filter(Boolean).join(' · ') || null;
-};
+});
 // a business owner with nothing to do on the side: the 'biz' focus is handled above, the old engine ignores it
 LEGENDS.push(
   { id: 'tycoon', n: 'เจ้าสัว', d: 'ขยายกิจการจนถึงขั้นใหญ่ที่สุด', c: p => p.flags.bizTycoon },
@@ -3211,29 +3188,7 @@ LEGENDS.push(
   { id: 'gatherer', n: 'คนเก็บของป่า', d: 'หาของได้รวมกันมากกว่า 30 ชิ้นในชีวิตเดียว', c: p => (p.flags.gathered || 0) >= 30 },
   { id: 'shardfind', n: 'เศษฟ้า', d: 'เคยพบเศษเส้นใยที่ร่วงลงมาจากฟ้า', c: p => (p.flags.gathered || 0) > 0 && p.flags.foundShard },
 );
-const _addMat = addMat;
-addMat = function (p, m, n) { if (m === 'shard') p.flags.foundShard = true; return _addMat(p, m, n); };
-
-// ---- auto play for the census ----
-const _simLife3 = simLife;
-simLife = function (realm) {
-  const p = makePerson(realm); p.auto = true;
-  while (p.alive) {
-    if (p.age >= 7 && Math.random() < .15) p.focus = pick(['work', 'work', 'train', 'love', 'rest']);
-    if (p.biz && Math.random() < .3) p.focus = 'biz';
-    if (p.age === 12 && !canArm(p)) setWeapon(p, pick(['sword', 'spear', 'axe', 'bow', 'dagger']));
-    if (p.age >= 14 && Math.random() < .1) { const s = shopList(p).filter(x => !x.why); if (s.length) buy(p, pick(s).id); }
-    if (p.age >= 14) { ensureCareer(p); if (Math.random() < .15) { const open = CAREERS.filter(c => !c.base && !careerMissing(p, c).length); if (open.length) takeCareer(p, pick(open).id); } }
-    if (p.age >= 7 && Math.random() < .3) forage(p);
-    if (p.inv) for (const m of MAT_IDS) if ((p.inv[m] || 0) >= 3) sellMat(p, m, p.inv[m]);
-    if (!p.biz && p.age >= 16 && Math.random() < .08) { const o = Object.keys(BIZ).filter(id => !bizMissing(p, id).length); if (o.length) openBiz(p, pick(o)); }
-    const ch = checkChoice(p);
-    if (ch) { resolveChoice(p, autoChoose(p, ch)); if (!p.alive) { p.years.push({ h: p.happy }); break; } }
-    const r = finishYear(p);
-    if (r.fate) { resolveChoice(p, autoChoose(p, r.fate)); afterFate(p); }
-  }
-  return p;
-};
+extend('addMat', 'economy: finding a sky shard is remembered', inner => function (p, m, n) { if (m === 'shard') p.flags.foundShard = true; return inner(p, m, n); });
 
 // the old 'open a shop' story beat now means joining the merchants' guild once your business has grown
 (() => {
@@ -3246,13 +3201,10 @@ simLife = function (realm) {
   ];
 })();
 // slaves own nothing and serfs very little, whatever the realm's average wealth
-const _makePerson2 = makePerson;
-makePerson = function (realm, parent) {
-  const p = _makePerson2(realm, parent);
+onBorn('economy: serfs and slaves start with almost nothing', p => {
   const cap = [Infinity, Infinity, Infinity, 10, 3][p.cls];
   if (p.wealth > cap) { p.wealth = Math.round(cap * (.4 + Math.random() * .6)); p.startWealth = p.wealth; }
-  return p;
-};
+});
 
 // ===== COINS =====
 // 1 unit of wealth = 1 silver. 10 copper = 1 silver, 10 silver = 1 gold, 10 gold = 1 platinum
@@ -3268,13 +3220,11 @@ function moneyText(t) {
   return t.replace(/ทรัพย์\s?(\d+(?:\.\d+)?)/g, (_, n, i, str) => (i > 0 && !/[\s(]/.test(str[i - 1]) ? ' ' : '') + money(+n)).replace(/ค่าเรียน (\d+(?:\.\d+)?)\/ปี/g, (_, n) => `ค่าเรียน ${money(+n)}/ปี`);
 }
 // old money from noble houses: the rich start far above everyone else
-const _makePerson3 = makePerson;
-makePerson = function (realm, parent) {
-  const p = _makePerson3(realm, parent);
+onBorn('economy: old money, the rich start far ahead', (p, parent) => {
   if (!parent) { if (p.cls === 0) p.wealth = Math.round(p.wealth * (1.5 + Math.random() * 1.5)); else if (p.cls === 1) p.wealth = Math.round(p.wealth * (1.1 + Math.random() * .5)); p.startWealth = p.wealth; }
-  return p;
-};
+});
 
+// ---- travel.js ----
 // ===== TRAVEL: trading trips and moving between realms =====
 const TPOS = { aurelis: [400, 230], undercity: [405, 255], serenth: [400, 205], kragmor: [190, 160], grieve: [600, 205], mulvane: [395, 405], dunes: [165, 375] };
 function tdist(a, b) {
@@ -3408,9 +3358,9 @@ LEGENDS.push(
 // you can only carry so much: a pack on your back, more with a cart or a caravan
 const carryCap = p => 15 + (p.cls <= 1 ? 15 : 0) + (p.biz && p.biz.id === 'caravan' ? 45 : 0);
 const carried = p => MAT_IDS.reduce((s, m) => s + (inv(p)[m] || 0), 0);
-const _buyMat = buyMat;
-buyMat = function (p, m) { if (carried(p) >= carryCap(p)) return `ย่ามของคุณเต็มแล้ว ขนได้ไม่เกิน ${carryCap(p)} ชิ้น`; return _buyMat(p, m); };
+extend('buyMat', 'travel: you cannot carry more than your pack holds', inner => function (p, m) { if (carried(p) >= carryCap(p)) return `ย่ามของคุณเต็มแล้ว ขนได้ไม่เกิน ${carryCap(p)} ชิ้น`; return inner(p, m); });
 
+// ---- housing.js ----
 // ===== HOUSING AND LAND =====
 // food, clothes and tax stay in the living cost; the roof over your head is now its own line
 UPKEEP[0] = 5; UPKEEP[1] = 2.8; UPKEEP[2] = 2; UPKEEP[3] = 1.1;
@@ -3545,56 +3495,45 @@ function landYear(p) {
 }
 
 // ---- hooks ----
-const _makePerson4 = makePerson;
-makePerson = function (realm, parent) {
-  const p = _makePerson4(realm, parent);
+onBorn('housing: a home, and land for noble houses', (p, parent) => {
   initHome(p, parent);
   if (parent && parent.land && parent.land.plots) p.land = { ...parent.land };
   else if (!parent && p.cls === 0) { const r = FARM[p.realm.id] ? p.realm.id : 'aurelis'; p.land = { realm: r, plots: 4 + Math.floor(Math.random() * 6), share: .5 }; }
-  return p;
-};
-const _applyFocus7 = applyFocus;
-applyFocus = function (p) {
-  const t = _applyFocus7(p);
-  if (!p.alive) return t;
-  const a = houseYear(p), b = landYear(p);
-  return [t, a, b].filter(Boolean).join(' · ') || null;
-};
+});
+afterYear('housing: rent, tax, disasters, land harvest', p => [houseYear(p), landYear(p)]);
 // illness and the survival of small children depend on the roof
-const _hazards = hazards;
-hazards = function (p) { const H = _hazards(p); if (p.home && H[0]) H[0][1] *= HOUSES[effTier(p)].ill; return H; };
+modHazards('housing: a poor roof makes illness deadlier', (p, H) => { if (p.home && H[0]) H[0][1] *= HOUSES[effTier(p)].ill; });
 (() => {
   const e = EVENTS.find(x => /p\.realm\.infant \* 2\.5/.test(x.c.toString()));
   if (e) e.c = p => p.kidNames.length > 0 && Math.random() < p.realm.infant * 2.5 * HOUSES[effTier(p)].ill;
 })();
 // moving away: a house cannot come with you
-const _moveTo = moveTo;
-moveTo = function (p, to) {
+extend('moveTo', 'housing: moving away: a house cannot come with you', inner => function (p, to) {
   const h = homeOf(p), owned = h.status === 'own' && !canMove(p, to);
   const v = owned ? homeValue(p) : 0;
-  const t = _moveTo(p, to); if (!t) return t;
+  const t = inner(p, to); if (!t) return t;
   const extra = [];
   if (owned) { p.wealth += v; led(p, 'sales', v); extra.push(`คุณขายบ้านหลังเก่าได้ ${money(v)}`); }
   Object.assign(h, { tier: 2, status: 'rent', damaged: false, realm: to, famOwned: false });
   extra.push('ที่บ้านใหม่ คุณเช่าห้องอยู่ไปก่อน');
   return [t, ...extra].join(' · ');
-};
+});
 // creditors take the house before they take you
-const _loanYear = loanYear;
-loanYear = function (p) {
+extend('loanYear', 'housing: creditors take the house before they take you', inner => function (p) {
   const L = p.loan;
   if (L && p.wealth < L.pay && L.missed >= 2 && !p.biz) {
     if (homeOf(p).status === 'own') { const n = HOUSES[p.home.tier].n; Object.assign(p.home, { tier: 1, status: 'rent', damaged: false }); p.loan = null; p.flags.badCredit = true; p.happy -= 10; return `คุณค้างหนี้ติดกันสามปี เจ้าหนี้จึงยึด${n}ของคุณไป ตอนนี้คุณต้องไปเช่าเพิงพักอยู่`; }
     if (landOf(p).plots) { const n = p.land.plots; p.land.plots = 0; p.land.realm = null; p.loan = null; p.flags.badCredit = true; p.happy -= 8; return `คุณค้างหนี้ติดกันสามปี เจ้าหนี้จึงยึดที่นาทั้ง ${n} แปลงของคุณไป`; }
   }
-  return _loanYear(p);
-};
+  return inner(p);
+});
 LEGENDS.push(
   { id: 'homeowner', n: 'หลังคาของตัวเอง', d: 'เกิดเป็นไพร่หรือทาส แต่ได้ซื้อบ้านเป็นของตัวเอง', c: p => p.flags.boughtHome && p.bornCls >= 3 },
   { id: 'fairlord', n: 'เจ้าที่ดินที่ไม่เหมือนใคร', d: 'มีไพร่เช่าที่นา แต่เก็บส่วนแบ่งแค่หนึ่งในสามมาตลอด 10 ปี', c: p => (p.flags.fairLord || 0) >= 10 && !p.flags.harshLord },
   { id: 'becamelord', n: 'กลายเป็นสิ่งที่เคยเกลียด', d: 'เกิดเป็นไพร่ แต่ภายหลังเก็บส่วนแบ่งครึ่งหนึ่งจากไพร่ของตัวเอง', c: p => p.bornCls === 3 && (p.flags.harshLord || 0) >= 3 },
 );
 
+// ---- royal.js ----
 // ===== ROYALTY: princes, princesses, heirs and rulers =====
 const ROYAL = {
   aurelis: { house: 'ราชวงศ์สุริยาแห่งออเรลิส', child: s => s === 'ญ' ? 'เจ้าหญิง' : 'เจ้าชาย', heir: s => s === 'ญ' ? 'มกุฎราชกุมารี' : 'มกุฎราชกุมาร', ruler: s => s === 'ญ' ? 'จักรพรรดินี' : 'จักรพรรดิ', of: 'แห่งออเรลิส', note: 'ราชวงศ์ที่สวมมงกุฎ แต่ศาสนจักรสุริยะเป็นผู้ถือกุญแจประตูเมือง' },
@@ -3644,28 +3583,18 @@ function makeRoyal(p, parent) {
     else p.royal.line = p.fam.filter(m => m.rel === 'sibling' && m.alive && m.a0 > 0).length + 1;
   }
 }
-const _makePerson5 = makePerson;
-makePerson = function (realm, parent) {
-  const p = _makePerson5(realm, parent);
+onBorn('royal: some noble births are royal', (p, parent) => {
   if (parent && parent.royal && !parent.royal.lost) makeRoyal(p, parent);
   else if (!parent && p.cls === 0 && ROYAL[p.realm.id] && Math.random() < ROYAL_P) makeRoyal(p);
-  return p;
-};
-const _makeSibling2 = makeSibling;
-makeSibling = function (d) { const p = _makeSibling2(d); if (d.royal) { p.royal = { ...d.royal, line: d.royal.line, ruler: false }; p.home = { ...d.home }; p.land = d.land ? { ...d.land } : p.land; p.cls = p.bornCls = 0; } return p; };
-const _famJobFor = famJobFor;
-famJobFor = function (m) { return m.royalKid ? ROYAL[m.royalKid].child(m.sex) : _famJobFor(m); };
+});
+extend('makeSibling', 'royal: a royal sibling stays royal', inner => function (d) { const p = inner(d); if (d.royal) { p.royal = { ...d.royal, line: d.royal.line, ruler: false }; p.home = { ...d.home }; p.land = d.land ? { ...d.land } : p.land; p.cls = p.bornCls = 0; } return p; });
+extend('famJobFor', 'royal: royal children have royal titles', inner => function (m) { return m.royalKid ? ROYAL[m.royalKid].child(m.sex) : inner(m); });
 // royals live grandly and do not take common work
-const _upkeep = upkeep;
-upkeep = function (p) { return _upkeep(p) + (p.royal ? 10 * priceF(p) : 0); };
-const _defaultCareer = defaultCareer;
-defaultCareer = function (p) { return p.royal ? 'royal' : _defaultCareer(p); };
-const _careerMissing2 = careerMissing;
-careerMissing = function (p, c, rk = 0) { const out = _careerMissing2(p, c, rk); if (p.royal && !c.base && !ROYAL_OK.includes(c.id) && rk === 0) out.unshift('ไม่เหมาะกับเชื้อพระวงศ์'); return out; };
-const _bizMissing = bizMissing;
-bizMissing = function (p, id) { const out = _bizMissing(p, id); if (p.royal) out.unshift('เชื้อพระวงศ์ไม่ค้าขายเอง'); return out; };
-const _entry = entry;
-entry = function (p, to, settle) { if (p.royal && !(settle && to === 'serenth' && p.race !== 'เอลฟ์')) return { ok: true, fee: 0 }; return _entry(p, to, settle); };
+extend('upkeep', 'royal: royals live grandly and do not take common work', inner => function (p) { return inner(p) + (p.royal ? 10 * priceF(p) : 0); });
+extend('defaultCareer', 'royal: a royal is royal by career', inner => function (p) { return p.royal ? 'royal' : inner(p); });
+extend('careerMissing', 'royal: royals may not take common careers', inner => function (p, c, rk = 0) { const out = inner(p, c, rk); if (p.royal && !c.base && !ROYAL_OK.includes(c.id) && rk === 0) out.unshift('ไม่เหมาะกับเชื้อพระวงศ์'); return out; });
+extend('bizMissing', 'royal: royals may not run a shop', inner => function (p, id) { const out = inner(p, id); if (p.royal) out.unshift('เชื้อพระวงศ์ไม่ค้าขายเอง'); return out; });
+extend('entry', 'royal: royals may cross borders freely', inner => function (p, to, settle) { if (p.royal && !(settle && to === 'serenth' && p.race !== 'เอลฟ์')) return { ok: true, fee: 0 }; return inner(p, to, settle); });
 
 // succession: keep the line up to date and crown the heir when the monarch dies
 function royalYear(p) {
@@ -3694,8 +3623,7 @@ function royalYear(p) {
   return out.join(' · ') || null;
 }
 // the elder monarch in the family can also be a sibling who took the throne
-const _applyFocus8 = applyFocus;
-applyFocus = function (p) { const t = _applyFocus8(p); if (!p.alive) return t; const r = royalYear(p); return [t, r].filter(Boolean).join(' · ') || null; };
+afterYear('royal: succession and tribute', royalYear);
 
 // ---- court life ----
 const otherRealm = p => pick(Object.keys(ROYAL).filter(k => k !== p.royal.realm));
@@ -3770,6 +3698,7 @@ LEGENDS.push(
   { id: 'sawpoor', n: 'เจ้าที่เดินดิน', d: 'ปลอมตัวออกไปดูชีวิตของคนธรรมดา', c: p => p.flags.sawPoor },
 );
 
+// ---- adventure.js ----
 // ===== GENTLER DEATH, MORE ADVENTURE =====
 // the world is still harsh and still unequal, but fewer lives end before they start
 for (const r of REALMS) {
@@ -3875,8 +3804,7 @@ LEGENDS.push(
   { id: 'villagehero', n: 'วีรบุรุษของหมู่บ้าน', d: 'ล้างรังโจรได้ด้วยมือตัวเอง', c: p => p.flags.heroOfVillage },
 );
 // let the census sometimes go adventuring too
-const _simLife4 = simLife;
-simLife = function (realm) {
+extend('simLife', 'adventure: let the census sometimes go adventuring too', inner => function (realm) {
   const p = makePerson(realm); p.auto = true;
   while (p.alive) {
     if (p.age >= 7 && Math.random() < .15) p.focus = pick(['work', 'work', 'train', 'love', 'rest']);
@@ -3894,8 +3822,9 @@ simLife = function (realm) {
     if (r.fate) { resolveChoice(p, autoChoose(p, r.fate)); afterFate(p); }
   }
   return p;
-};
+});
 
+// ---- disease.js ----
 // ===== LONGER LIVES, DISEASES AND CURSES =====
 // most people now live into their sixties; the poor still age faster and get sick more
 const AGE_SHIFT = { aurelis: 2, undercity: 5, grieve: 5, mulvane: 7, dunes: 4, kragmor: 0, serenth: 0 };
@@ -3923,12 +3852,7 @@ function healIll(p, x) { p.ills = ills(p).filter(y => y !== x); p.flags.cured = 
 function liftCurse(p, id) { p.curses = curses(p).filter(y => y.id !== id); p.flags.liftedCurse = true; }
 
 // sudden death from illness becomes rare: sickness now arrives as a disease you can see and treat
-const _hazards2 = hazards;
-hazards = function (p) {
-  const H = _hazards2(p);
-  for (const h of H) { if (h[2] === 'plague' || (h[2] === 'ill' && p.age >= 15)) h[1] *= .3; }
-  return H;
-};
+modHazards('disease: sudden death from illness becomes rare', (p, H) => { for (const h of H) { if (h[2] === 'plague' || (h[2] === 'ill' && p.age >= 15)) h[1] *= .3; } });
 
 function contractYear(p) {
   const r = p.realm, a = p.age, out = [];
@@ -4021,37 +3945,31 @@ function curseAct(p, cid, aid) {
   return null;
 }
 // curses arrive from risky things you already do
-const _addMat2 = addMat;
-addMat = function (p, m, n) { const r = _addMat2(p, m, n); if (m === 'shard' && n > 0 && roll(.15)) { const t = addCurse(p, 'thread', 'เศษเส้นใยที่คุณเก็บมาพันรอบข้อมือคุณ และไม่ยอมคลายออก'); if (t) (p.pendingNotes = p.pendingNotes || []).push(t); } return r; };
+extend('addMat', 'disease: curses arrive from risky things you already do', inner => function (p, m, n) { const r = inner(p, m, n); if (m === 'shard' && n > 0 && roll(.15)) { const t = addCurse(p, 'thread', 'เศษเส้นใยที่คุณเก็บมาพันรอบข้อมือคุณ และไม่ยอมคลายออก'); if (t) (p.pendingNotes = p.pendingNotes || []).push(t); } return r; });
 (() => {
   const q = QBY.ruins; if (!q) return;
   const ob = q.build;
   q.build = p => { const b = ob(p); b.options = b.options.map(o => Object.assign({}, o, { act: z => { const t = o.act(z); if (z.alive && /ห้องเก็บของ|ของมีค่า/.test(t) && roll(.25)) { addCurse(z, 'ruin'); return t + ' · คืนนั้นคุณฝันว่ามีคนเดินตามหลังมาจากซากเมือง'; } return t; } })); return b; };
 })();
 // the family curse follows the blood
-const _makePerson6 = makePerson;
-makePerson = function (realm, parent) { const p = _makePerson6(realm, parent); if (parent && parent.curses && parent.curses.some(c => c.id === 'blood')) { p.curses = [{ id: 'blood', since: 0, inherited: true }]; } return p; };
-const _famHazard = famHazard;
-famHazard = function (p, m, age) { const c = _famHazard(p, m, age); if (c) return c; if (p.curses && p.curses.some(x => x.id === 'blood') && age >= 1) return _famHazard(p, m, age); return null; };
+onBorn('disease: the family curse follows the blood', (p, parent) => { if (parent && parent.curses && parent.curses.some(c => c.id === 'blood')) { p.curses = [{ id: 'blood', since: 0, inherited: true }]; } });
+extend('famHazard', 'disease: the blood curse doubles family risk', inner => function (p, m, age) { const c = inner(p, m, age); if (c) return c; if (p.curses && p.curses.some(x => x.id === 'blood') && age >= 1) return inner(p, m, age); return null; });
 function autoTreat(p) { ills(p).forEach((x, i) => { for (const m of ['heal', 'potion', 'doctor', 'temple']) if (!treatWhy(p, x, m) && roll(.6)) { treat(p, i, m); break; } }); }
-const _applyFocus9 = applyFocus;
-applyFocus = function (p) {
+extend('applyFocus', 'disease: catching and living with illness (bots treat themselves first)', inner => function (p) {
   if (p.auto) autoTreat(p);
-  const t = _applyFocus9(p);
+  const t = inner(p);
   if (!p.alive) return t;
   const lines = [...(p.pendingNotes || []), ...contractYear(p)]; p.pendingNotes = [];
-  const iy = illYear(p);
-  if (typeof iy === 'string') return [t, ...lines, iy].filter(Boolean).join(' · ');
-  return [t, ...lines, ...iy].filter(Boolean).join(' · ') || null;
-};
+  return joinT(t, lines, illYear(p));
+});
 LEGENDS.push(
   { id: 'survivor', n: 'รอดจากไข้เถ้าดำ', d: 'หายจากไข้เถ้าดำที่เข้าระยะวิกฤตแล้ว', c: p => p.flags.survivedCrisis },
   { id: 'cursebreaker', n: 'แก้คำสาป', d: 'ปลดคำสาปออกจากตัวเองได้สำเร็จ', c: p => p.flags.liftedCurse },
   { id: 'glassman', n: 'คนแก้ว', d: 'มีชีวิตอยู่กับผิวแก้วจนอายุ 50', c: p => hasIll(p, 'glassskin') && p.age >= 50 },
 );
-const _healIll = healIll;
-healIll = function (p, x) { if (x.id === 'ashfever' && x.stage >= 3) p.flags.survivedCrisis = true; return _healIll(p, x); };
+extend('healIll', 'disease: surviving a crisis is remembered', inner => function (p, x) { if (x.id === 'ashfever' && x.stage >= 3) p.flags.survivedCrisis = true; return inner(p, x); });
 
+// ---- elder.js ----
 // ===== WHAT MONEY IS FOR IN THE SECOND HALF OF LIFE =====
 // 1) works for the realm that outlive you and change the world for later lives
 const WORKS = {
@@ -4093,8 +4011,7 @@ function build(p, id, free) {
 const careCost = p => 4 * (p.realm.wealth / 50 + .4);
 function canCare(p) { if (p.age < 50) return 'ต้องอายุ 50 ปีขึ้นไป'; if (p.cls >= 3) return 'คนในฐานะคุณไม่มีใครมาดูแลให้'; return null; }
 function toggleCare(p) { if (canCare(p)) return null; p.care = !p.care; return p.care ? 'คุณจ้างคนมาดูแลยามแก่ เขาช่วยต้มยา พาเดินเล่น และอ่านหนังสือให้ฟังทุกคืน' : 'คุณเลิกจ้างคนดูแล'; }
-const _hazards3 = hazards;
-hazards = function (p) { const H = _hazards3(p); if (p.care) for (const h of H) if (h[2] === 'old' || h[2] === 'ill') h[1] *= .6; return H; };
+modHazards('elder: a paid carer keeps the old alive longer', (p, H) => { if (p.care) for (const h of H) if (h[2] === 'old' || h[2] === 'ill') h[1] *= .6; });
 // 3) giving to family while you are alive
 function canGive(p) { if (p.age < 30) return 'ต้องอายุ 30 ปีขึ้นไป'; if (!p.kidNames.length) return 'คุณยังไม่มีลูก'; if (p.cls === 4) return 'ทาสไม่มีอะไรจะให้'; if (p.wealth < 10) return `ต้องมีอย่างน้อย ${money(10)}`; return null; }
 function giveKids(p) { if (canGive(p)) return null; const v = Math.round(p.wealth * .25); p.wealth -= v; led(p, 'buy', -v); p.giftHeir = (p.giftHeir || 0) + v; p.happy += 4; return `คุณแบ่งเงิน ${money(v)} ให้ลูกๆ ตั้งตัว พวกเขาจะได้ใช้ตั้งแต่ตอนนี้ ไม่ต้องรอให้คุณตาย`; }
@@ -4125,21 +4042,16 @@ function settleEstate(p) {
   return out.length ? `ตามพินัยกรรมของคุณ เงินที่เหลือถูกใช้สร้าง${out.join(' ')}ที่${p.realm.short}` : '';
 }
 // the heir receives according to the will and gifts
-const _makePerson7 = makePerson;
-makePerson = function (realm, parent) {
-  const p = _makePerson7(realm, parent);
+onBorn('elder: the heir receives according to the will and gifts', (p, parent) => {
   if (parent) {
     const w = parent.will || 'none', pw = parent.wealth || 0;
     const adj = { none: 0, heir: .25, split: -.2, give: -.6 + .05 }[w] || 0;
     p.wealth = Math.max(0, p.wealth + pw * adj + (parent.giftHeir || 0));
     p.startWealth = p.wealth;
   }
-  return p;
-};
-// upkeep for the carer
-const _applyFocus10 = applyFocus;
-applyFocus = function (p) {
-  const t0 = _applyFocus10(p);
+});
+extend('applyFocus', 'elder: losing freedom means losing property; paying the carer', inner => function (p) {
+  const t0 = inner(p);
   // losing your freedom means losing what you owned
   let t = t0;
   if (p.cls >= 3 && !p.royal) {
@@ -4151,13 +4063,14 @@ applyFocus = function (p) {
   }
   if (p.alive && p.care) { const c = careCost(p); if (p.wealth >= c) { p.wealth -= c; led(p, 'living', -c); p.happy += 2; } else { p.care = false; return [t, 'คุณไม่มีเงินจ้างคนดูแลต่อ เขาจึงลาออกไป'].filter(Boolean).join(' · '); } }
   return t;
-};
+});
 LEGENDS.push(
   { id: 'philanthropist', n: 'ผู้ให้', d: 'สร้างสิ่งที่ช่วยคนในแดนด้วยเงินของตัวเอง', c: p => p.flags.philanthropist },
   { id: 'vanity', n: 'รูปปั้นกลางเมือง', d: 'จ่ายเงินสร้างรูปปั้นของตัวเอง', c: p => (p.built || []).some(x => x.startsWith('statue')) },
   { id: 'gaveall', n: 'ไม่เอาอะไรไปด้วย', d: 'บริจาคทรัพย์สินทั้งหมดในพินัยกรรม', c: p => p.will === 'give' && (p.estateWorks || []).length > 0 },
 );
 
+// ---- morality.js ----
 // ===== REPUTATION AND CONSCIENCE =====
 // not one good/evil bar: four groups who judge you by their own values, and your own conscience
 const FACTIONS = {
@@ -4222,20 +4135,17 @@ function choiceDeed(p, cid, label) {
   return d;
 }
 // tag every option with the choice it came from
-const _checkChoice = checkChoice;
-checkChoice = function (p) { const ch = _checkChoice(p); if (ch) for (const o of ch.options) o._cid = ch.id; return ch; };
-const _resolveChoice2 = resolveChoice;
-resolveChoice = function (p, o) {
+extend('checkChoice', 'morality: tag every option with the choice it came from', inner => function (p) { const ch = inner(p); if (ch) for (const o of ch.options) o._cid = ch.id; return ch; });
+extend('resolveChoice', 'morality: a choice changes reputation and guilt', inner => function (p, o) {
   const cid = o._cid || (typeof pending !== 'undefined' && pending && pending.id) || '';
-  const t = _resolveChoice2(p, o);
+  const t = inner(p, o);
   addRep(p, choiceDeed(p, cid, o.label || ''));
   deedSync(p);
   return t;
-};
+});
 // show the effect on reputation before choosing
-const _previewOption2 = previewOption;
-previewOption = function (p, o, n) {
-  const pr = _previewOption2(p, o, n); if (!pr) return pr;
+extend('previewOption', 'morality: show the effect on reputation before choosing', inner => function (p, o, n) {
+  const pr = inner(p, o, n); if (!pr) return pr;
   try {
     const q = structuredClone({ ...p, pendingFight: null }); q.checks = []; const before = JSON.stringify(rep(q)), g0 = guilt(q);
     o.act(q); const cid = o._cid || (typeof pending !== 'undefined' && pending && pending.id) || '';
@@ -4245,7 +4155,7 @@ previewOption = function (p, o, n) {
     pr.guilt = guilt(q) - g0;
   } catch (e) { }
   return pr;
-};
+});
 // atonement
 CHOICES.push({ id: 'atone', repeat: 4, when: p => guilt(p) >= 30 && p.age >= 16 && roll(.25),
   prompt: p => `อายุ ${p.age} ปี คุณนอนไม่หลับมาหลายคืนแล้ว ภาพของสิ่งที่เคยทำวนกลับมาทุกครั้งที่หลับตา`,
@@ -4274,13 +4184,10 @@ function moralYear(p) {
   if (R.under >= 40 && roll(.1)) { const v = 3 * priceF(p); p.wealth += v; out.push(`คนจากตรอกมืดแวะมาฝากของขวัญเล็กๆ ไว้ ${money(v)} เพื่อขอบคุณที่คุณไม่เคยปากโป้ง`); }
   return out;
 }
-const _applyFocus11 = applyFocus;
-applyFocus = function (p) { const t = _applyFocus11(p); if (!p.alive) return t; const m = moralYear(p); return [t, ...m].filter(Boolean).join(' · ') || null; };
-const _hazards4 = hazards;
-hazards = function (p) { const H = _hazards4(p); if (p.rep && p.rep.church <= -40) for (const h of H) if (h[2] === 'burn') h[1] *= 1.5; return H; };
+extend('applyFocus', 'morality: a year at work shapes reputation', inner => function (p) { const t = inner(p); if (!p.alive) return t; const m = moralYear(p); return [t, ...m].filter(Boolean).join(' · ') || null; });
+extend('hazards', 'morality: a heretic risks the inquisition', inner => function (p) { const H = inner(p); if (p.rep && p.rep.church <= -40) for (const h of H) if (h[2] === 'burn') h[1] *= 1.5; return H; });
 // a name carries over: children inherit a little of how people saw their parent
-const _makePerson8 = makePerson;
-makePerson = function (realm, parent) { const p = _makePerson8(realm, parent); if (parent && parent.rep) { const R = rep(p); for (const k of FKEYS) R[k] = Math.round(R[k] + parent.rep[k] * .3); } return p; };
+extend('makePerson', 'morality: a name carries over: children inherit a little of how people saw their parent', inner => function (realm, parent) { const p = inner(realm, parent); if (parent && parent.rep) { const R = rep(p); for (const k of FKEYS) R[k] = Math.round(R[k] + parent.rep[k] * .3); } return p; });
 // how you are remembered
 function epitaph(p) {
   const R = rep(p), out = [];
@@ -4306,6 +4213,7 @@ LEGENDS.push(
   { id: 'redeemed', n: 'ไถ่บาป', d: 'เคยรู้สึกผิดอย่างหนัก แต่ได้ชดใช้ก่อนตาย', c: p => p.flags.atoned && guilt(p) < 20 },
 );
 
+// ---- heir.js ----
 // ===== CONTINUING AS AN HEIR OR A YOUNGER SIBLING: START AT THEIR REAL AGE =====
 // the years before the handover are lived quickly in the background, then the player takes over
 function fastForward(p, target) {
@@ -4340,6 +4248,7 @@ function heirAge(p, parent, sib) {
   return 0;
 }
 
+// ---- relic.js ----
 // ===== RELICS: old things with real power, and a real price =====
 // every relic exists once in the whole world. it passes to your heir, or is lost where you die and can be found again in a later life
 const RELICS = {
@@ -4416,31 +4325,26 @@ function syncRelics(p) {
 
 // ---- effects ----
 function relicChk(p, keys) { let b = 0; for (const x of p.relics || []) { const c = RELICS[x.id].chk; if (c) for (const k of keys) if (k && c[k]) b += c[k]; } return b; }
-const _check9 = check;
-check = function (p, a, s, dc) {
+extend('check', 'relic: relics add to dice rolls', inner => function (p, a, s, dc) {
   const b = p.relics && p.relics.length ? relicChk(p, [a, s]) : 0;
-  const ok = _check9(p, a, s, dc - b);
+  const ok = inner(p, a, s, dc - b);
   if (b) { const c = p.checks[p.checks.length - 1]; c.dc += b; c.bonus += b; }
   return ok;
-};
-const _pAtk9 = pAtk;
-pAtk = function (p) { return _pAtk9(p) + (p.relics || []).reduce((s, x) => s + (RELICS[x.id].atk || 0), 0); };
-const _hazards9 = hazards;
-hazards = function (p) {
-  const H = _hazards9(p);
+});
+extend('pAtk', 'relic: relics add to attack', inner => function (p) { return inner(p) + (p.relics || []).reduce((s, x) => s + (RELICS[x.id].atk || 0), 0); });
+extend('hazards', 'relic: relics change death risks', inner => function (p) {
+  const H = inner(p);
   if (p.relics && p.relics.length) for (const x of p.relics) { const z = RELICS[x.id].haz; if (z) for (const h of H) if (z[h[2]]) h[1] *= z[h[2]]; }
   return H;
-};
-const _famHazard9 = famHazard;
-famHazard = function (p, m, age) {
-  const c = _famHazard9(p, m, age); if (c) return c;
+});
+extend('famHazard', 'relic: the drowned bell takes years from family', inner => function (p, m, age) {
+  const c = inner(p, m, age); if (c) return c;
   const f = (p.relics || []).reduce((s, x) => s + (RELICS[x.id].fam || 0), 0);
-  return f && Math.random() < f ? _famHazard9(p, m, age) : null;
-};
+  return f && Math.random() < f ? inner(p, m, age) : null;
+});
 const theftMult = p => (p.relics || []).reduce((s, x) => Math.max(s, RELICS[x.id].theft || 1), 1);
-const _applyFocus12 = applyFocus;
-applyFocus = function (p) {
-  let t = _applyFocus12(p);
+extend('applyFocus', 'relic: yearly price of each relic; the enslaved lose them', inner => function (p) {
+  let t = inner(p);
   if (!p.alive || !(p.relics || []).length) return t;
   const out = [];
   // a slave or serf owns nothing, not even this
@@ -4455,7 +4359,7 @@ applyFocus = function (p) {
     if (R.yrT && Math.random() < .12) out.push(pick(R.yrT));
   }
   return [t, ...out].filter(Boolean).join(' · ');
-};
+});
 
 // ---- where relics come from ----
 // 1) born into a house that already owns one
@@ -4482,16 +4386,15 @@ function passRelics(prev, next, parent, sib) {
   }
 }
 // 3) found on a hard road. lost relics lie where their last owner died
-const _payQuest9 = payQuest;
-payQuest = function (p, base, txt) {
-  let t = _payQuest9(p, base, txt);
+extend('payQuest', 'relic: quests can turn up relics, including lost ones', inner => function (p, base, txt) {
+  let t = inner(p, base, txt);
   if (p.auto) return t;
   const r = questRealm(p), lost = lostHere(p, r.id);
   const fresh = RIDS.filter(id => RELICS[id].src === r.id && freeRelic(p, id));
   if (lost.length && Math.random() < .25) { const id = pick(lost); t += ` · ระหว่างทางคุณเจอ${relicN(id)} ที่ใครบางคนทำหายไว้ในชีวิตก่อน · ` + gainRelic(p, id, `พบที่${r.short}`); }
   else if (fresh.length && Math.random() < base / 160) { const id = pick(fresh); t += ` · ` + gainRelic(p, id, `พบที่${r.short}`) + ` (${RELICS[id].d})`; }
   return t;
-};
+});
 // the sky thread quest can give the needle
 const _skyBuild = QBY.skythread.build;
 QBY.skythread.build = p => { const b = _skyBuild(p); const o = b.options[0], act = o.act; o.act = q => { let t = act(q); if (/^เส้นใยสงบลง/.test(t) && freeRelic(q, 'needle') && Math.random() < .25) t += ' · ในกองเส้นใยมีเข็มเงินเล่มหนึ่งปักอยู่ · ' + gainRelic(q, 'needle', 'พบบนยอดเขา'); return t; }; return b; };
@@ -4538,6 +4441,7 @@ LEGENDS.push(
   { id: 'relichunter', n: 'นักล่าของวิเศษ', d: 'พบหรือได้ของวิเศษ 2 ชิ้นในชีวิตเดียว', c: p => (p.flags.relicsFound || 0) >= 2 },
 );
 
+// ---- arms.js ----
 // ===== WHAT A WEAPON IS FOR =====
 // 1) arenas and fighting pits: a fight you can choose, any year
 const ARENA = {
@@ -4620,16 +4524,14 @@ function startHunt(p) {
 // 3) a person who can fight survives battles and wild beasts more often
 const combatPower = p => (p.gear && p.skills && p.attrs) ? Math.max(0, pAtk(p) + (pAC(p) - 10) / 2) : 0;
 const fightSurvive = p => Math.max(.6, 1 - .04 * combatPower(p));
-const _hazards10 = hazards;
-hazards = function (p) {
-  const H = _hazards10(p); const f = fightSurvive(p);
+extend('hazards', 'arms: fighters survive war and beasts more often', inner => function (p) {
+  const H = inner(p); const f = fightSurvive(p);
   if (f < 1) for (const h of H) if (h[2] === 'war' || h[2] === 'beast') h[1] *= f;
   return H;
-};
+});
 // 4) fighting careers pay by how well you fight
 const FIGHT_JOBS = ['soldier', 'merc', 'guard', 'hunter', 'knight', 'battlemage'];
-const _incomeMod = incomeMod;
-incomeMod = function (p) { const m = _incomeMod(p); return FIGHT_JOBS.includes(p.career) ? m * (1 + Math.min(.4, combatPower(p) * .04)) : m; };
+extend('incomeMod', 'arms: fighting careers pay by skill', inner => function (p) { const m = inner(p); return FIGHT_JOBS.includes(p.career) ? m * (1 + Math.min(.4, combatPower(p) * .04)) : m; });
 LEGENDS.push(
   { id: 'champion', n: 'แชมป์ประจำลาน', d: 'ชนะการท้าชิงแชมป์ในลานประลองหรือบ่อต่อสู้', c: p => p.flags.champion },
   { id: 'biggame', n: 'นายพราน', d: 'ล่าสัตว์ร้ายได้ด้วยมือตัวเอง', c: p => p.flags.bigGame },
@@ -5469,38 +5371,71 @@ function appendYear(text, cls = '') {
   const p = document.createElement('p'); if (cls) p.className = cls;
   text = moneyText(String(text));
   p.textContent = text; curBody().insertBefore(p, curBody().querySelector('.deltas')); $('logbox').scrollTop = 0;
-  if (cls === 'event' || cls === 'outcome') notifyFrom(text, p);
 }
 // ---------- notifications for the things you should not miss ----------
-const KIN = '(แม่|พ่อ|พี่ชาย|พี่สาว|น้องชาย|น้องสาว|คู่ชีวิต|ลูกชาย|ลูกสาว|ลูก)';
-const NOTE_RULES = [
-  { k: 'loss', pause: 1, icon: '†', re: new RegExp(KIN + 'ของคุณ[^·]*(เสียชีวิต|จากไป|สวรรคต|ตาย)|จากไปในอ้อมกอด|เสียชีวิตก่อนอายุครบขวบ|พิธีพระศพ') },
-  { k: 'joy', pause: 1, icon: '✦', re: /เกิดแล้ว|ลูกคนใหม่ของคุณเกิด|เกิดมาแข็งแรง/ },
-  { k: 'joy', icon: '♥', re: /คุณแต่งงานกับ|งานแต่งเล็กๆ มีแขก|งานอภิเษกสมรส/ },
-  { k: 'good', icon: '♛', re: /พิธีราชาภิเษก|ขึ้นครองบัลลังก์|ตอนนี้คุณเป็นมกุฎ|ลำดับแรกในการสืบทอด/ },
-  { k: 'good', icon: '▲', re: /ได้เลื่อนขั้นเป็น|ตกเป็นของคุณ|เป็นอิสระแล้ว|ตอนนี้คุณเป็นอิสระ|ฐานะเป็นพ่อค้า|หายขาด|หายไปในที่สุด/ },
-  { k: 'warn', icon: '!', re: /ไข้เถ้าดำ|ปอดเถ้า|ไข้หนอง|ผิวแก้ว|ไม่อยากลุกจากเตียง/, only: /ติด|หมอบอก|เริ่ม|ระยะวิกฤต|หนักขึ้น/ },
-  { k: 'good', icon: '◆', re: /คุณได้ของวิเศษ/ },
-  { k: 'warn', icon: '◆', re: /ของวิเศษของคุณ[^·]*(ถูกขโมย|ถูกนายยึด)/ },
-  { k: 'warn', icon: '✧', re: /คำสาป|สาปแช่ง|พันรอบข้อมือ|เดินตามหลังมาจากซากเมือง/ },
-  { k: 'warn', icon: '!', re: /ของคุณ(ก็)?ถูกยึด|ยึด[^·]*ของคุณ|ขายคุณเป็นทาส|ตกเป็นทาส|ไล่ออก ตอนนี้คุณต้องไปอยู่|ของคุณเสียหาย|ข้าวของของคุณเสียหายไป|ค้างติดกัน|เจ้าหนี้(จึง)?(ยึด|พา)|ถอดยศและยึด/ },
-];
+// we compare the state of the life before and after each year, choice, fight and season event,
+// so notifications come from what actually changed, not from reading the story text
 function notePrefs() { try { return JSON.parse(localStorage.getItem('ash-notes')) || { pause: true }; } catch (e) { return { pause: true }; } }
 function setNotePrefs(v) { try { localStorage.setItem('ash-notes', JSON.stringify(v)); } catch (e) { } }
-let NOTEPREF = notePrefs(), NOTE_N = 0, NOTE_AGE = -1;
-function notifyFrom(text, el) {
-  if (!P || !P.alive) return;
-  if (NOTE_AGE !== P.age) { NOTE_AGE = P.age; NOTE_N = 0; }
-  for (const part of text.split(' · ')) {
-    // a family member named in this line who died this very year is always a loss, whatever the cause text says
-    const died = (P.fam || []).find(m => !m.alive && !m.never && !m.left && m.dAge >= P.age - 1 && part.includes(m.name) && /ของคุณ/.test(part) && !/เกิดแล้ว/.test(part));
-    const r = died ? NOTE_RULES[0] : NOTE_RULES.find(x => x.re.test(part) && (!x.only || x.only.test(part)));
-    if (!r) continue;
-    el.classList.add('imp', 'imp-' + r.k);
-    if (++NOTE_N > 3 && !r.pause) continue;
-    toast(part, r);
-    if (NOTEPREF.pause && r.pause && el.classList.contains('event') && !paused) { paused = true; $('pauseBtn').textContent = 'เล่นต่อ'; $('pauseBtn').setAttribute('aria-pressed', true); toast('เกมหยุดไว้ให้แล้ว กด "เล่นต่อ" หรือ Space เมื่อพร้อม', { k: 'info', icon: '❚❚' }); }
+let NOTEPREF = notePrefs(), NOTE_BASE = null;
+const famKey = m => m.rel + '|' + m.name;
+function noteSnap(p) {
+  return {
+    fam: new Map((p.fam || []).filter(m => !m.never && famAge(p, m) >= 0).map(m => [famKey(m), m.alive])),
+    cls: p.cls, career: p.career, rank: p.careerRank || 0, ruler: !!(p.royal && p.royal.ruler),
+    ills: new Map((p.ills || []).map(x => [x.id, x.stage || 1])), curses: (p.curses || []).map(x => x.id), relics: (p.relics || []).map(x => x.id),
+    home: p.home ? { ...p.home } : null, plots: (p.land && p.land.plots) || 0, biz: p.biz ? p.biz.id : null,
+  };
+}
+const NOTE_KIND = { loss: ['†', 1], joy: ['✦', 1], love: ['♥', 0], good: ['▲', 0], warn: ['!', 0], relic: ['◆', 0] };
+function noteDiff(p, b) {
+  const out = [], add = (k, text, find) => out.push({ k, text, find });
+  for (const m of p.fam || []) {
+    if (m.never || famAge(p, m) < 0) continue;
+    const was = b.fam.get(famKey(m));
+    if (was === true && !m.alive && !m.left) add('loss', `${m.name} ${relName(p, m)}ของคุณ${m.cause || 'จากไปแล้ว'}`, m.name);
+    if (was === undefined && m.alive) {
+      if (m.rel === 'spouse') add('love', `คุณแต่งงานกับ${m.name}`, m.name);
+      else if (m.rel === 'sibling' || m.rel === 'child') add('joy', `${relName(p, m)}ของคุณเกิดแล้ว ชื่อ${m.name}`, m.name);
+    }
   }
+  if (b.cls >= 3 && p.cls <= 2) add('good', 'คุณเป็นอิสระแล้ว');
+  if (b.cls <= 2 && p.cls >= 3) add('warn', `คุณตกเป็น${p.cls === 4 ? 'ทาส' : 'ไพร่ติดที่ดิน'}`);
+  if (p.career === b.career && (p.careerRank || 0) > b.rank) add('good', `คุณได้เลื่อนขั้นเป็น${careerTitle(p)}`);
+  if (!b.ruler && p.royal && p.royal.ruler) add('good', 'คุณขึ้นครองบัลลังก์');
+  for (const x of p.ills || []) { const s0 = b.ills.get(x.id); if (s0 == null) add('warn', `คุณป่วยเป็น${ILLS[x.id].n}`, ILLS[x.id].n); else if (ILLS[x.id].acute && x.stage >= 3 && s0 < 3) add('warn', `${ILLS[x.id].n}เข้าระยะวิกฤต ต้องรักษาด่วน`, ILLS[x.id].n); }
+  for (const id of b.ills.keys()) if (!(p.ills || []).some(x => x.id === id) && p.alive) add('good', `${ILLS[id].n}หายขาดแล้ว`);
+  for (const x of p.curses || []) if (!b.curses.includes(x.id)) add('warn', `คุณต้อง${CURSES[x.id].n}`);
+  for (const id of b.curses) if (!(p.curses || []).some(x => x.id === id)) add('good', `${CURSES[id].n}หลุดพ้นไปแล้ว`);
+  for (const x of p.relics || []) if (!b.relics.includes(x.id)) add('relic', `คุณได้ของวิเศษ: ${relicN(x.id)}`, relicN(x.id));
+  for (const id of b.relics) if (!hasRelic(p, id)) add('warn', `${relicN(id)}ไม่ได้อยู่กับคุณแล้ว`, relicN(id));
+  const h0 = b.home, h = p.home;
+  if (h0 && h) {
+    if (h0.status === 'family' && h.status === 'own') add('good', `${HOUSES[h.tier].n}ของพ่อแม่ตกเป็นของคุณ`);
+    else if (h0.status === 'own' && h.status !== 'own') add('warn', `คุณเสีย${HOUSES[h0.tier].n}ไป`);
+    else if (h0.status === h.status && h.tier < h0.tier && h.status === 'rent') add('warn', `คุณต้องย้ายไปอยู่${HOUSES[h.tier].n}`);
+    if (!h0.damaged && h.damaged) add('warn', `${HOUSES[h.tier].n}ของคุณเสียหาย ต้องซ่อม`);
+  }
+  if (p.land && (p.land.plots || 0) < b.plots) add('warn', `คุณเสียที่นาไป ${b.plots - (p.land.plots || 0)} แปลง`);
+  if (b.biz && !p.biz) add('warn', `${BIZ[b.biz].n}ของคุณไม่ได้เป็นของคุณแล้ว`);
+  return out;
+}
+// call before a year, a choice, a fight or a season event
+function noteStart() { NOTE_BASE = P && P.alive ? noteSnap(P) : null; }
+// call after it; mayPause is false when the player just chose what happened
+function noteEnd(mayPause) {
+  const b = NOTE_BASE; NOTE_BASE = null;
+  if (!b || !P || !P.alive) return;
+  const notes = noteDiff(P, b);
+  const lines = [...curBody().querySelectorAll('p')];
+  let stop = false;
+  for (const n of notes) {
+    const [icon, pause] = NOTE_KIND[n.k];
+    if (n.find) { const el = lines.reverse().find(l => l.textContent.includes(n.find)); if (el) el.classList.add('imp', 'imp-' + (n.k === 'relic' || n.k === 'love' ? 'good' : n.k)); lines.reverse(); }
+    toast(n.text, { k: n.k === 'love' ? 'joy' : n.k === 'relic' ? 'good' : n.k, icon });
+    if (pause && mayPause) stop = true;
+  }
+  if (stop && NOTEPREF.pause && !paused) { paused = true; $('pauseBtn').textContent = 'เล่นต่อ'; $('pauseBtn').setAttribute('aria-pressed', true); toast('เกมหยุดไว้ให้แล้ว กด "เล่นต่อ" หรือ Space เมื่อพร้อม', { k: 'info', icon: '❚❚' }); }
 }
 function toast(text, r) {
   const box = $('toasts'); if (!box) return;
@@ -5528,7 +5463,7 @@ function runSlot(i) {
   if (i === 0) appendYear(`${SEASONS[0]} · ${seasonLine(0)}`);
   if (i === 0 && P.age === 6 && P.realm.tale) appendYear(P.realm.tale, 'tale');
   if (i === 1) appendYear(`${SEASONS[1]} · ${flavor(P)}`);
-  if ((i === 1 || i === 3) && P.age > 0) { const t = randomEvent(P); if (t) appendYear(t, 'event'); }
+  if ((i === 1 || i === 3) && P.age > 0) { noteStart(); const t = randomEvent(P); if (t) appendYear(t, 'event'); noteEnd(true); }
   if (i === 2) appendYear(`${SEASONS[2]} · ${seasonLine(2)}`);
   if (i === 3) appendYear(`${SEASONS[3]} · ${seasonLine(3)}`);
   if (i === choiceSlot && P.age > 0) {
@@ -5560,10 +5495,11 @@ function skipYear() {
 }
 function endYear() {
   const age = P.age;
+  noteStart();
   const res = finishYear(P, true);
   syncRelics(P);
   res.lines.forEach(t => t.startsWith('§') ? appendYear(t.slice(1), 'world') : appendYear(t, 'event'));
-  flushUps();
+  flushUps(); noteEnd(true);
   if (res.fate) { pending = res.fate; pending.before = snap(); renderLife(); renderChoice(); return; }
   closeYear();
   if (!P.alive) { $('grid').appendChild(gridCell(null, true)); addLog(age, P.cause, 'death'); renderLife(); setTimeout(endLife, 1800); return; }
@@ -5631,9 +5567,10 @@ function closeCombat() {
   const label = { win: 'ชนะ', lose: 'แพ้', fled: 'หนีพ้น', paid: 'ยอมจ่าย' }[res] || '';
   const foe = P.pendingFight.foe.n;
   const t = finishFight(P);
+  if (!NOTE_BASE) noteStart();
   appendYear(`ผลการต่อสู้กับ${foe}: ${label}`, 'roll ' + (res === 'win' || res === 'fled' ? 'ok' : 'bad'));
   if (t) appendYear(t, 'outcome');
-  flushRolls(); flushUps();
+  flushRolls(); flushUps(); noteEnd(false);
   $('combat').hidden = true;
   const wasFate = pending && pending.wasFate; pending = null;
   afterChoice(wasFate);
@@ -5677,12 +5614,14 @@ function previewText(pr) {
 }
 function choose(o) {
   const wasFate = pending.fatal;
+  noteStart();
   const t = resolveChoice(P, o);
   pending = null; $('choice').hidden = true;
   appendYear(`คุณเลือก: ${o.label.replace(/^\[[^\]]+\] /, '')}`, 'picked');
   appendYear(t, 'outcome');
   flushRolls(); flushUps();
   if (P.pendingFight) { openCombat(wasFate); return; }
+  noteEnd(false);
   afterChoice(wasFate);
 }
 function afterChoice(wasFate) {
