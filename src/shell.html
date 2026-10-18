@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<title>เกิดในเถ้า</title>
+<title>เกิดจากเถ้าถ่าน</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chonburi&family=Pridi:wght@300;400;600&family=Sarabun:wght@400;600&display=swap">
@@ -391,7 +391,7 @@ details.minimap .map{margin-top:8px;cursor:default}
   <section id="intro" class="stack" style="gap:28px">
     <div class="stack">
       <span class="eyebrow">แผ่นดินเวลมอร์ · ปี ห.ถ. 312 (312 ปีหลังเถ้าตก)</span>
-      <h1>เกิดในเถ้า</h1>
+      <h1>เกิดจากเถ้าถ่าน</h1>
       <p class="lede">ทุกขณะมีชีวิตใหม่ถือกำเนิดขึ้นบนแผ่นดินนี้ และคุณกำลังจะเป็นหนึ่งในนั้น คุณจะเกิดที่ไหน เป็นลูกของใคร คุณเลือกไม่ได้ เพราะไม่มีใครเลือกได้</p>
     </div>
     <div class="card resume" id="resumeCard" hidden>
@@ -661,7 +661,7 @@ const $ = id => document.getElementById(id);
 const N_SIM = 300;
 let WS = null;
 // compute one realm per tick so the page stays responsive while the census is built
-const WS_VER = 'r33';
+const WS_VER = 'r34';
 function computeWS(done) {
   // the census only changes when the game or the world changes, so keep the last one
   const key = 'ash-ws', ver = WS_VER + ':' + (typeof WORLD !== 'undefined' ? WORLD.works.length : 0);
@@ -1238,6 +1238,8 @@ function renderFam() {
   h += grp('พ่อแม่', ['mother', 'father'], '');
   h += grp('พี่น้อง', ['sibling'], 'คุณเป็นลูกคนเดียว');
   h += grp('คู่ชีวิตและลูก', ['spouse', 'child'], P.age < 16 ? 'ยังไม่มี' : 'คุณยังไม่ได้แต่งงานและยังไม่มีลูก');
+  const people = Object.entries(P.npc || {}).filter(([k, n]) => NPC_ROLE[k] && k !== 'secret');
+  if (people.length) h += `<div class="stack" style="gap:8px"><span class="eyebrow">คนที่ผ่านเข้ามาในชีวิต</span><div class="fam">` + people.map(([k, n]) => `<div class="fm"><span class="rel">${NPC_ROLE[k]}</span><b>${esc(n.name)}</b><span>${k === 'feud' ? 'ผิดใจกันตอนคุณอายุ' : k === 'pet' ? 'มาอยู่กับคุณตอนอายุ' : 'รู้จักตอนคุณอายุ'} ${n.met} ปี</span>${npcStatus(P, k, n) ? `<span class="sub">${npcStatus(P, k, n)}</span>` : ''}</div>`).join('') + `</div><p class="muted small" style="margin:0">คนเหล่านี้อาจกลับมาในชีวิตคุณอีก สิ่งที่คุณเลือกทำกับพวกเขาก่อนหน้านี้จะตามมา</p></div>`;
   $('paneFam').innerHTML = h;
 }
 function gridCell(y, last) {
@@ -1290,10 +1292,6 @@ const SEASON_REALM = {
   dunes: ['กลางวันร้อนจัด แต่กลางคืนหนาวจนฟันกระทบกัน', 'เนินทรายแก้วสะท้อนแสงจนแสบตา', 'ทั้งเผ่าเดินทางตอนกลางคืนเพื่อหลบแดด', 'ลมพัดทรายแก้วกระทบกันเป็นเสียงเหมือนกระดิ่ง'],
 };
 let clockT = null, progress = 0, slotDone = 0, choiceSlot = 2, yearLi = null, yearBefore = null, lastTs = 0;
-function seasonLine(i) {
-  const pool = [...SEASON_ANY[i], ...(SEASON_REALM[P.realm.id] || [])];
-  return pick(pool);
-}
 function curBody() { return yearLi.querySelector('.body'); }
 function appendYear(text, cls = '') {
   const p = document.createElement('p'); if (cls) p.className = cls;
@@ -1387,13 +1385,23 @@ function beginYear() {
   renderClock();
 }
 // slots 0..3 = the four seasons; returns false when the clock must stop (a choice is waiting)
+// a year says what matters: one line about your life, sometimes the air of a season, more when the year is heavy
+let YEAR_PLAN = null;
+function planYear() {
+  const slots = [0, 1, 2, 3].sort(() => Math.random() - .5);
+  const heavy = heavyYear(P);
+  return { atmos: P.age === 0 || Math.random() < .5 ? slots[0] : -1, life: slots[1], life2: heavy || Math.random() < .2 ? slots[2] : -1, last: '' };
+}
+function yearLine() {
+  const t = P.age < 7 && !heavyYear(P) ? flavor(P) : lifeLine(P, YEAR_PLAN.last);
+  YEAR_PLAN.last = t; return t;
+}
 function runSlot(i) {
-  if (i === 0) appendYear(`${SEASONS[0]} · ${seasonLine(0)}`);
+  if (i === 0 || !YEAR_PLAN) YEAR_PLAN = planYear();
   if (i === 0 && P.age === 6 && P.realm.tale) appendYear(P.realm.tale, 'tale');
-  if (i === 1) appendYear(`${SEASONS[1]} · ${flavor(P)}`);
+  if (YEAR_PLAN.atmos === i) appendYear(`${SEASONS[i]} · ${atmosLine(P, i, SEASON_ANY[i], SEASON_REALM[P.realm.id])}`);
+  if (YEAR_PLAN.life === i || YEAR_PLAN.life2 === i) appendYear(`${SEASONS[i]} · ${yearLine()}`);
   if ((i === 1 || i === 3) && P.age > 0) { noteStart(); const t = randomEvent(P); if (t) appendYear(t, 'event'); noteEnd(true); }
-  if (i === 2) appendYear(`${SEASONS[2]} · ${seasonLine(2)}`);
-  if (i === 3) appendYear(`${SEASONS[3]} · ${seasonLine(3)}`);
   if (i === choiceSlot && P.age > 0) {
     const ch = checkChoice(P);
     if (ch) { pending = ch; pending.before = snap(); renderChoice(); return false; }
@@ -1427,7 +1435,7 @@ function endYear() {
   const res = finishYear(P, true);
   syncRelics(P);
   res.lines.forEach(t => t.startsWith('§') ? appendYear(t.slice(1), 'world') : appendYear(t, 'event'));
-  flushUps(); noteEnd(true);
+  flushUps(); noteEnd(true); saveSeen();
   if (res.fate) { pending = res.fate; pending.before = snap(); renderLife(); renderChoice(); return; }
   closeYear();
   if (!P.alive) { $('grid').appendChild(gridCell(null, true)); addLog(age, P.cause, 'death'); renderLife(); setTimeout(endLife, 1800); return; }

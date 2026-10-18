@@ -1,6 +1,6 @@
 import asyncio
 from playwright.async_api import async_playwright
-URL='http://127.0.0.1:8765/index.html'
+URL='http://127.0.0.1:8765/เกิดจากเถ้าถ่าน.html'
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); pg=await b.new_page()

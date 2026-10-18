@@ -30,9 +30,9 @@ extend('access', 'combat: who may train spear, axe, dagger and shield', inner =>
 const WEAPONS = {
   none: { n: 'มือเปล่า', a: 'STR', die: 4, v: 'ต่อย', skill: null },
   sword: { n: 'ดาบ', a: 'STR', die: 8, v: 'ฟัน', skill: 'sword', sp: { n: 'ฟันสองครั้ง', d: 'โจมตีสองครั้ง แต่แม่นน้อยลง' } },
-  spear: { n: 'หอก', a: 'STR', die: 8, v: 'แทง', skill: 'spear', sp: { n: 'รั้งระยะ', d: 'โจมตี และศัตรูตีคุณได้ยากขึ้นในยกนี้' } },
+  spear: { n: 'หอก', a: 'STR', die: 8, v: 'แทง', skill: 'spear', sp: { n: 'รั้งระยะ', d: 'โจมตี แถมศัตรูตีโดนยากขึ้นในยกนี้' } },
   axe: { n: 'ขวาน', a: 'STR', die: 10, hit: -1, v: 'จาม', skill: 'axe', sp: { n: 'ฟันหนัก', d: 'แม่นน้อยลง แต่แรงเป็นสองเท่า' } },
-  bow: { n: 'ธนู', a: 'DEX', die: 8, v: 'ยิง', skill: 'bow', sp: { n: 'ถอยแล้วยิง', d: 'โจมตีจากระยะไกล ศัตรูตีคุณได้ยากมากในยกนี้' } },
+  bow: { n: 'ธนู', a: 'DEX', die: 8, v: 'ยิง', skill: 'bow', sp: { n: 'ถอยแล้วยิง', d: 'ยิงจากระยะไกล ศัตรูตีโดนยากมากในยกนี้' } },
   dagger: { n: 'มีดสั้น', a: 'DEX', die: 4, hit: 1, v: 'แทง', skill: 'dagger', sp: { n: 'แทงจุดตาย', d: 'แม่นน้อยลงมาก แต่แรงเป็นสามเท่า' } },
 };
 const TIER = ['ทำเอง', 'ธรรมดา', 'ช่างฝีมือ'];
@@ -100,7 +100,7 @@ function fightActions(p, F) {
     const ch = W.sp.n === 'ฟันสองครั้ง' ? hitChance(atk - 3, F.foe.ac) : W.sp.n === 'ฟันหนัก' ? hitChance(atk - 2, F.foe.ac) : W.sp.n === 'แทงจุดตาย' ? hitChance(atk - 4, F.foe.ac) : hitChance(atk, F.foe.ac);
     out.push({ id: 'special', n: W.sp.n, d: W.sp.d, ch });
   }
-  out.push({ id: 'defend', n: 'ตั้งรับ', d: 'ศัตรูตีคุณได้ยากขึ้นมาก และพักหายใจได้เล็กน้อย' });
+  out.push({ id: 'defend', n: 'ตั้งรับ', d: 'ศัตรูตีโดนยากขึ้นมาก แล้วได้พักหายใจนิดหน่อย' });
   if (rank(p, 'fire') >= 1) out.push({ id: 'fire', n: 'ลูกไฟ', d: 'ใช้มานา 3', ch: hitChance(am(p, 'INT') + rank(p, 'fire') * 2 + 2, F.foe.ac), off: (p.mana || 0) < 3 ? 'มานาไม่พอ' : null });
   if (rank(p, 'heal') >= 1) out.push({ id: 'heal', n: 'สมานแผล', d: 'ใช้มานา 2 ฟื้นแรง', off: (p.mana || 0) < 2 ? 'มานาไม่พอ' : null });
   if (F.foe.flee < 99) out.push({ id: 'flee', n: 'หนี', d: 'ทอยว่องไว+ลอบเร้น ถ้าพลาดจะโดนตีฟรี', ch: hitChance(am(p, 'DEX') + rank(p, 'stealth') * 2, F.foe.flee) });
@@ -128,27 +128,27 @@ function fightAct(p, F, id) {
     if (W.sp.n === 'ถอยแล้วยิง') { strike(atk, 1); foeMod -= 5; }
     if (W.sp.n === 'แทงจุดตาย') strike(atk - 4, 3);
   }
-  if (id === 'defend') { F.def = 5; F.php = Math.min(F.max, F.php + 1); L.push('คุณตั้งรับ และพักหายใจ'); }
+  if (id === 'defend') { F.def = 5; F.php = Math.min(F.max, F.php + 1); L.push('ตั้งรับ แล้วพักหายใจ'); }
   if (id === 'fire') {
     p.mana -= 3; const r = d20();
-    if (r + am(p, 'INT') + rank(p, 'fire') * 2 + 2 >= foe.ac || r === 20) { const d = 2 + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + rank(p, 'fire') * 2; F.fhp -= d; L.push(`ลูกไฟของคุณระเบิดใส่${foe.n} เสีย ${d}`); }
-    else L.push(`${foe.n}หลบลูกไฟของคุณได้`);
+    if (r + am(p, 'INT') + rank(p, 'fire') * 2 + 2 >= foe.ac || r === 20) { const d = 2 + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + rank(p, 'fire') * 2; F.fhp -= d; L.push(`ลูกไฟระเบิดใส่${foe.n} เสีย ${d}`); }
+    else L.push(`${foe.n}หลบลูกไฟได้`);
   }
-  if (id === 'heal') { p.mana -= 2; const h = 1 + Math.floor(Math.random() * 6) + rank(p, 'heal') * 2; F.php = Math.min(F.max, F.php + h); L.push(`แสงอุ่นๆ สมานแผลของคุณ ฟื้นแรง ${h}`); }
+  if (id === 'heal') { p.mana -= 2; const h = 1 + Math.floor(Math.random() * 6) + rank(p, 'heal') * 2; F.php = Math.min(F.max, F.php + h); L.push(`แสงอุ่นๆ สมานแผล ฟื้นแรง ${h}`); }
   if (id === 'flee') {
     if (d20() + am(p, 'DEX') + rank(p, 'stealth') * 2 >= foe.flee) { F.over = true; F.result = 'fled'; L.push('คุณหนีพ้น'); return L; }
-    L.push('คุณหนีไม่พ้น'); foeMod += 2;
+    L.push('หนีไม่พ้น'); foeMod += 2;
   }
-  if (id === 'pay') { const v = Math.min(p.wealth, foe.pay); p.wealth = clampW(p.wealth - v); F.over = true; F.result = 'paid'; L.push(`คุณยื่นของมีค่าให้${foe.n}ไป ${Math.round(v)} พวกมันหัวเราะแล้วจากไป`); return L; }
-  if (id === 'yield') { F.over = true; F.result = 'lose'; F.lethal = 0; L.push('คุณวางอาวุธลงและยอมแพ้'); return L; }
+  if (id === 'pay') { const v = Math.min(p.wealth, foe.pay); p.wealth = clampW(p.wealth - v); F.over = true; F.result = 'paid'; L.push(`ยื่นของมีค่าให้${foe.n}ไป ${Math.round(v)} พวกมันหัวเราะแล้วก็ไป`); return L; }
+  if (id === 'yield') { F.over = true; F.result = 'lose'; F.lethal = 0; L.push('วางอาวุธลง ยอมแพ้'); return L; }
   if (F.fhp <= 0) { F.over = true; F.result = 'win'; L.push(`${foe.n}ล้มลง`); return L; }
   // foe turn
   const r = d20();
-  if (r === 1 || (r !== 20 && r + foe.atk + foeMod < pAC(p) + F.def)) L.push(F.def ? `คุณรับการโจมตีของ${foe.n}ไว้ได้` : `${foe.n}${foe.v}พลาด`);
+  if (r === 1 || (r !== 20 && r + foe.atk + foeMod < pAC(p) + F.def)) L.push(F.def ? `รับการโจมตีของ${foe.n}ไว้ได้` : `${foe.n}${foe.v}พลาด`);
   else { let d = 1 + Math.floor(Math.random() * foe.die) + foe.plus; if (r === 20) d *= 2; F.php -= d; L.push(`${foe.n}${foe.v}โดนคุณ เสีย ${d}`); }
   if (F.php <= 0) { F.over = true; F.result = 'lose'; L.push('คุณล้มลง'); return L; }
   F.round++;
-  if (F.round > 12) { F.over = true; F.result = 'fled'; L.push('ทั้งสองฝ่ายหมดแรง และแยกย้ายกันไป'); }
+  if (F.round > 12) { F.over = true; F.result = 'fled'; L.push('หมดแรงกันทั้งสองฝ่าย แยกย้ายกันไป'); }
   return L;
 }
 // apply the result to the person; returns the closing line
@@ -215,11 +215,11 @@ extend('buildFate', 'combat: replace old one-roll fights with real fights', inne
   if (kind === 'beast') {
     const foe = beastFor(p);
     F.options = [
-      fightOpt('สู้', foe, { lethal: .9, death: cause, intro: `${FOES[foe].n}พุ่งเข้าใส่คุณ`, onEnd: (q, r) => r === 'win' ? live(q, 'มันล้มลงตรงหน้าคุณ') : r === 'fled' ? live(q, 'คุณหนีพ้นมาได้ ทั้งที่ขาสั่นไปหมด') : r === 'paid' ? '' : r === 'lose' ? live(q, 'คุณรอดมาได้ด้วยบาดแผลเต็มตัว') : '' }),
+      fightOpt('สู้', foe, { lethal: .9, death: cause, intro: `${FOES[foe].n}พุ่งเข้าใส่`, onEnd: (q, r) => r === 'win' ? live(q, 'มันล้มลงตรงหน้า') : r === 'fled' ? live(q, 'หนีพ้นมาได้ ทั้งที่ขาสั่นไปหมด') : r === 'paid' ? '' : r === 'lose' ? live(q, 'รอดมาได้ แต่แผลเต็มตัว') : '' }),
       ...F.options.filter(o => o.label === 'วิ่งหนี'),
     ];
   }
-  if (kind === 'war') F.options = F.options.map(o => o.label === 'สู้จนถึงที่สุด' ? fightOpt('สู้จนถึงที่สุด', 'veteran', { lethal: .9, death: cause, intro: 'ทหารผ่านศึกของข้าศึกตรงเข้ามาหาคุณ', onEnd: (q, r) => r === 'win' ? (q.wealth += 15, q.happy += 10, q.flags.hero = true, live(q, 'พอฝุ่นจางลง คุณยังยืนอยู่ ผู้คนเล่าเรื่องนี้กันไปอีกหลายปี')) : r === 'fled' ? live(q, 'คุณถอยออกมาจากแนวรบได้ทันเวลา') : r === 'lose' ? live(q, 'คุณล้มลงกลางสนามรบ แต่มีคนลากคุณกลับมาได้') : '' }) : o);
+  if (kind === 'war') F.options = F.options.map(o => o.label === 'สู้จนถึงที่สุด' ? fightOpt('สู้จนถึงที่สุด', 'veteran', { lethal: .9, death: cause, intro: 'ทหารผ่านศึกฝ่ายข้าศึกตรงดิ่งเข้ามาหา', onEnd: (q, r) => r === 'win' ? (q.wealth += 15, q.happy += 10, q.flags.hero = true, live(q, 'พอฝุ่นจาง คุณยังยืนอยู่ คนเอาเรื่องนี้ไปเล่ากันอีกหลายปี')) : r === 'fled' ? live(q, 'ถอยออกจากแนวรบได้ทันเวลา') : r === 'lose' ? live(q, 'ล้มลงกลางสนามรบ แต่มีคนลากกลับมาได้') : '' }) : o);
   return F;
 });
 function patchChoice(id, label, mk) {
@@ -227,52 +227,52 @@ function patchChoice(id, label, mk) {
   const orig = c.options;
   c.options = p => orig(p).map(o => o.label === label ? mk(p) : o);
 }
-patchChoice('bounty', 'สู้กับนักล่าค่าหัว', () => fightOpt('สู้กับนักล่าค่าหัว', 'hunter', { intro: 'นักล่าค่าหัวชักดาบออกมา', onEnd: (q, r) => { if (r === 'win') { q.flags.fugitive = false; return 'นักล่าค่าหัวไม่ได้กลับไปรายงานใคร'; } if (r === 'fled') return 'คุณหนีเข้าป่าไปได้ แต่รู้ดีว่าเขาจะกลับมา'; if (r === 'lose') { q.flags.fugitive = false; q.cls = 4; return 'คุณถูกจับตัวกลับไปขายเป็นทาสชดใช้ความผิด'; } return ''; } }));
-patchChoice('vendetta', 'สู้', () => fightOpt('สู้', 'avenger', { intro: 'เขาดึงมีดออกมาจากแขนเสื้อ', onEnd: (q, r) => { if (r === 'win') { q.flags.vendetta = false; return 'คุณชนะ แต่ไม่รู้สึกว่าชนะเลย'; } if (r === 'fled') return 'คุณหนีไปได้ แต่เขารู้ว่าบ้านคุณอยู่ที่ไหน'; if (r === 'lose') return 'เขาปล่อยคุณไว้ในสภาพปางตาย แล้วเดินจากไป'; return ''; } }));
-patchChoice('duel', 'รับคำท้า', () => fightOpt('รับคำท้า', 'duelist', { intro: 'ทั้งสองฝ่ายถอดเสื้อคลุมแล้วยืนเผชิญหน้ากันกลางลาน', death: 'เสียชีวิตในการดวลเพื่อศักดิ์ศรีของตระกูล', onEnd: (q, r) => { if (r === 'win') { q.happy += 8; q.flags.duelWin = true; q.flags.famous = true; return 'คุณชนะ และคู่ต่อสู้ต้องคุกเข่าต่อหน้าทุกคน'; } if (r === 'lose') { q.happy -= 6; return 'คุณแพ้ และได้แผลเป็นยาวที่แก้ม'; } return ''; } }));
+patchChoice('bounty', 'สู้กับนักล่าค่าหัว', () => fightOpt('สู้กับนักล่าค่าหัว', 'hunter', { intro: 'นักล่าค่าหัวชักดาบออกมา', onEnd: (q, r) => { if (r === 'win') { q.flags.fugitive = false; return 'นักล่าค่าหัวไม่ได้กลับไปรายงานใคร'; } if (r === 'fled') return 'หนีเข้าป่าไปได้ แต่รู้ดีว่าเขาต้องกลับมาอีก'; if (r === 'lose') { q.flags.fugitive = false; q.cls = 4; return 'โดนจับตัวกลับไปขายเป็นทาสใช้หนี้ความผิด'; } return ''; } }));
+patchChoice('vendetta', 'สู้', () => fightOpt('สู้', 'avenger', { intro: 'เขาชักมีดออกมาจากแขนเสื้อ', onEnd: (q, r) => { if (r === 'win') { q.flags.vendetta = false; return 'ชนะ แต่ไม่รู้สึกว่าชนะเลย'; } if (r === 'fled') return 'หนีไปได้ แต่เขารู้ว่าบ้านคุณอยู่ไหน'; if (r === 'lose') return 'เขาทิ้งคุณไว้ในสภาพปางตาย แล้วเดินจากไป'; return ''; } }));
+patchChoice('duel', 'รับคำท้า', () => fightOpt('รับคำท้า', 'duelist', { intro: 'ทั้งสองฝ่ายถอดเสื้อคลุม แล้วยืนประจันหน้ากันกลางลาน', death: 'เสียชีวิตในการดวลเพื่อศักดิ์ศรีของตระกูล', onEnd: (q, r) => { if (r === 'win') { q.happy += 8; q.flags.duelWin = true; q.flags.famous = true; return 'ชนะ คู่ต่อสู้ต้องคุกเข่าต่อหน้าทุกคน'; } if (r === 'lose') { q.happy -= 6; return 'แพ้ แถมได้แผลเป็นยาวที่แก้ม'; } return ''; } }));
 (() => { const c = CHOICES.find(x => x.id === 'knighted'); if (c) c.when = p => ['sword', 'spear', 'axe', 'bow'].some(w => rank(p, w) >= 4) && p.cls >= 1 && p.cls < 4 && p.age <= 50 && has(p, 'aurelis', 'kragmor', 'grieve') && roll(.3); })();
 
 // --- new choices: bandits, the army ---
 const banditRisk = p => (({ grieve: .07, dunes: .07, mulvane: .06, undercity: .06, kragmor: .03, aurelis: .02, serenth: 0 })[p.realm.id] || .04) * (p.rep && p.rep.under <= -30 ? 1.5 : 1);
 CHOICES.push(
   { id: 'bandits', repeat: 6, when: p => p.age >= 14 && p.age <= 65 && p.cls < 4 && roll(banditRisk(p)),
-    prompt: p => `อายุ ${p.age} ปี ระหว่างทางกลับบ้าน ${p.wealth > 120 ? 'หัวหน้าโจรกับลูกน้อง' : 'โจรสองคน'}ออกมาดักหน้าคุณ`,
+    prompt: p => `อายุ ${p.age} ปี ระหว่างทางกลับบ้าน ${p.wealth > 120 ? 'หัวหน้าโจรกับลูกน้อง' : 'โจรสองคน'}โผล่ออกมาดักหน้า`,
     options: p => [
-      fightOpt('สู้', p.wealth > 120 ? 'boss' : 'bandit', { intro: 'โจรชักมีดออกมา', death: 'ถูกโจรปล้นฆ่ากลางทาง', onEnd: (q, r) => r === 'win' ? (q.wealth += 5, 'โจรที่เหลือวิ่งหนีไป คุณเก็บถุงเงินของพวกมันมาด้วย') : r === 'lose' ? (q.wealth = clampW(q.wealth - 15), 'พวกมันเอาของไปจนหมดตัว แล้วทิ้งคุณไว้ข้างทาง') : '' }),
-      opt('ยอมให้ของไป', q => { const v = Math.min(q.wealth, 12); q.wealth -= v; return v > 0 ? 'คุณยื่นของมีค่าทั้งหมดที่พกมาให้ พวกมันปล่อยคุณไป' : 'คุณไม่มีอะไรให้ พวกมันเตะคุณสองทีแล้วจากไป'; }),
-      Object.assign(opt('วิ่งหนี', q => { if (check(q, 'DEX', 'stealth', 12)) return 'คุณวิ่งหลบเข้าซอกหินจนพวกมันหาไม่เจอ'; startFight(q, q.wealth > 50 ? 'boss' : 'bandit', { hurt: 3, death: 'ถูกโจรปล้นฆ่ากลางทาง', onEnd: (z, r) => r === 'win' ? 'คุณสู้จนพวกมันถอยไป' : r === 'lose' ? (z.wealth = clampW(z.wealth - 15), 'พวกมันเอาของไปจนหมดตัว') : '' }); return 'พวกมันวิ่งตามทัน'; }), { chk: ['DEX', 'stealth'] }),
+      fightOpt('สู้', p.wealth > 120 ? 'boss' : 'bandit', { intro: 'โจรชักมีดออกมา', death: 'ถูกโจรปล้นฆ่ากลางทาง', onEnd: (q, r) => r === 'win' ? (q.wealth += 5, 'โจรที่เหลือวิ่งหนีกระเจิง เก็บถุงเงินของพวกมันมาด้วย') : r === 'lose' ? (q.wealth = clampW(q.wealth - 15), 'พวกมันรูดทรัพย์ไปจนหมดตัว แล้วทิ้งไว้ข้างทาง') : '' }),
+      opt('ยอมให้ของไป', q => { const v = Math.min(q.wealth, 12); q.wealth -= v; return v > 0 ? 'ยื่นของมีค่าที่พกมาให้หมด พวกมันเลยปล่อยตัวไป' : 'ไม่มีอะไรจะให้ พวกมันเตะไปสองทีแล้วก็ไป'; }),
+      Object.assign(opt('วิ่งหนี', q => { if (check(q, 'DEX', 'stealth', 12)) return 'วิ่งหลบเข้าซอกหิน พวกมันหาไม่เจอ'; startFight(q, q.wealth > 50 ? 'boss' : 'bandit', { hurt: 3, death: 'ถูกโจรปล้นฆ่ากลางทาง', onEnd: (z, r) => r === 'win' ? 'สู้จนพวกมันถอยไป' : r === 'lose' ? (z.wealth = clampW(z.wealth - 15), 'พวกมันรูดทรัพย์ไปจนหมดตัว') : '' }); return 'พวกมันวิ่งตามทัน'; }), { chk: ['DEX', 'stealth'] }),
     ] },
   { id: 'enlist', when: p => p.age >= 16 && p.age <= 30 && (p.cls === 2 || p.cls === 3) && !p.flags.enlisted && has(p, 'aurelis', 'undercity', 'grieve', 'kragmor', 'dunes') && roll(.1),
     prompt: p => `อายุ ${p.age} ปี กองทัพประจำการรับสมัครทหาร ได้เงินเดือน อาหารทุกวัน และครูฝึกอาวุธ${p.cls === 3 ? ' ไพร่ที่เป็นทหารจะพ้นจากที่ดินของเจ้านาย' : ''}`,
     options: p => [
-      opt('สมัครเป็นทหาร', q => { q.flags.enlisted = true; q.flags.armyRank = 0; q.flags.armyWins = 0; if (q.cls === 3) q.cls = 2; const g = gear(q); if (g.w === 'none') { setWeapon(q, 'spear'); g.own.spear = 1; } q.happy -= 2; return 'คุณได้หอกหนึ่งเล่ม เสื้อเกราะผ้าหนึ่งตัว และเตียงในค่ายทหาร'; }),
-      opt('ไม่สมัคร', () => 'คุณดูแถวคนสมัครทหารยาวเหยียดแล้วเดินผ่านไป'),
+      opt('สมัครเป็นทหาร', q => { q.flags.enlisted = true; q.flags.armyRank = 0; q.flags.armyWins = 0; if (q.cls === 3) q.cls = 2; const g = gear(q); if (g.w === 'none') { setWeapon(q, 'spear'); g.own.spear = 1; } q.happy -= 2; return 'ได้หอกเล่มหนึ่ง เสื้อเกราะผ้าตัวหนึ่ง กับเตียงในค่ายทหาร'; }),
+      opt('ไม่สมัคร', () => 'มองแถวคนสมัครทหารยาวเหยียด แล้วเดินผ่านไป'),
     ] },
   { id: 'battle', repeat: 25, when: p => (p.flags.enlisted || p.flags.soldier > 0) && p.age >= 16 && p.age <= 55 && roll(p.realm.war >= .01 || eraActive(p, 'war4') ? .45 : .2),
-    prompt: p => `อายุ ${p.age} ปี ทัพของคุณปะทะกับข้าศึกที่ชายแดน`,
+    prompt: p => `อายุ ${p.age} ปี ทัพปะทะกับข้าศึกที่ชายแดน`,
     options: p => [
-      fightOpt('บุกแนวหน้า', (p.flags.armyRank || 0) >= 1 ? 'veteran' : 'soldier', { intro: 'แตรทัพดังขึ้น คุณวิ่งเข้าหาแนวข้าศึก', death: 'เสียชีวิตในสงครามชายแดน', onEnd: (q, r) => {
-        if (r !== 'win') return r === 'lose' ? 'คุณถูกหามกลับมาที่ค่ายในสภาพสาหัส' : r === 'fled' ? 'คุณถอยกลับมาที่แนวหลังได้' : '';
+      fightOpt('บุกแนวหน้า', (p.flags.armyRank || 0) >= 1 ? 'veteran' : 'soldier', { intro: 'แตรทัพดังขึ้น วิ่งเข้าหาแนวข้าศึก', death: 'เสียชีวิตในสงครามชายแดน', onEnd: (q, r) => {
+        if (r !== 'win') return r === 'lose' ? 'โดนหามกลับค่ายมาในสภาพสาหัส' : r === 'fled' ? 'ถอยกลับมาแนวหลังได้' : '';
         q.wealth += 6; q.flags.armyWins = (q.flags.armyWins || 0) + 1;
         const w = q.flags.armyWins, rk = q.flags.armyRank || 0, best = Math.max(...['sword', 'spear', 'axe', 'bow', 'dagger'].map(s => rank(q, s)));
-        if (rk === 0 && w >= 3) { q.flags.armyRank = 1; q.wealth += 10; q.happy += 5; return 'คุณชนะศึกครั้งที่สาม ผู้บังคับบัญชาเลื่อนยศให้คุณเป็นนายสิบ'; }
-        if (rk === 1 && w >= 7 && best >= 3) { q.flags.armyRank = 2; q.cls = Math.min(q.cls, 1); q.wealth += 20; q.happy += 8; return 'คุณได้เลื่อนยศเป็นนายร้อย ได้บ้านพักนายทหาร และเงินเดือนมากกว่าพ่อค้าบางคน'; }
-        return 'ทัพของคุณยึดเนินเขาได้ คุณได้ส่วนแบ่งจากของที่ยึดมา';
+        if (rk === 0 && w >= 3) { q.flags.armyRank = 1; q.wealth += 10; q.happy += 5; return 'ชนะศึกเป็นครั้งที่สาม นายเลื่อนยศให้เป็นนายสิบ'; }
+        if (rk === 1 && w >= 7 && best >= 3) { q.flags.armyRank = 2; q.cls = Math.min(q.cls, 1); q.wealth += 20; q.happy += 8; return 'ได้เลื่อนยศเป็นนายร้อย ได้บ้านพักนายทหาร เงินเดือนมากกว่าพ่อค้าบางคนเสียอีก'; }
+        return 'ทัพยึดเนินเขาได้ ได้ส่วนแบ่งจากของที่ยึดมา';
       } }),
-      opt('รักษาแนวหลัง', q => { q.wealth += 2; q.happy -= 2; return 'คุณเฝ้าเสบียงอยู่แนวหลังจนการรบจบ'; }),
-      Object.assign(opt('หนีทัพ', q => { if (check(q, 'DEX', 'stealth', 14)) { q.flags.enlisted = false; q.flags.soldier = 0; q.flags.fugitive = true; return 'คุณหายเข้าป่าไปในคืนนั้น ตอนนี้คุณเป็นทหารหนีทัพ'; } q.health -= 25; q.flags.enlisted = false; q.wealth = clampW(q.wealth - 10); return 'คุณถูกจับได้ ถูกเฆี่ยนต่อหน้าทั้งกอง และถูกไล่ออกจากกองทัพ'; }), { chk: ['DEX', 'stealth'] }),
+      opt('รักษาแนวหลัง', q => { q.wealth += 2; q.happy -= 2; return 'เฝ้าเสบียงอยู่แนวหลังจนรบเสร็จ'; }),
+      Object.assign(opt('หนีทัพ', q => { if (check(q, 'DEX', 'stealth', 14)) { q.flags.enlisted = false; q.flags.soldier = 0; q.flags.fugitive = true; return 'หายเข้าป่าไปในคืนนั้น ตอนนี้กลายเป็นทหารหนีทัพไปแล้ว'; } q.health -= 25; q.flags.enlisted = false; q.wealth = clampW(q.wealth - 10); return 'โดนจับได้ โดนเฆี่ยนต่อหน้าทั้งกอง แล้วโดนไล่ออกจากกองทัพ'; }), { chk: ['DEX', 'stealth'] }),
     ] },
   { id: 'discharge', when: p => p.flags.enlisted && p.age >= 45 && roll(.3),
-    prompt: p => `อายุ ${p.age} ปี กองทัพเสนอให้คุณปลดประจำการพร้อมเงินบำนาญ`,
+    prompt: p => `อายุ ${p.age} ปี กองทัพเสนอให้ปลดประจำการพร้อมเบี้ยบำนาญ`,
     options: p => [
-      opt('ปลดประจำการ', q => { q.flags.enlisted = false; q.wealth += 8 + (q.flags.armyRank || 0) * 8; q.happy += 4; return 'คุณเก็บเครื่องแบบใส่หีบ แล้วกลับบ้าน'; }),
-      opt('รับราชการต่อ', () => 'คุณยังไม่อยากวางอาวุธ'),
+      opt('ปลดประจำการ', q => { q.flags.enlisted = false; q.wealth += 8 + (q.flags.armyRank || 0) * 8; q.happy += 4; return 'เก็บเครื่องแบบใส่หีบ แล้วกลับบ้าน'; }),
+      opt('รับราชการต่อ', () => 'ยังไม่อยากวางอาวุธ'),
     ] },
 );
 EVENTS.push(
-  { w: 4, c: p => p.flags.enlisted, t: p => pick(['ครูฝึกในค่ายสั่งให้ทั้งกองวิ่งรอบค่ายจนสลบไปสามคน', 'คุณได้รับเงินเดือนทหารครบทั้งปี', 'เพื่อนร่วมกองของคุณเล่าเรื่องบ้านเกิดให้ฟังทุกคืน', 'กองของคุณถูกส่งไปเฝ้าด่านชายแดนทั้งฤดู']), f: p => { p.wealth += 3; p.health += 1; } },
-  { w: 2, c: p => p.flags.enlisted && (p.flags.armyRank || 0) >= 1, t: () => 'ทหารใหม่ในกองมองคุณด้วยสายตาเดียวกับที่คุณเคยมองนายสิบของคุณ', f: p => { p.happy += 2; } },
-  { w: 2, c: p => gear(p).w !== 'none' && p.age > 14, t: p => `คุณลับ${WEAPONS[gear(p).w].n}ของตัวเองทุกเย็นจนกลายเป็นนิสัย`, f: p => { const s = WEAPONS[gear(p).w].skill; if (s && p.skills[s] && p.skills[s].r < MAX_RANK) p.skills[s].x += 5; } },
+  { w: 4, c: p => p.flags.enlisted, t: p => pick(['ครูฝึกสั่งให้ทั้งกองวิ่งรอบค่ายจนสลบไปสามคน', 'ได้เงินเดือนทหารครบทั้งปี', 'เพื่อนร่วมกองเล่าเรื่องบ้านเกิดให้ฟังทุกคืน', 'กองโดนส่งไปเฝ้าด่านชายแดนทั้งฤดู']), f: p => { p.wealth += 3; p.health += 1; } },
+  { w: 2, c: p => p.flags.enlisted && (p.flags.armyRank || 0) >= 1, t: () => 'ทหารใหม่มองคุณด้วยสายตาแบบเดียวกับที่คุณเคยมองนายสิบตอนเป็นทหารใหม่', f: p => { p.happy += 2; } },
+  { w: 2, c: p => gear(p).w !== 'none' && p.age > 14, t: p => `ลับ${WEAPONS[gear(p).w].n}ทุกเย็นจนติดเป็นนิสัย`, f: p => { const s = WEAPONS[gear(p).w].skill; if (s && p.skills[s] && p.skills[s].r < MAX_RANK) p.skills[s].x += 5; } },
 );
 LEGENDS.push(
   { id: 'veteran', n: 'ทหารผ่านศึก', d: 'ชนะการต่อสู้ 10 ครั้งในชีวิตเดียว', c: p => (p.fights && p.fights.win >= 10) },

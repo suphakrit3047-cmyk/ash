@@ -4,7 +4,7 @@ async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':1000,'height':1400})
         errs=[]; pg.on('pageerror',lambda e:errs.append(str(e)[:300]))
-        await pg.set_content('<!doctype html><meta charset=utf-8><body>'+open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)),'..','..','index.html'),encoding='utf-8').read()+'</body>')
+        await pg.set_content('<!doctype html><meta charset=utf-8><body>'+open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)),'..','..','เกิดจากเถ้าถ่าน.html'),encoding='utf-8').read()+'</body>')
         await pg.wait_for_function("!document.getElementById('startBtn').disabled", timeout=60000)
         await pg.evaluate("tutState = () => ({seen:[],off:true}); setSpeed(0); SEC_DEFAULT.push('')")
         await pg.click('#startBtn'); await pg.wait_for_selector('#liveBtn', state='visible'); await pg.click('#liveBtn'); await pg.wait_for_timeout(300)

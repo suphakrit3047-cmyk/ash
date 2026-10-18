@@ -16,8 +16,8 @@ const MATS = {
   herb: { n: 'สมุนไพร', base: .8, d: 'ใช้ปรุงยา ร้านยาต้องใช้' },
   hide: { n: 'หนังสัตว์', base: 1.4, d: 'ใช้ทำเกราะหนัง โรงช่างต้องใช้' },
   ore: { n: 'แร่เหล็ก', base: 1.2, d: 'ใช้ตีอาวุธ โรงตีเหล็กต้องใช้' },
-  glass: { n: 'แก้วเถ้า', base: 2, d: 'แก้วที่เกิดจากพายุเถ้า คนรวยในเมืองชอบเอาไปประดับบ้าน' },
-  shard: { n: 'เศษเส้นใย', base: 9, d: 'เส้นใยบนฟ้าที่ขาดตกลงมา หายากมาก ศาสนจักรห้ามซื้อขาย' },
+  glass: { n: 'แก้วเถ้า', base: 2, d: 'แก้วที่เกิดจากพายุเถ้า คนรวยในเมืองชอบเอาไปแต่งบ้าน' },
+  shard: { n: 'เศษเส้นใย', base: 9, d: 'เศษเส้นใยที่ขาดตกลงมาจากฟ้า หายากมาก ศาสนจักรห้ามซื้อขาย' },
 };
 const MAT_IDS = Object.keys(MATS);
 // what each place pays, relative to base (0 = nobody buys it here)
@@ -64,17 +64,17 @@ function sellMat(p, m, n) {
   n = Math.min(n, inv(p)[m] || 0); if (!n) return null;
   if (m === 'shard' && has(p, 'aurelis', 'undercity') && roll(p.rep && p.rep.under >= 30 ? .05 : .2)) {
     inv(p)[m] -= n; p.wealth = clampW(p.wealth - 10); p.happy -= 5; led(p, 'sales', -10);
-    return `คนที่มาขอซื้อ${MATS[m].n}เป็นสายของศาสนจักร ของถูกยึด และคุณต้องจ่ายค่าปรับ ${money(10)}`;
+    return `คนที่มาขอซื้อ${MATS[m].n}เป็นสายของศาสนจักร ของโดนยึด แถมโดนปรับอีก ${money(10)}`;
   }
   let v = 0; const bk = mktBook(p); for (let i = 0; i < n; i++) { v += matPrice(p, m); bk.sold[m] = (bk.sold[m] || 0) + 1; }
   inv(p)[m] -= n; p.wealth = clampW(p.wealth + v); led(p, 'sales', v); p.flags.sold = (p.flags.sold || 0) + n;
-  return `คุณขาย${MATS[m].n} ${n} ชิ้น ได้ ${money(v)}`;
+  return `ขาย${MATS[m].n}ไป ${n} ชิ้น ได้ ${money(v)}`;
 }
 function buyMat(p, m) {
   if (p.cls === 4 || m === 'shard') return null;
   const v = buyPrice(p, m); if (p.wealth < v) return null; const bk = mktBook(p); bk.bought[m] = (bk.bought[m] || 0) + 1;
   p.wealth = clampW(p.wealth - v); led(p, 'buy', -v); inv(p)[m] = (inv(p)[m] || 0) + 1;
-  return `คุณซื้อ${MATS[m].n}มา 1 ชิ้น ราคา ${money(v)}`;
+  return `ซื้อ${MATS[m].n}มาชิ้นหนึ่ง ราคา ${money(v)}`;
 }
 // active: once a year go out and look for things
 function canForage(p) {
@@ -89,22 +89,22 @@ function forage(p) {
   const city = has(p, 'aurelis', 'serenth');
   const ok = check(p, 'WIS', 'survival', city ? 13 : 10);
   if (!ok) {
-    if (roll(.2)) { p.health -= 6; return city ? 'คุณเดินหาสมุนไพรตามสวนรอบเมือง จนโดนยามไล่ตีออกมา' : 'คุณหลงทางในป่าจนมืด และพลัดตกเนินจนข้อเท้าแพลง'; }
-    return city ? 'คุณเดินหาของทั้งวัน แต่ในเมืองแทบไม่มีอะไรให้เก็บ' : 'คุณออกไปหาของทั้งวัน แต่กลับมามือเปล่า';
+    if (roll(.2)) { p.health -= 6; return city ? 'เดินหาสมุนไพรตามสวนรอบเมือง จนโดนยามไล่ตีออกมา' : 'หลงป่าจนมืด พลัดตกเนินข้อเท้าแพลง'; }
+    return city ? 'เดินหาของทั้งวัน แต่ในเมืองแทบไม่มีอะไรให้เก็บ' : 'ออกไปหาของทั้งวัน กลับมามือเปล่า';
   }
   const n = 1 + (rank(p, 'survival') >= 2 ? 1 : 0) + (roll(.3) ? 1 : 0);
   const got = {};
   for (let i = 0; i < n; i++) { const m = findRoll(p); got[m] = (got[m] || 0) + 1; addMat(p, m, 1); }
-  return 'คุณออกไปหาของ และได้' + Object.entries(got).map(([m, k]) => `${MATS[m].n} ${k} ชิ้น`).join(' กับ') + (got.shard ? ' เศษเส้นใยในมือคุณยังสั่นเบาๆ เหมือนมีชีวิต' : '');
+  return 'ออกไปหาของมา ได้' + Object.entries(got).map(([m, k]) => `${MATS[m].n} ${k} ชิ้น`).join(' กับ') + (got.shard ? ' เศษเส้นใยในมือยังสั่นเบาๆ อยู่เลย เหมือนมีชีวิต' : '');
 }
 // crafting with materials
 const CRAFTS = [
   { id: 'potion', n: 'ปรุงยา', need: { herb: 2 }, ok: p => rank(p, 'alchemy') >= 1 || rank(p, 'medicine') >= 1 ? null : 'ต้องมีเล่นแร่หรือการแพทย์ขั้น 1', d: 'สุขภาพ +10',
-    act: p => { p.health = clamp(p.health + 10); return 'คุณต้มสมุนไพรเป็นยาบำรุง ร่างกายรู้สึกดีขึ้นมาก'; } },
+    act: p => { p.health = clamp(p.health + 10); return 'ต้มสมุนไพรเป็นยาบำรุง กินแล้วรู้สึกดีขึ้นเยอะ'; } },
   { id: 'forge', n: 'ตีอาวุธเอง', need: { ore: 3 }, ok: p => rank(p, 'smith') < 1 ? 'ต้องมีตีเหล็กขั้น 1' : canArm(p) || (gear(p).w === 'none' ? 'ต้องเลือกอาวุธประจำตัวก่อน' : (gear(p).own[gear(p).w] || 0) >= 2 ? 'อาวุธของคุณดีที่สุดแล้ว' : (gear(p).own[gear(p).w] || 0) >= 1 && rank(p, 'smith') < 3 ? 'ตีอาวุธชั้นช่างฝีมือต้องมีตีเหล็กขั้น 3' : null), d: 'อาวุธดีขึ้น 1 ขั้น',
-    act: p => { const g = gear(p); g.own[g.w] = (g.own[g.w] || 0) + 1; return `คุณหลอมแร่และตี${WEAPONS[g.w].n}เล่มใหม่ด้วยมือตัวเอง`; } },
+    act: p => { const g = gear(p); g.own[g.w] = (g.own[g.w] || 0) + 1; return `หลอมแร่แล้วตี${WEAPONS[g.w].n}เล่มใหม่ด้วยมือตัวเอง`; } },
   { id: 'leather', n: 'ทำเกราะหนัง', need: { hide: 3 }, ok: p => rank(p, 'craft') < 1 ? 'ต้องมีงานช่างขั้น 1' : canArm(p) || (gear(p).armor >= 1 ? 'คุณมีเกราะที่ดีกว่าหรือเท่ากันแล้ว' : null), d: 'ได้เกราะหนัง',
-    act: p => { gear(p).armor = 1; return 'คุณฟอกหนังและเย็บเป็นเกราะหนังได้หนึ่งตัว'; } },
+    act: p => { gear(p).armor = 1; return 'ฟอกหนังแล้วเย็บเป็นเกราะหนังได้ตัวหนึ่ง'; } },
 ];
 function doCraft(p, id) {
   const c = CRAFTS.find(x => x.id === id); if (!c || c.ok(p)) return null;
@@ -142,7 +142,7 @@ function openBiz(p, id) {
   p.wealth = clampW(p.wealth - cost); led(p, 'buy', -cost);
   p.biz = { id, lvl: 1, invested: cost, since: p.age, last: null };
   p.flags.bizOwner = true;
-  return `คุณเปิด${b.n}เป็นของตัวเอง ลงทุนไป ${money(cost)}`;
+  return `เปิด${b.n}เป็นของตัวเอง ลงทุนไป ${money(cost)}`;
 }
 const bizMax = p => p.biz && p.biz.id === 'stall' ? 1 : 3;
 const expandCost = p => Math.round(BIZ[p.biz.id].cost * p.biz.lvl);
@@ -152,14 +152,14 @@ function expandBiz(p) {
   const c = expandCost(p); if (p.wealth < c) return null;
   p.wealth = clampW(p.wealth - c); led(p, 'buy', -c); p.biz.lvl++; p.biz.invested += c;
   if (p.biz.lvl === 3) p.flags.bizTycoon = true;
-  return `คุณขยาย${BIZ[p.biz.id].n}ให้ใหญ่ขึ้น จ้างคนเพิ่ม`;
+  return `ขยาย${BIZ[p.biz.id].n}ให้ใหญ่ขึ้น จ้างคนเพิ่ม`;
 }
 const sellValue = p => Math.round(p.biz.invested * .5);
 function sellBiz(p) {
   if (!p.biz) return null;
   const v = sellValue(p), n = BIZ[p.biz.id].n;
   p.wealth = clampW(p.wealth + v); led(p, 'sales', v); p.biz = null; if (p.focus === 'biz') p.focus = 'work';
-  return `คุณขาย${n}ไป ได้เงินคืน ${money(v)}`;
+  return `ขาย${n}ไป ได้เงินคืนมา ${money(v)}`;
 }
 function bizYear(p) {
   const B = p.biz; if (!B) return null;
@@ -169,11 +169,11 @@ function bizYear(p) {
   let v = b.base * F * (1 + .15 * rank(p, bizSkill(p, b))) * LVL_MULT[B.lvl] * cm * (managed ? 1.4 : .75) * (.6 + Math.random() * .7);
   let t = null, used = 0;
   if (b.use) { const k = Math.min(inv(p)[b.use] || 0, B.lvl * 2); used = k; inv(p)[b.use] = (inv(p)[b.use] || 0) - k; v += k * MATS[b.use].base * 1.6; }
-  if (roll(.12)) { v = -b.base * F * .5 * B.lvl; t = pick([`ปีนี้${b.n}ขาดทุน ลูกค้าหายไปครึ่งหนึ่ง`, `ลูกจ้างใน${b.n}ขโมยเงินแล้วหนีไป`, `เจ้าหน้าที่มาเก็บภาษีกิจการย้อนหลัง`]); }
-  else if (b.risky && roll(.15)) { v = -12; t = 'กองคาราวานของคุณถูกโจรปล้นกลางทาง สินค้าหายไปทั้งขบวน'; }
-  else if (b.use && !used && roll(.4)) t = `${b.n}ของคุณไม่มี${MATS[b.use].n}ใช้ กำไรจึงน้อยกว่าที่ควร`;
+  if (roll(.12)) { v = -b.base * F * .5 * B.lvl; t = pick([`ปีนี้${b.n}ขาดทุน ลูกค้าหายไปครึ่งหนึ่ง`, `ลูกจ้างใน${b.n}ขโมยเงินแล้วชิ่งหนี`, `เจ้าหน้าที่มาไล่เก็บภาษีย้อนหลัง`]); }
+  else if (b.risky && roll(.15)) { v = -12; t = 'คาราวานโดนโจรปล้นกลางทาง ของหายเกลี้ยงทั้งขบวน'; }
+  else if (b.use && !used && roll(.4)) t = `${b.n}ไม่มี${MATS[b.use].n}ใช้ กำไรเลยน้อยกว่าที่ควร`;
   p.wealth = clampW(p.wealth + v); led(p, 'biz', v); B.last = v;
-  if (managed) { const sid = bizSkill(p, b), sk = p.skills[sid]; if (sk && sk.r < MAX_RANK) { sk.x += 13 * (1 - sk.r * .08); if (sk.x >= 100) { sk.x = 0; sk.r++; t = (t ? t + ' · ' : '') + `ดูแลกิจการมาหลายปี ฝีมือ${SBY[sid].n}ของคุณเพิ่มขึ้นเป็นขั้น ${sk.r}`; } } p.health = clamp(p.health - .6); gainXP(p, 3); }
+  if (managed) { const sid = bizSkill(p, b), sk = p.skills[sid]; if (sk && sk.r < MAX_RANK) { sk.x += 13 * (1 - sk.r * .08); if (sk.x >= 100) { sk.x = 0; sk.r++; t = (t ? t + ' · ' : '') + `ดูแลกิจการมาหลายปี ฝีมือ${SBY[sid].n}ขึ้นเป็นขั้น ${sk.r}`; } } p.health = clamp(p.health - .6); gainXP(p, 3); }
   return t;
 }
 
@@ -184,7 +184,7 @@ function canBorrow(p) {
   if (p.age < 16) return 'ต้องอายุ 16 ปีขึ้นไป';
   if (p.cls >= 3) return p.cls === 4 ? 'ทาสกู้เงินไม่ได้' : 'ไพร่ติดที่ดินกู้เงินไม่ได้ เพราะไม่มีอะไรค้ำประกัน';
   if (p.loan) return 'มีหนี้อยู่แล้ว';
-  if (p.flags.badCredit) return 'ไม่มีใครยอมให้คุณกู้อีกแล้ว';
+  if (p.flags.badCredit) return 'ไม่มีใครยอมให้กู้อีกแล้ว';
   return null;
 }
 function borrow(p) {
@@ -192,22 +192,22 @@ function borrow(p) {
   const t = loanTerms(p);
   p.loan = { left: t.years, pay: t.pay, missed: 0 };
   p.wealth = clampW(p.wealth + t.amt); led(p, 'loan', t.amt);
-  return p.cls <= 1 ? `ธนาคารของสมาคมพ่อค้าให้คุณกู้ ${money(t.amt)} ผ่อนปีละ ${money(t.pay)} เป็นเวลา ${t.years} ปี` : `คนปล่อยกู้ในตลาดให้คุณยืม ${money(t.amt)} ผ่อนปีละ ${money(t.pay)} เป็นเวลา ${t.years} ปี รวมแล้วต้องจ่ายเกือบสองเท่า`;
+  return p.cls <= 1 ? `ธนาคารของสมาคมพ่อค้าให้กู้ ${money(t.amt)} ผ่อนปีละ ${money(t.pay)} อยู่ ${t.years} ปี` : `เจ้าหนี้นอกระบบในตลาดให้ยืม ${money(t.amt)} ผ่อนปีละ ${money(t.pay)} อยู่ ${t.years} ปี รวมๆ แล้วต้องจ่ายเกือบสองเท่า`;
 }
 const payoffCost = p => p.loan ? Math.round(p.loan.left * p.loan.pay * .85) : 0;
 function payoff(p) {
   if (!p.loan) return null; const c = payoffCost(p); if (p.wealth < c) return null;
-  p.wealth = clampW(p.wealth - c); led(p, 'loan', -c); p.loan = null; return `คุณใช้หนี้ก้อนสุดท้ายหมด จ่ายไป ${money(c)}`;
+  p.wealth = clampW(p.wealth - c); led(p, 'loan', -c); p.loan = null; return `ใช้หนี้ก้อนสุดท้ายหมด จ่ายไป ${money(c)}`;
 }
 function loanYear(p) {
   const L = p.loan; if (!L) return null;
-  if (p.wealth >= L.pay) { p.wealth -= L.pay; led(p, 'loan', -L.pay); L.left--; L.missed = 0; if (L.left <= 0) { p.loan = null; return 'คุณผ่อนหนี้งวดสุดท้ายหมดแล้ว'; } return null; }
+  if (p.wealth >= L.pay) { p.wealth -= L.pay; led(p, 'loan', -L.pay); L.left--; L.missed = 0; if (L.left <= 0) { p.loan = null; return 'ผ่อนหนี้งวดสุดท้ายหมดแล้ว'; } return null; }
   L.missed++; p.happy -= 5;
-  if (L.missed < 3) return `ปีนี้คุณไม่มีเงินผ่อนหนี้ เจ้าหนี้มาทวงถึงบ้าน (ค้างติดกันมาแล้ว ${L.missed} ปี ถ้าค้างติดกันถึง 3 ปีจะถูกยึด)`;
+  if (L.missed < 3) return `ปีนี้ไม่มีเงินผ่อนหนี้ เจ้าหนี้มาทวงถึงบ้าน (ค้างมาแล้ว ${L.missed} ปีติด ถ้าค้างครบ 3 ปีจะโดนยึด)`;
   p.loan = null; p.flags.badCredit = true;
-  if (p.biz) { const n = BIZ[p.biz.id].n; p.biz = null; if (p.focus === 'biz') p.focus = 'work'; return `คุณค้างหนี้ติดกันสามปี เจ้าหนี้จึงยึด${n}ของคุณไป`; }
-  if (p.cls === 2) { p.cls = 3; p.flags.debtBond = true; if (typeof ensureCareer === 'function') ensureCareer(p); return 'คุณค้างหนี้ติดกันสามปีและไม่มีอะไรให้ยึด เจ้าหนี้จึงพาคุณไปทำงานบนที่ดินของเขาจนกว่าจะใช้หนี้หมด ตอนนี้คุณเป็นไพร่ติดที่ดิน'; }
-  p.wealth = 0; return 'คุณค้างหนี้ติดกันสามปี เจ้าหนี้ยึดทุกอย่างที่คุณมีไป';
+  if (p.biz) { const n = BIZ[p.biz.id].n; p.biz = null; if (p.focus === 'biz') p.focus = 'work'; return `ค้างหนี้ติดกันสามปี เจ้าหนี้เลยยึด${n}ไป`; }
+  if (p.cls === 2) { p.cls = 3; p.flags.debtBond = true; if (typeof ensureCareer === 'function') ensureCareer(p); return 'ค้างหนี้ติดกันสามปี ไม่มีอะไรให้ยึด เจ้าหนี้เลยลากตัวไปทำงานบนที่ดินของเขาจนกว่าจะใช้หนี้หมด ตอนนี้กลายเป็นไพร่ติดที่ดินไปแล้ว'; }
+  p.wealth = 0; return 'ค้างหนี้ติดกันสามปี เจ้าหนี้ยึดทุกอย่างที่มีไปหมด';
 }
 
 // ---- yearly hook ----
@@ -221,7 +221,7 @@ extend('applyFocus', 'economy: training fees, business, loans, finds; closes the
     // things picked up while working outdoors
     if (p.age >= 7 && p.focus === 'work' && p.cls !== 4 && (OUTDOOR.includes(p.career) || p.age < 14) && roll(p.career === 'hunter' ? .7 : .25)) {
       const m = p.career === 'hunter' ? 'hide' : findRoll(p); addMat(p, m, 1);
-      if (roll(.5) || m === 'shard') parts.push(m === 'shard' ? 'ระหว่างทำงาน คุณเจอเศษเส้นใยเรืองแสงจางๆ ตกอยู่ในพงหญ้า และเก็บมันไว้' : `ระหว่างทำงาน คุณเก็บ${MATS[m].n}ติดมือกลับมา`);
+      if (roll(.5) || m === 'shard') parts.push(m === 'shard' ? 'ระหว่างทำงาน เจอเศษเส้นใยเรืองแสงจางๆ ตกอยู่ในพงหญ้า เลยเก็บไว้' : `ระหว่างทำงาน เก็บ${MATS[m].n}ติดมือกลับมาด้วย`);
     }
   }
   rollLedger(p);
@@ -240,10 +240,10 @@ extend('addMat', 'economy: finding a sky shard is remembered', inner => function
 (() => {
   const c = CHOICES.find(x => x.id === 'ownShop'); if (!c) return;
   c.when = p => p.biz && p.biz.lvl >= 2 && p.cls === 2 && p.wealth >= 30 && roll(.3);
-  c.prompt = p => `อายุ ${p.age} ปี ${BIZ[p.biz.id].n}ของคุณใหญ่พอจนสมาคมพ่อค้ามาเชิญให้เข้าเป็นสมาชิก ค่าแรกเข้า ${money(20)} สมาชิกได้ฐานะพ่อค้า กู้เงินดอกต่ำ และค้าขายได้ราคาดีขึ้น แต่ต้องใช้ชีวิตให้สมฐานะ ค่าครองชีพจะสูงขึ้น`;
+  c.prompt = p => `อายุ ${p.age} ปี ${BIZ[p.biz.id].n}ใหญ่พอที่สมาคมพ่อค้ามาเชิญเข้าเป็นสมาชิก ค่าแรกเข้า ${money(20)} เป็นสมาชิกแล้วจะได้ฐานะพ่อค้า กู้เงินได้ดอกต่ำ ขายของได้ราคาดีขึ้น แต่ต้องใช้ชีวิตให้สมฐานะ ค่าครองชีพก็สูงขึ้นตาม`;
   c.options = p => [
-    opt('เข้าสมาคม (ทรัพย์ 20)', q => { q.wealth -= 20; led(q, 'buy', -20); q.cls = 1; q.flags.selfMade = true; q.happy += 10; return 'ชื่อของคุณถูกเขียนลงในทะเบียนสมาคมพ่อค้า ตอนนี้คุณมีฐานะเป็นพ่อค้าแล้ว'; }, q => q.wealth >= 20, 'ต้องมีทรัพย์ 20'),
-    opt('ยังไม่เข้า', () => 'คุณขอบคุณ แล้วกลับไปดูแลกิจการตามเดิม'),
+    opt('เข้าสมาคม (ทรัพย์ 20)', q => { q.wealth -= 20; led(q, 'buy', -20); q.cls = 1; q.flags.selfMade = true; q.happy += 10; return 'ชื่อถูกเขียนลงทะเบียนสมาคมพ่อค้าแล้ว ตอนนี้มีฐานะเป็นพ่อค้าเต็มตัว'; }, q => q.wealth >= 20, 'ต้องมีทรัพย์ 20'),
+    opt('ยังไม่เข้า', () => 'ขอบคุณ แล้วกลับไปดูแลกิจการตามเดิม'),
   ];
 })();
 // slaves own nothing and serfs very little, whatever the realm's average wealth

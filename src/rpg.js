@@ -153,11 +153,11 @@ function trainable(p) { return SKILLS.filter(s => access(p, s.id).ok && rank(p, 
 function trainYear(p) {
   let sid = p.trainSkill;
   if (!sid || !access(p, sid).ok || rank(p, sid) >= MAX_RANK) {
-    if (!p.auto) { p.focus = 'work'; return 'ปีนี้คุณฝึกสิ่งที่ตั้งใจไว้ไม่ได้ จึงกลับไปทำงานแทน'; }
+    if (!p.auto) { p.focus = 'work'; return 'ปีนี้ฝึกอย่างที่ตั้งใจไว้ไม่ได้ เลยกลับไปทำงานแทน'; }
     const list = trainable(p); if (!list.length) return null; sid = pick(list).id; p.trainSkill = sid;
   }
   const s = SBY[sid], ac = access(p, sid);
-  if (ac.cost > p.wealth) { if (!p.auto) p.focus = 'work'; return `ค่าเรียน${s.n}ปีนี้ ${money(ac.cost)} แต่คุณมีไม่พอ`; }
+  if (ac.cost > p.wealth) { if (!p.auto) p.focus = 'work'; return `ค่าเรียน${s.n}ปีนี้ ${money(ac.cost)} แต่เงินไม่พอ`; }
   p.wealth = clampW(p.wealth - ac.cost);
   const sk = p.skills[sid];
   sk.x += 26 * ac.mult * (1 + .15 * am(p, s.a)) * (T(p, 'clever') ? 1.3 : 1) * (1 - sk.r * .08);
@@ -165,8 +165,8 @@ function trainYear(p) {
   if (ac.danger) p.flags.secretMagic = (p.flags.secretMagic || 0) + 1;
   if (s.magic && has(p, 'aurelis', 'undercity') && !p.flags.churchMage) p.flags.hiddenMage = true;
   gainXP(p, 4);
-  if (sk.x >= 100) { sk.x = 0; sk.r++; gainXP(p, 10); return `ฝีมือ${s.n}ของคุณเพิ่มขึ้นเป็นขั้น ${sk.r}`; }
-  return Math.random() < .5 ? `คุณใช้เวลาว่างทั้งปีฝึก${s.n}` : null;
+  if (sk.x >= 100) { sk.x = 0; sk.r++; gainXP(p, 10); return `ฝีมือ${s.n}ขึ้นเป็นขั้น ${sk.r}`; }
+  return Math.random() < .5 ? `เวลาว่างทั้งปีหมดไปกับการฝึก${s.n}` : null;
 }
 
 // ---- passive effects of skills and stats ----
@@ -193,107 +193,107 @@ function buildFate(p, cause, kind) {
   const c = (label, a, s, act, need, needText) => Object.assign(opt(label, act, need, needText), { chk: [a, s] });
   let options = [];
   if (kind === 'ill' || kind === 'plague') options = [
-    opt('จ้างหมอหลวงมารักษา', p => { p.wealth -= 22; return Math.random() < .85 ? live(p, 'หมอหลวงรักษาคุณจนหาย ค่ารักษาครั้งนี้เท่ากับที่คนทั่วไปหาได้ในหลายปี') : fail(p, 'แม้แต่หมอหลวงก็ช่วยไม่ได้'); }, p => p.wealth >= 40, 'ต้องมีทรัพย์ 40 ขึ้นไป'),
-    c('รักษาตัวเองตามวิชาที่เรียนมา', 'WIS', 'medicine', p => check(p, 'WIS', 'medicine', 13) ? live(p, 'คุณรู้ว่าต้องใช้สมุนไพรอะไร และมันได้ผล') : fail(p, 'คุณวินิจฉัยโรคผิด'), p => rank(p, 'medicine') >= 1, 'ต้องมีทักษะการแพทย์'),
-    ...(rank(p, 'heal') >= 1 ? [c('ใช้เวทรักษาตัวเอง', 'WIS', 'heal', p => check(p, 'WIS', 'heal', 10) ? live(p, 'แสงอุ่นๆ ไหลจากฝ่ามือเข้าสู่อก ไข้ลดลงภายในคืนเดียว') : fail(p, 'พลังของคุณไม่พอจะสู้กับโรคนี้'))] : []),
-    c('ภาวนาและรอ', 'CON', null, p => { p.health -= 15; return check(p, 'CON', null, 15) ? live(p, 'ไข้ลดลงในคืนที่เจ็ด ร่างกายของคุณสู้ไหว') : fail(p, 'ไม่มีใครตอบคำภาวนาของคุณ'); }),
+    opt('จ้างหมอหลวงมารักษา', p => { p.wealth -= 22; return Math.random() < .85 ? live(p, 'หมอหลวงรักษาจนหาย แต่ค่ารักษาครั้งนี้เท่ากับรายได้หลายปีของคนธรรมดา') : fail(p, 'ขนาดหมอหลวงยังช่วยไม่ได้'); }, p => p.wealth >= 40, 'ต้องมีทรัพย์ 40 ขึ้นไป'),
+    c('รักษาตัวเองตามวิชาที่เรียนมา', 'WIS', 'medicine', p => check(p, 'WIS', 'medicine', 13) ? live(p, 'รู้ว่าต้องใช้สมุนไพรตัวไหน แล้วก็ได้ผลจริง') : fail(p, 'ดูอาการผิดไป'), p => rank(p, 'medicine') >= 1, 'ต้องมีทักษะการแพทย์'),
+    ...(rank(p, 'heal') >= 1 ? [c('ใช้เวทรักษาตัวเอง', 'WIS', 'heal', p => check(p, 'WIS', 'heal', 10) ? live(p, 'แสงอุ่นๆ ไหลจากฝ่ามือเข้าสู่อก คืนเดียวไข้ก็ลด') : fail(p, 'พลังไม่พอจะสู้กับโรคนี้'))] : []),
+    c('ภาวนาและรอ', 'CON', null, p => { p.health -= 15; return check(p, 'CON', null, 15) ? live(p, 'คืนที่เจ็ดไข้ก็ลด ร่างกายสู้ไหว') : fail(p, 'สวดจนคอแห้ง ก็ไม่มีใครตอบ'); }),
   ];
   else if (kind === 'war') options = [
-    c('ฝ่าแนวรบหนีกลับบ้าน', 'DEX', 'stealth', p => { p.health -= 15; return check(p, 'DEX', 'stealth', 13 - (T(p, 'cunning') ? 2 : 0)) ? live(p, 'คุณเดินทางตอนกลางคืนอยู่สิบวัน จนกลับถึงบ้าน') : fail(p, 'คุณไปไม่ถึงบ้าน'); }),
-    c('สู้จนถึงที่สุด', 'STR', 'sword', p => { if (check(p, 'STR', 'sword', 15 - (T(p, 'brave') ? 2 : 0))) { p.wealth += 15; p.happy += 10; p.flags.hero = true; return live(p, 'พอฝุ่นจางลง คุณยังยืนอยู่ ผู้คนเล่าเรื่องนี้กันไปอีกหลายปี'); } return fail(p, 'คุณสู้จนลมหายใจสุดท้าย'); }),
-    ...(rank(p, 'fire') >= 1 ? [c('ใช้เวทไฟเปิดทาง', 'INT', 'fire', p => { if (check(p, 'INT', 'fire', 12)) { p.flags.hero = true; return live(p, 'กำแพงไฟพุ่งขึ้นตรงหน้าทัพศัตรู ทหารฝั่งคุณหนีออกมาได้ทั้งกอง'); } return fail(p, 'เปลวไฟของคุณดับลงกลางทาง'); })] : []),
-    opt('ยอมจำนนเป็นเชลย', p => { if (Math.random() < .75) { p.cls = 4; p.flags.captive = true; p.happy -= 15; return live(p, 'คุณรอด แต่ตอนนี้คุณเป็นทาสของอีกฝ่าย'); } return fail(p, 'ฝ่ายตรงข้ามไม่จับเชลยในวันนั้น'); }),
+    c('ฝ่าแนวรบหนีกลับบ้าน', 'DEX', 'stealth', p => { p.health -= 15; return check(p, 'DEX', 'stealth', 13 - (T(p, 'cunning') ? 2 : 0)) ? live(p, 'เดินทางตอนกลางคืนอยู่สิบวัน จนกลับถึงบ้านได้') : fail(p, 'ไปไม่ถึงบ้าน'); }),
+    c('สู้จนถึงที่สุด', 'STR', 'sword', p => { if (check(p, 'STR', 'sword', 15 - (T(p, 'brave') ? 2 : 0))) { p.wealth += 15; p.happy += 10; p.flags.hero = true; return live(p, 'พอฝุ่นจาง คุณยังยืนอยู่ คนเอาเรื่องนี้ไปเล่ากันอีกหลายปี'); } return fail(p, 'สู้จนลมหายใจเฮือกสุดท้าย'); }),
+    ...(rank(p, 'fire') >= 1 ? [c('ใช้เวทไฟเปิดทาง', 'INT', 'fire', p => { if (check(p, 'INT', 'fire', 12)) { p.flags.hero = true; return live(p, 'กำแพงไฟพุ่งขึ้นขวางหน้าทัพศัตรู ทหารฝั่งเราหนีออกมาได้ทั้งกอง'); } return fail(p, 'ไฟดับวูบกลางทาง'); })] : []),
+    opt('ยอมจำนนเป็นเชลย', p => { if (Math.random() < .75) { p.cls = 4; p.flags.captive = true; p.happy -= 15; return live(p, 'รอดมาได้ แต่ตอนนี้กลายเป็นทาสของอีกฝ่ายไปแล้ว'); } return fail(p, 'วันนั้นฝ่ายตรงข้ามไม่จับเชลย'); }),
   ];
   else if (kind === 'famine') options = [
-    ...(p.cls < 4 ? [opt(p.cls < 3 ? 'ขายตัวเป็นไพร่แลกข้าว' : 'ขายตัวเป็นทาสแลกข้าว', p => { p.cls = p.cls < 3 ? 3 : 4; p.happy -= 12; p.flags.soldSelf = true; return live(p, 'คุณรอดผ่านฤดูนั้นมาได้ แต่ต้องแลกด้วยอิสรภาพ'); })] : []),
-    c('ออกล่าสัตว์ในป่าต้องห้าม', 'WIS', 'survival', p => check(p, 'WIS', 'survival', 13) ? live(p, 'คุณกลับมาพร้อมกวางหนึ่งตัว พอให้ทั้งบ้านรอดฤดูนี้') : (die(p, 'ถูกจับได้ขณะล่าสัตว์ในเขตป่าต้องห้าม และถูกลงโทษจนเสียชีวิต'), 'ยามป่าเห็นคุณก่อน')),
-    c('ขโมยข้าวจากยุ้งฉางเจ้าที่ดิน', 'DEX', 'stealth', p => { if (check(p, 'DEX', 'stealth', 12 - (T(p, 'cunning') ? 2 : 0))) { p.health += 5; return live(p, 'คืนนั้นคุณแบกข้าวออกมาได้สองกระสอบ'); } die(p, 'ถูกจับได้ขณะขโมยข้าว และถูกลงโทษจนเสียชีวิต'); return 'ยามเห็นคุณเสียก่อน'; }),
-    opt('ใช้เงินที่เหลือทั้งหมดซื้ออาหาร', p => { p.wealth = 4; return live(p, 'คุณรอด แต่ไม่เหลืออะไรเลย'); }, p => p.wealth >= 25, 'ต้องมีทรัพย์ 25 ขึ้นไป'),
+    ...(p.cls < 4 ? [opt(p.cls < 3 ? 'ขายตัวเป็นไพร่แลกข้าว' : 'ขายตัวเป็นทาสแลกข้าว', p => { p.cls = p.cls < 3 ? 3 : 4; p.happy -= 12; p.flags.soldSelf = true; return live(p, 'รอดหน้าแล้งมาได้ แต่ต้องแลกกับอิสรภาพ'); })] : []),
+    c('ออกล่าสัตว์ในป่าต้องห้าม', 'WIS', 'survival', p => check(p, 'WIS', 'survival', 13) ? live(p, 'กลับมาพร้อมกวางตัวหนึ่ง พอให้ทั้งบ้านรอดหน้านี้ไปได้') : (die(p, 'ถูกจับได้ขณะล่าสัตว์ในเขตป่าต้องห้าม และถูกลงโทษจนเสียชีวิต'), 'ยามป่าเห็นเข้าเสียก่อน')),
+    c('ขโมยข้าวจากยุ้งฉางเจ้าที่ดิน', 'DEX', 'stealth', p => { if (check(p, 'DEX', 'stealth', 12 - (T(p, 'cunning') ? 2 : 0))) { p.health += 5; return live(p, 'คืนนั้นแบกข้าวออกมาได้สองกระสอบ'); } die(p, 'ถูกจับได้ขณะขโมยข้าว และถูกลงโทษจนเสียชีวิต'); return 'ยามเห็นเข้าเสียก่อน'; }),
+    opt('ใช้เงินที่เหลือทั้งหมดซื้ออาหาร', p => { p.wealth = 4; return live(p, 'รอดมาได้ แต่ไม่เหลืออะไรติดตัวเลย'); }, p => p.wealth >= 25, 'ต้องมีทรัพย์ 25 ขึ้นไป'),
   ];
   else if (kind === 'mine') options = [
-    c('ขุดทางออกเอง', 'STR', 'smith', p => { p.health -= 20; return check(p, 'STR', 'smith', 14 - (T(p, 'tough') ? 2 : 0)) ? live(p, 'นิ้วของคุณแตกทุกนิ้ว แต่ในที่สุดคุณก็เห็นแสงสว่าง') : fail(p, 'หินหนักเกินไป'); }),
-    opt('รอคนมาช่วย', p => Math.random() < (p.cls <= 1 ? .85 : .2) ? live(p, p.cls <= 1 ? 'ทีมกู้ภัยมาถึงภายในวันเดียว เพราะครอบครัวคุณจ่ายเงินให้มาช่วยคุณก่อน' : 'ทีมกู้ภัยมาถึงในวันที่สี่ โชคดีที่คุณยังหายใจอยู่') : (die(p, 'ติดอยู่ใต้อุโมงค์ที่ถล่ม และความช่วยเหลือมาไม่ถึง'), 'ทีมกู้ภัยขุดหาคนจากตระกูลที่จ่ายเงินก่อน และไปไม่ถึงตัวคุณ')),
+    c('ขุดทางออกเอง', 'STR', 'smith', p => { p.health -= 20; return check(p, 'STR', 'smith', 14 - (T(p, 'tough') ? 2 : 0)) ? live(p, 'นิ้วแตกทุกนิ้ว แต่สุดท้ายก็มองเห็นแสงสว่าง') : fail(p, 'หินหนักเกินกว่าจะขยับไหว'); }),
+    opt('รอคนมาช่วย', p => Math.random() < (p.cls <= 1 ? .85 : .2) ? live(p, p.cls <= 1 ? 'คนขุดมาถึงภายในวันเดียว เพราะที่บ้านจ่ายเงินให้มาขุดหาคุณก่อน' : 'คนขุดมาถึงเอาวันที่สี่ ยังดีที่ยังหายใจอยู่') : (die(p, 'ติดอยู่ใต้อุโมงค์ที่ถล่ม และความช่วยเหลือมาไม่ถึง'), 'คนขุดไปขุดหาคนจากตระกูลที่จ่ายเงินก่อน มาไม่ถึงตัวคุณ')),
   ];
   else if (kind === 'beast') options = [
-    c('สู้', 'STR', 'sword', p => { p.health -= 15; return check(p, 'STR', 'sword', 13 - (T(p, 'brave') ? 2 : 0)) ? live(p, 'มันถอยกลับเข้าไปในความมืด ทิ้งแผลเป็นยาวไว้ที่แขนคุณ') : fail(p, 'มันแข็งแรงกว่าคุณ'); }),
-    c('วิ่งหนี', 'DEX', null, p => { p.health -= 5; return check(p, 'DEX', null, 11) ? live(p, 'คุณวิ่งไม่หยุดจนถึงหมู่บ้าน โดยไม่หันกลับไปมองเลย') : fail(p, 'มันเร็วกว่าคุณ'); }),
-    ...(rank(p, 'bow') >= 1 ? [c('ยิงธนูจากที่สูง', 'DEX', 'bow', p => check(p, 'DEX', 'bow', 12) ? live(p, 'ลูกธนูดอกที่สามปักเข้าที่คอของมัน') : fail(p, 'ลูกธนูหมดก่อนที่มันจะล้ม'))] : []),
-    ...(rank(p, 'fire') >= 1 ? [c('ไล่มันด้วยเปลวไฟ', 'INT', 'fire', p => check(p, 'INT', 'fire', 10) ? live(p, 'มันกลัวไฟมากกว่าที่คุณคิด') : fail(p, 'ไฟของคุณติดไม่ทัน'))] : []),
+    c('สู้', 'STR', 'sword', p => { p.health -= 15; return check(p, 'STR', 'sword', 13 - (T(p, 'brave') ? 2 : 0)) ? live(p, 'มันถอยกลับเข้าไปในความมืด ทิ้งแผลยาวไว้ที่แขน') : fail(p, 'มันแรงกว่าคุณ'); }),
+    c('วิ่งหนี', 'DEX', null, p => { p.health -= 5; return check(p, 'DEX', null, 11) ? live(p, 'วิ่งไม่คิดชีวิตจนถึงหมู่บ้าน ไม่กล้าหันกลับไปมองเลย') : fail(p, 'มันเร็วกว่าคุณ'); }),
+    ...(rank(p, 'bow') >= 1 ? [c('ยิงธนูจากที่สูง', 'DEX', 'bow', p => check(p, 'DEX', 'bow', 12) ? live(p, 'ธนูดอกที่สามปักเข้าคอมันพอดี') : fail(p, 'ลูกธนูหมดก่อนที่มันจะล้ม'))] : []),
+    ...(rank(p, 'fire') >= 1 ? [c('ไล่มันด้วยเปลวไฟ', 'INT', 'fire', p => check(p, 'INT', 'fire', 10) ? live(p, 'มันกลัวไฟมากกว่าที่คิด') : fail(p, 'จุดไฟไม่ทัน'))] : []),
   ];
   else if (kind === 'burn') options = [
-    c('ใช้เวทหนีออกจากคุก', 'INT', 'fire', p => { if (check(p, 'INT', 'fire', 15)) { p.flags.hiddenMage = false; p.flags.fugitive = true; p.wealth = 3; move(p, RBY.grieve); return live(p, 'ประตูเหล็กละลายลง คุณหนีออกจากออเรลิสไปที่ราบเถ้าโดยไม่มีอะไรติดตัว'); } return fail(p, 'ผนังคุกถูกจารึกอักขระกันเวท'); }),
-    ...(rank(p, 'illusion') >= 1 ? [c('ใช้เวทมายาปลอมตัวหนี', 'CHA', 'illusion', p => { if (check(p, 'CHA', 'illusion', 11)) { p.flags.hiddenMage = false; p.flags.fugitive = true; move(p, RBY.dunes); return live(p, 'ผู้คุมเห็นนักบวชคนหนึ่งเดินออกจากคุก ไม่มีใครเห็นคุณ'); } return fail(p, 'ภาพลวงตาของคุณแตกต่อหน้าผู้คุม'); })] : []),
-    opt('สารภาพและยอมเป็นของศาสนจักร', p => { if (Math.random() < .6) { p.flags.hiddenMage = false; p.flags.churchMage = true; p.happy -= 15; return live(p, 'ศาสนจักรไว้ชีวิตคุณ เพราะคุณมีประโยชน์กับพวกเขา'); } return fail(p, 'ศาลศาสนาต้องการเชือดไก่ให้ลิงดู'); }),
-    c('ชี้ตัวคนอื่นแทน', 'CHA', 'speech', p => { if (check(p, 'CHA', 'speech', 13 - (T(p, 'cunning') ? 3 : 0))) { p.flags.hiddenMage = false; p.flags.betrayer = true; p.happy -= 20; return live(p, 'หญิงชราคนหนึ่งถูกเผาแทนคุณ ขณะที่คุณยืนดูอยู่ในฝูงชน'); } return fail(p, 'ไม่มีใครเชื่อคำของคุณ'); }),
+    c('ใช้เวทหนีออกจากคุก', 'INT', 'fire', p => { if (check(p, 'INT', 'fire', 15)) { p.flags.hiddenMage = false; p.flags.fugitive = true; p.wealth = 3; move(p, RBY.grieve); return live(p, 'ประตูเหล็กละลายลง หนีออกจากออเรลิสไปทุ่งเถ้าตัวเปล่า'); } return fail(p, 'ผนังคุกสลักอักขระกันเวทไว้ทั่ว'); }),
+    ...(rank(p, 'illusion') >= 1 ? [c('ใช้เวทมายาปลอมตัวหนี', 'CHA', 'illusion', p => { if (check(p, 'CHA', 'illusion', 11)) { p.flags.hiddenMage = false; p.flags.fugitive = true; move(p, RBY.dunes); return live(p, 'ผู้คุมเห็นแค่นักบวชคนหนึ่งเดินออกจากคุก ไม่มีใครเห็นคุณ'); } return fail(p, 'ภาพลวงตาแตกต่อหน้าผู้คุม'); })] : []),
+    opt('สารภาพและยอมเป็นของศาสนจักร', p => { if (Math.random() < .6) { p.flags.hiddenMage = false; p.flags.churchMage = true; p.happy -= 15; return live(p, 'ศาสนจักรไว้ชีวิต เพราะคุณยังมีประโยชน์กับพวกเขา'); } return fail(p, 'ศาลศาสนาอยากเชือดไก่ให้ลิงดู'); }),
+    c('ชี้ตัวคนอื่นแทน', 'CHA', 'speech', p => { if (check(p, 'CHA', 'speech', 13 - (T(p, 'cunning') ? 3 : 0))) { p.flags.hiddenMage = false; p.flags.betrayer = true; p.happy -= 20; return live(p, 'หญิงแก่คนหนึ่งโดนเผาแทน ขณะที่คุณยืนดูอยู่ในฝูงคน'); } return fail(p, 'ไม่มีใครเชื่อสักคำ'); }),
   ];
   return { id: 'fate', fatal: true, prompt: `ความตายมาเยือน: ${FATE_TEXT[kind]}`, options };
 }
 
 // ---- skill-driven events ----
 EVENTS.push(
-  { w: 3, c: p => rank(p, 'medicine') >= 2, t: () => 'เพื่อนบ้านพาลูกมาให้คุณช่วยทำแผล', f: p => { p.wealth += 2; p.happy += 2; } },
-  { w: 3, c: p => rank(p, 'trade') >= 2, t: () => 'คุณต่อรองราคาสินค้าได้ดีกว่าทุกคนในตลาด', f: p => { p.wealth += 5; } },
-  { w: 3, c: p => rank(p, 'sword') >= 2, t: () => 'โจรสองคนดักปล้นคุณกลางทาง คุณชักดาบไล่พวกมันไปได้', f: p => { p.happy += 3; } },
-  { w: 3, c: p => rank(p, 'bow') >= 2, t: () => 'คุณยิงกวางตัวใหญ่ได้ ทั้งบ้านมีเนื้อกินไปทั้งเดือน', f: p => { p.health += 4; } },
-  { w: 3, c: p => rank(p, 'survival') >= 2, t: () => 'ปีนี้แห้งแล้ง แต่คุณรู้ว่ารากไม้ชนิดไหนกินได้', f: p => { p.health += 3; } },
-  { w: 3, c: p => rank(p, 'stealth') >= 2, t: () => 'คุณแอบเข้าไปฟังการประชุมของเจ้าที่ดินได้โดยไม่มีใครเห็น', f: p => { p.know += 2; } },
-  { w: 3, c: p => rank(p, 'speech') >= 2, t: () => 'คำพูดของคุณทำให้สองบ้านที่ทะเลาะกันกลับมาคืนดีกัน', f: p => { p.happy += 4; } },
-  { w: 3, c: p => rank(p, 'smith') >= 2, t: () => 'ของที่คุณตีออกมาขายได้ราคาดีกว่าที่คาดไว้', f: p => { p.wealth += 6; } },
-  { w: 3, c: p => rank(p, 'alchemy') >= 2, t: () => 'คุณปรุงยาแก้ไข้ไปขายในตลาด ขายหมดภายในวันเดียว', f: p => { p.wealth += 5; } },
-  { w: 3, c: p => rank(p, 'letters') >= 2, t: () => 'คุณเขียนจดหมายให้เพื่อนบ้านที่อ่านหนังสือไม่ออก', f: p => { p.happy += 2; p.wealth += 1; } },
-  { w: 3, c: p => rank(p, 'history') >= 3, t: () => 'คุณสังเกตว่าตำราของออเรลิสกับเซเรนธ์เล่าเรื่องเถ้าไม่ตรงกัน', f: p => { p.know += 3; } },
-  { w: 3, c: p => rank(p, 'fire') >= 1, t: () => 'คุณจุดไฟในเตาด้วยปลายนิ้ว เด็กๆ ในบ้านมองกันตาโต', f: p => { p.happy += 3; } },
-  { w: 3, c: p => rank(p, 'heal') >= 1, t: () => 'แผลที่มือของคุณสมานภายในคืนเดียว', f: p => { p.health += 5; } },
-  { w: 3, c: p => rank(p, 'illusion') >= 1, t: () => 'คุณเล่นกลด้วยเวทมายาให้เด็กในละแวกดู ทุกคนหัวเราะกันลั่น', f: p => { p.happy += 3; } },
-  { w: 3, c: p => rank(p, 'thread') >= 1, t: () => 'ทุกครั้งที่ใช้เวทเส้นใย คุณได้ยินเสียงบางอย่างบนฟ้าตึงขึ้น', f: p => { p.know += 2; p.happy -= 1; } },
+  { w: 3, c: p => rank(p, 'medicine') >= 2, t: () => 'เพื่อนบ้านพาลูกมาให้ช่วยทำแผล', f: p => { p.wealth += 2; p.happy += 2; } },
+  { w: 3, c: p => rank(p, 'trade') >= 2, t: () => 'ต่อราคาของได้ดีกว่าใครในตลาด', f: p => { p.wealth += 5; } },
+  { w: 3, c: p => rank(p, 'sword') >= 2, t: () => 'โจรสองคนดักปล้นกลางทาง ชักดาบออกมาไล่พวกมันไปได้', f: p => { p.happy += 3; } },
+  { w: 3, c: p => rank(p, 'bow') >= 2, t: () => 'ยิงกวางตัวใหญ่ได้ ทั้งบ้านมีเนื้อกินไปทั้งเดือน', f: p => { p.health += 4; } },
+  { w: 3, c: p => rank(p, 'survival') >= 2, t: () => 'ปีนี้แล้ง แต่รู้ว่ารากไม้ชนิดไหนกินได้', f: p => { p.health += 3; } },
+  { w: 3, c: p => rank(p, 'stealth') >= 2, t: () => 'แอบเข้าไปฟังเจ้าที่ดินประชุมได้ ไม่มีใครเห็น', f: p => { p.know += 2; } },
+  { w: 3, c: p => rank(p, 'speech') >= 2, t: () => 'คำพูดของคุณทำให้สองบ้านที่ทะเลาะกันกลับมาดีกัน', f: p => { p.happy += 4; } },
+  { w: 3, c: p => rank(p, 'smith') >= 2, t: () => 'ของที่ตีออกมาขายได้ราคาดีกว่าที่คิด', f: p => { p.wealth += 6; } },
+  { w: 3, c: p => rank(p, 'alchemy') >= 2, t: () => 'ปรุงยาแก้ไข้ไปขายในตลาด หมดเกลี้ยงในวันเดียว', f: p => { p.wealth += 5; } },
+  { w: 3, c: p => rank(p, 'letters') >= 2, t: () => 'เขียนจดหมายให้เพื่อนบ้านที่อ่านหนังสือไม่ออก', f: p => { p.happy += 2; p.wealth += 1; } },
+  { w: 3, c: p => rank(p, 'history') >= 3, t: () => 'สังเกตว่าตำราของออเรลิสกับเซเรนธ์เล่าเรื่องเถ้าไม่ตรงกัน', f: p => { p.know += 3; } },
+  { w: 3, c: p => rank(p, 'fire') >= 1, t: () => 'จุดไฟในเตาด้วยปลายนิ้ว เด็กๆ ในบ้านมองกันตาโต', f: p => { p.happy += 3; } },
+  { w: 3, c: p => rank(p, 'heal') >= 1, t: () => 'แผลที่มือสมานภายในคืนเดียว', f: p => { p.health += 5; } },
+  { w: 3, c: p => rank(p, 'illusion') >= 1, t: () => 'เล่นกลด้วยเวทมายาให้เด็กแถวบ้านดู หัวเราะกันลั่น', f: p => { p.happy += 3; } },
+  { w: 3, c: p => rank(p, 'thread') >= 1, t: () => 'ใช้เวทเส้นใยทีไร ได้ยินเสียงอะไรบางอย่างบนฟ้าตึงขึ้นทุกที', f: p => { p.know += 2; p.happy -= 1; } },
   { w: 3, c: p => (p.flags.secretMagic || 0) > 2 && has(p, 'aurelis', 'undercity'), t: () => 'เพื่อนบ้านเริ่มสังเกตว่าบ้านคุณมีแสงแปลกๆ ตอนกลางคืน', f: p => { p.happy -= 3; } },
 );
 
 // ---- careers unlocked by skill ----
 CHOICES.push(
   { id: 'ownShop', when: p => rank(p, 'trade') >= 3 && p.cls >= 2 && p.wealth >= 40 && roll(.3),
-    prompt: p => `อายุ ${p.age} ปี คุณมีฝีมือการค้าและเงินทุนพอจะเปิดกิจการเป็นของตัวเอง${p.cls >= 3 ? ' แต่ต้องไถ่ตัวจากเจ้าของก่อน' : ''}`,
+    prompt: p => `อายุ ${p.age} ปี มีฝีมือการค้าและทุนพอจะเปิดกิจการเป็นของตัวเองแล้ว${p.cls >= 3 ? ' แต่ต้องไถ่ตัวจากเจ้าของก่อน' : ''}`,
     options: p => [
-      opt('เปิดกิจการ', p => { p.wealth -= p.cls >= 3 ? 35 : 25; p.cls = 1; p.flags.selfMade = true; p.happy += 10; return 'ป้ายร้านชื่อคุณแขวนอยู่หน้าประตู ตอนนี้คุณเป็นพ่อค้าแล้ว'; }, p => p.wealth >= (p.cls >= 3 ? 35 : 25), 'เงินทุนยังไม่พอ'),
-      opt('รอให้พร้อมกว่านี้', () => 'คุณเก็บเงินต่อไปอีกสักพัก'),
+      opt('เปิดกิจการ', p => { p.wealth -= p.cls >= 3 ? 35 : 25; p.cls = 1; p.flags.selfMade = true; p.happy += 10; return 'ป้ายร้านชื่อคุณแขวนอยู่หน้าประตูแล้ว ตอนนี้เป็นพ่อค้าเต็มตัว'; }, p => p.wealth >= (p.cls >= 3 ? 35 : 25), 'ทุนยังไม่พอ'),
+      opt('รอให้พร้อมกว่านี้', () => 'เก็บเงินต่ออีกสักพัก'),
     ] },
   { id: 'knighted', when: p => rank(p, 'sword') >= 4 && p.cls >= 1 && p.cls < 4 && p.age <= 50 && has(p, 'aurelis', 'kragmor', 'grieve') && roll(.3),
-    prompt: p => `อายุ ${p.age} ปี ฝีมือดาบของคุณเลื่องลือไปทั่ว ขุนนางคนหนึ่งเสนอแต่งตั้งคุณเป็นอัศวิน`,
+    prompt: p => `อายุ ${p.age} ปี ฝีมือดาบเลื่องลือไปทั่ว ขุนนางคนหนึ่งเสนอจะแต่งตั้งเป็นอัศวิน`,
     options: p => [
-      opt('รับการแต่งตั้ง', p => { p.cls = 0; p.flags.knight = true; p.flags.knighted = true; p.wealth += 15; return 'คุณคุกเข่าลง แล้วลุกขึ้นมาเป็นขุนนาง ทั้งที่ไม่ได้เกิดมาเป็น'; }),
-      opt('ปฏิเสธ', () => 'คุณไม่อยากเป็นดาบให้ใคร'),
+      opt('รับการแต่งตั้ง', p => { p.cls = 0; p.flags.knight = true; p.flags.knighted = true; p.wealth += 15; return 'คุกเข่าลงไป แล้วลุกขึ้นมาเป็นขุนนาง ทั้งที่ไม่ได้เกิดมาเป็น'; }),
+      opt('ปฏิเสธ', () => 'ไม่อยากเป็นดาบให้ใคร'),
     ] },
   { id: 'physician', when: p => rank(p, 'medicine') >= 4 && p.cls >= 1 && roll(.3),
-    prompt: p => `อายุ ${p.age} ปี หมอหลวงได้ยินชื่อเสียงของคุณ และเสนอให้คุณเป็นหมอประจำราชสำนัก`,
+    prompt: p => `อายุ ${p.age} ปี หมอหลวงได้ยินชื่อเสียง เลยเสนอให้มาเป็นหมอประจำราชสำนัก`,
     options: p => [
-      opt('รับตำแหน่ง', p => { p.cls = Math.min(p.cls, 1); p.wealth += 20; p.flags.physician = true; if (!has(p, 'serenth')) move(p, RBY.aurelis); return 'คุณได้บ้านในเมืองชั้นใน และได้รักษาแต่คนที่ไม่เคยต้องต่อแถวรอหมอ'; }),
+      opt('รับตำแหน่ง', p => { p.cls = Math.min(p.cls, 1); p.wealth += 20; p.flags.physician = true; if (!has(p, 'serenth')) move(p, RBY.aurelis); return 'ได้บ้านในเมืองชั้นใน ได้รักษาแต่คนที่ไม่เคยต้องต่อแถวรอหมอ'; }),
       opt('อยู่รักษาคนที่บ้านเกิดต่อ', p => { p.happy += 6; p.flags.savedOther = true; return 'คนที่บ้านเกิดไม่มีหมอคนอื่นนอกจากคุณ'; }),
     ] },
   { id: 'archmage', when: p => p.gifted && Math.max(rank(p, 'fire'), rank(p, 'heal'), rank(p, 'illusion')) >= 4 && (has(p, 'serenth') || p.flags.churchMage) && roll(.3),
-    prompt: p => `อายุ ${p.age} ปี ${has(p, 'serenth') ? 'หอเวทสูง' : 'ศาสนจักรสุริยะ'}เสนอตำแหน่งจอมเวทให้คุณ`,
+    prompt: p => `อายุ ${p.age} ปี ${has(p, 'serenth') ? 'หอเวทสูง' : 'ศาสนจักรสุริยะ'}เสนอตำแหน่งจอมเวทให้`,
     options: p => [
-      opt('รับตำแหน่งจอมเวท', p => { p.cls = 0; p.flags.archmage = true; p.wealth += 25; return 'คุณได้หอคอยเป็นของตัวเอง พร้อมศิษย์อีกสิบสองคน'; }),
-      opt('ปฏิเสธ', () => 'คุณอยากใช้เวทช่วยคนที่ต้องการมันจริงๆ มากกว่า'),
+      opt('รับตำแหน่งจอมเวท', p => { p.cls = 0; p.flags.archmage = true; p.wealth += 25; return 'ได้หอคอยเป็นของตัวเอง พร้อมลูกศิษย์อีกสิบสองคน'; }),
+      opt('ปฏิเสธ', () => 'อยากใช้เวทช่วยคนที่ต้องการมันจริงๆ มากกว่า'),
     ] },
   { id: 'freedom', when: p => p.cls >= 3 && p.wealth >= 45 && roll(.35),
-    prompt: p => `อายุ ${p.age} ปี คุณเก็บเงินได้มากพอจะไถ่ตัวเป็นอิสระ`,
+    prompt: p => `อายุ ${p.age} ปี เก็บเงินได้พอจะไถ่ตัวเป็นไทแล้ว`,
     options: p => [
-      opt('ไถ่ตัว', p => { p.wealth -= 35; p.cls = 2; p.flags.boughtFreedom = true; p.happy += 15; return 'คุณถือหนังสือไถ่ตัวไว้แน่น และหยิบขึ้นมาอ่านซ้ำทุกคืน'; }),
-      opt('เก็บเงินไว้ให้ลูก', p => { legacy(p).gift = Math.round(p.wealth * .5); return 'คุณยังไม่เป็นอิสระ แต่ลูกของคุณจะเริ่มต้นได้ดีกว่า'; }),
+      opt('ไถ่ตัว', p => { p.wealth -= 35; p.cls = 2; p.flags.boughtFreedom = true; p.happy += 15; return 'กำหนังสือไถ่ตัวไว้แน่น หยิบมาอ่านซ้ำทุกคืน'; }),
+      opt('เก็บเงินไว้ให้ลูก', p => { legacy(p).gift = Math.round(p.wealth * .5); return 'ยังไม่เป็นไท แต่ลูกจะได้เริ่มต้นดีกว่า'; }),
     ] },
   { id: 'cureEpidemic', when: p => (rank(p, 'heal') >= 2 || rank(p, 'medicine') >= 3) && p.realm.plague >= .003 && roll(.1),
-    prompt: p => `อายุ ${p.age} ปี ไข้เถ้าดำระบาดในละแวกบ้าน และมีแต่คุณที่รักษาได้`,
+    prompt: p => `อายุ ${p.age} ปี ไข้เถ้าดำระบาดแถวบ้าน มีแต่คุณที่รักษาได้`,
     options: p => [
-      opt('รักษาทุกคนฟรี', p => { p.flags.savedOther = true; p.flags.epidemicHero = true; p.happy += 10; if (!check(p, 'CON', null, 6)) { die(p, 'ติดไข้เถ้าดำจากคนไข้ที่ตัวเองรักษา'); return 'คุณรักษาคนได้หลายสิบคน ก่อนจะล้มลงเอง'; } return 'คนทั้งละแวกรอดเพราะคุณ ชื่อของคุณถูกพูดถึงไปอีกหลายชั่วคน'; }),
-      opt('เก็บค่ารักษา', p => { p.wealth += 20; p.happy -= 3; return 'คนที่จ่ายได้ก็รอด'; }),
-      opt('ปิดประตูบ้าน', p => { p.happy -= 8; return 'คุณได้ยินเสียงเคาะประตูทุกคืนจนโรคซา'; }),
+      opt('รักษาทุกคนฟรี', p => { p.flags.savedOther = true; p.flags.epidemicHero = true; p.happy += 10; if (!check(p, 'CON', null, 6)) { die(p, 'ติดไข้เถ้าดำจากคนไข้ที่ตัวเองรักษา'); return 'รักษาคนไปหลายสิบคน ก่อนจะล้มลงเอง'; } return 'คนทั้งละแวกรอดเพราะคุณ ชื่อคุณถูกพูดถึงไปอีกหลายชั่วคน'; }),
+      opt('เก็บค่ารักษา', p => { p.wealth += 20; p.happy -= 3; return 'คนที่มีเงินจ่ายก็รอด'; }),
+      opt('ปิดประตูบ้าน', p => { p.happy -= 8; return 'มีคนมาเคาะประตูทุกคืนจนโรคซา'; }),
     ] },
   { id: 'threadChoice', when: p => rank(p, 'thread') >= 2 && !p.done.threadAct && roll(.3),
-    prompt: p => `อายุ ${p.age} ปี คุณสัมผัสเส้นใยที่ขาดบนฟ้าได้ชัดเจนแล้ว คุณอาจซ่อมมันได้ หรือดึงพลังของมันมาใช้เอง`,
+    prompt: p => `อายุ ${p.age} ปี สัมผัสเส้นใยที่ขาดบนฟ้าได้ชัดแล้ว จะซ่อมมันก็ได้ หรือจะดึงพลังมาใช้เองก็ได้`,
     options: p => [
-      Object.assign(opt('พยายามซ่อมเส้นใย', p => { p.done.threadAct = 1; if (check(p, 'INT', 'thread', 17)) { p.flags.mender = true; p.happy += 15; return 'คืนนั้นท้องฟ้าเหนือหมู่บ้านใสเป็นครั้งแรกในรอบสามร้อยปี'; } p.health -= 25; return 'เส้นใยดีดกลับมาบาดคุณ คุณสลบไปสามวัน'; }), { chk: ['INT', 'thread'] }),
-      opt('ดึงพลังมาใช้เอง', p => { p.done.threadAct = 1; p.wealth += 30; p.know += 10; p.flags.threadDrain = true; return 'คุณรู้สึกแข็งแกร่งกว่าที่เคย ส่วนฟ้าทางตะวันออกมืดลงอีกนิด'; }),
-      opt('ปล่อยไว้อย่างนั้น', p => { p.done.threadAct = 1; return 'คุณไม่อยากเป็นอีกคนที่ทำให้ฟ้าฉีก'; }),
+      Object.assign(opt('พยายามซ่อมเส้นใย', p => { p.done.threadAct = 1; if (check(p, 'INT', 'thread', 17)) { p.flags.mender = true; p.happy += 15; return 'คืนนั้นฟ้าเหนือหมู่บ้านใสเป็นครั้งแรกในรอบสามร้อยปี'; } p.health -= 25; return 'เส้นใยดีดกลับมาบาด สลบไปสามวัน'; }), { chk: ['INT', 'thread'] }),
+      opt('ดึงพลังมาใช้เอง', p => { p.done.threadAct = 1; p.wealth += 30; p.know += 10; p.flags.threadDrain = true; return 'รู้สึกแข็งแกร่งกว่าที่เคย ส่วนฟ้าทางตะวันออกก็มืดลงอีกนิด'; }),
+      opt('ปล่อยไว้อย่างนั้น', p => { p.done.threadAct = 1; return 'ไม่อยากเป็นอีกคนที่ทำให้ฟ้าฉีก'; }),
     ] },
 );
 
@@ -312,35 +312,35 @@ LEGENDS.push(
 // ===== ACTIVE SPELLS =====
 const SPELLS = [
   { id: 'spark', s: 'fire', r: 1, n: 'ประกายไฟ', cost: 2, d: 'รับจ้างจุดเตาและเผาถ่าน ได้เงินเล็กน้อย',
-    cast: p => { p.wealth += 3 + rank(p, 'fire'); return 'คุณรับจ้างจุดเตาและเผาถ่านให้คนในละแวกด้วยปลายนิ้ว'; } },
+    cast: p => { p.wealth += 3 + rank(p, 'fire'); return 'รับจ้างจุดเตาเผาถ่านให้คนแถวบ้านด้วยปลายนิ้ว'; } },
   { id: 'firebolt', s: 'fire', r: 2, n: 'ลูกไฟขับไล่', cost: 4, d: 'ปีนี้สัตว์ร้ายและภัยสงครามอันตรายกับคุณน้อยลง',
-    cast: p => { ymod(p, { beast: .4, war: .7 }); return 'คุณเดินตรวจรอบหมู่บ้านพร้อมลูกไฟในมือ สัตว์ร้ายไม่กล้าเข้าใกล้ไปทั้งปี'; } },
+    cast: p => { ymod(p, { beast: .4, war: .7 }); return 'เดินตรวจรอบหมู่บ้านพร้อมลูกไฟในมือ สัตว์ร้ายไม่กล้าเข้าใกล้ไปทั้งปี'; } },
   { id: 'firewall', s: 'fire', r: 3, n: 'กำแพงเพลิง', cost: 6, d: 'รับจ้างคุ้มกันกองคาราวาน ได้เงินก้อนใหญ่ (ทอยปัญญา+เวทไฟ)', chk: ['INT', 'fire'],
-    cast: p => { if (check(p, 'INT', 'fire', 13)) { p.wealth += 14; return 'กองคาราวานจ้างคุณคุ้มกัน โจรที่ดักรอเห็นกำแพงไฟแล้ววิ่งหนีไปหมด'; } p.health -= 10; return 'เปลวไฟย้อนกลับมาลวกแขนของคุณเอง'; } },
+    cast: p => { if (check(p, 'INT', 'fire', 13)) { p.wealth += 14; return 'คาราวานจ้างไปคุ้มกัน โจรที่ดักรออยู่เห็นกำแพงไฟเข้าก็วิ่งหนีกระเจิง'; } p.health -= 10; return 'ไฟย้อนกลับมาลวกแขนตัวเอง'; } },
   { id: 'firestorm', s: 'fire', r: 5, n: 'พายุไฟ', cost: 10, cd: 5, d: 'พลังทำลายสูงสุดของเวทไฟ ในแดนที่มีสงครามอาจยุติการรบได้',
-    cast: p => { if (has(p, 'grieve') || eraActive(p, 'war4')) { p.flags.hero = true; p.flags.famous = true; p.happy += 8; p.wealth += 20; return 'พายุไฟของคุณกวาดผ่านสนามรบ ทั้งสองทัพถอยกลับไปในวันเดียว ผู้คนเล่าเรื่องนี้ไปอีกร้อยปี'; } p.know += 5; p.happy += 5; return 'คุณปล่อยพายุไฟกลางที่โล่ง ทรายใต้เท้ากลายเป็นแก้วเหมือนวันที่เถ้าตก'; } },
+    cast: p => { if (has(p, 'grieve') || eraActive(p, 'war4')) { p.flags.hero = true; p.flags.famous = true; p.happy += 8; p.wealth += 20; return 'พายุไฟกวาดผ่านสนามรบ สองทัพถอยกลับไปในวันเดียว คนเล่าเรื่องนี้ต่อกันไปอีกร้อยปี'; } p.know += 5; p.happy += 5; return 'ปล่อยพายุไฟกลางที่โล่ง ทรายใต้เท้ากลายเป็นแก้วเหมือนวันที่เถ้าตก'; } },
   { id: 'mend', s: 'heal', r: 1, n: 'สมานแผล', cost: 2, d: 'ฟื้นสุขภาพตัวเอง',
-    cast: p => { p.health += 8; return 'แสงอุ่นๆ จากฝ่ามือทำให้ร่างกายคุณเบาขึ้น'; } },
+    cast: p => { p.health += 8; return 'แสงอุ่นๆ จากฝ่ามือทำให้ตัวเบาขึ้น'; } },
   { id: 'healother', s: 'heal', r: 2, n: 'รักษาผู้อื่น', cost: 4, d: 'รักษาคนในละแวก ได้ทั้งเงินและความสุข',
-    cast: p => { p.wealth += 4; p.happy += 4; p.flags.healer = true; return pick(['คุณรักษาขาหักของเด็กข้างบ้านให้หายภายในคืนเดียว', 'คุณรักษาไข้ให้หญิงชราที่ไม่มีเงินจ้างหมอ', 'คุณห้ามเลือดให้คนงานที่บาดเจ็บจากงานได้ทันเวลา']); } },
+    cast: p => { p.wealth += 4; p.happy += 4; p.flags.healer = true; return pick(['รักษาขาหักของเด็กข้างบ้านให้หายในคืนเดียว', 'รักษาไข้ให้ยายแก่ที่ไม่มีเงินจ้างหมอ', 'ห้ามเลือดให้คนงานที่เจ็บจากงานได้ทันเวลา']); } },
   { id: 'purge', s: 'heal', r: 3, n: 'ขับไข้', cost: 6, d: 'ปีนี้คุณและคนรอบตัวป่วยยากขึ้นมาก',
-    cast: p => { ymod(p, { ill: .5, plague: .3 }); p.happy += 5; p.flags.savedOther = true; return 'คุณเดินไปทุกบ้านในละแวก ไข้ที่กำลังลามหยุดลงที่หน้าบ้านของคุณ'; } },
+    cast: p => { ymod(p, { ill: .5, plague: .3 }); p.happy += 5; p.flags.savedOther = true; return 'เดินไปทุกบ้านแถวนั้น ไข้ที่กำลังลามหยุดลงที่หน้าบ้านคุณ'; } },
   { id: 'prolong', s: 'heal', r: 5, n: 'ต่อชีวิต', cost: 10, cd: 5, d: 'ฟื้นสุขภาพก้อนใหญ่ และชะลอความชราในปีนี้',
-    cast: p => { p.health += 25; ymod(p, { old: .4, ill: .6 }); return 'คุณใช้พลังทั้งหมดกับร่างกายตัวเอง ผมขาวบางเส้นกลับมาดำอีกครั้ง'; } },
+    cast: p => { p.health += 25; ymod(p, { old: .4, ill: .6 }); return 'ทุ่มพลังทั้งหมดให้ร่างกายตัวเอง ผมหงอกบางเส้นกลับมาดำอีกครั้ง'; } },
   { id: 'glamour', s: 'illusion', r: 1, n: 'แสงลวงตา', cost: 2, d: 'เล่นกลให้คนรอบตัว ความสุขเพิ่ม',
-    cast: p => { p.happy += 4; return pick(['คุณเสกผีเสื้อแสงให้บินรอบตัวเด็กๆ ในละแวก', 'คุณทำให้ฝนในงานเลี้ยงกลายเป็นกลีบดอกไม้', 'คุณเล่าเรื่องโลกก่อนเถ้าพร้อมภาพลวงตาให้ทุกคนดู']); } },
+    cast: p => { p.happy += 4; return pick(['เสกผีเสื้อแสงบินวนรอบตัวเด็กๆ แถวบ้าน', 'เสกฝนในงานเลี้ยงให้กลายเป็นกลีบดอกไม้', 'เล่าเรื่องโลกก่อนเถ้าตก พร้อมเสกภาพลวงตาให้ทุกคนดู']); } },
   { id: 'disguise', s: 'illusion', r: 2, n: 'ใบหน้าลวง', cost: 4, d: 'ปลอมตัวหลบคนเก็บภาษี ได้เงินคืน (ทอยเสน่ห์+เวทมายา)', chk: ['CHA', 'illusion'],
-    cast: p => { if (check(p, 'CHA', 'illusion', 12)) { p.wealth += 8; return 'คนเก็บภาษีเห็นคุณเป็นคนอื่น และข้ามบ้านของคุณไป'; } p.health -= 6; p.wealth -= 5; return 'ภาพลวงตาแตกกลางตลาด คุณถูกรุมทำร้ายและปรับเงิน'; } },
+    cast: p => { if (check(p, 'CHA', 'illusion', 12)) { p.wealth += 8; return 'คนเก็บภาษีเห็นคุณเป็นคนอื่น เลยข้ามบ้านไป'; } p.health -= 6; p.wealth -= 5; return 'ภาพลวงตาแตกกลางตลาด โดนรุมซ้อมแล้วยังโดนปรับ'; } },
   { id: 'veil', s: 'illusion', r: 3, n: 'ม่านมายา', cost: 6, d: 'ปีนี้ซ่อนตัวจากสงคราม ศาลศาสนา และสัตว์ร้าย',
-    cast: p => { ymod(p, { war: .4, burn: .3, beast: .6 }); return 'คุณคลุมบ้านด้วยม่านมายา คนที่เดินผ่านเห็นแค่บ้านร้าง'; } },
+    cast: p => { ymod(p, { war: .4, burn: .3, beast: .6 }); return 'คลุมบ้านด้วยม่านมายา ใครเดินผ่านก็เห็นเป็นบ้านร้าง'; } },
   { id: 'dreamwalk', s: 'illusion', r: 5, n: 'ฝันร่วม', cost: 10, d: 'เดินเข้าไปในความฝันของคนอื่น อาจได้รู้ความลับของโลก',
-    cast: p => { p.know += 8; p.happy += 6; if (!p.flags.ledger) { p.flags.ledger = true; return 'คุณเดินเข้าไปในความฝันของผู้อาวุโสแห่งเซเรนธ์ และเห็นการลงมติเจ็ดต่อหกผ่านสายตาของเขา ตอนนี้คุณต้องหาหลักฐานมายืนยันสิ่งที่เห็น'; } return 'คุณเดินผ่านความฝันของคนทั้งหมู่บ้านในคืนเดียว และตื่นมาพร้อมความเข้าใจที่ไม่เคยมี'; } },
+    cast: p => { p.know += 8; p.happy += 6; if (!p.flags.ledger) { p.flags.ledger = true; return 'เดินเข้าไปในฝันของผู้อาวุโสแห่งเซเรนธ์ ได้เห็นการลงมติเจ็ดต่อหกผ่านสายตาเขา ตอนนี้ต้องหาหลักฐานมายืนยันสิ่งที่เห็น'; } return 'เดินผ่านฝันของคนทั้งหมู่บ้านในคืนเดียว ตื่นมาเข้าใจอะไรหลายอย่างที่ไม่เคยเข้าใจ'; } },
   { id: 'listen', s: 'thread', r: 1, n: 'ฟังเส้นใย', cost: 3, d: 'ฟังเสียงเส้นใยบนฟ้า ความรู้เพิ่ม',
-    cast: p => { p.know += 4; return 'คุณได้ยินเส้นใยส่งเสียงครวญอยู่เหนือเมฆ เส้นที่งอกใหม่ทุกเส้นถูกดึงไปทางเดียวกัน คือทางเซเรนธ์'; } },
+    cast: p => { p.know += 4; return 'ได้ยินเส้นใยครวญอยู่เหนือเมฆ เส้นที่งอกใหม่ทุกเส้นถูกดึงไปทางเดียวกันหมด คือทางเซเรนธ์'; } },
   { id: 'drain', s: 'thread', r: 2, n: 'ดึงเส้นใย', cost: 5, d: 'ดึงพลังจากฟ้ามาเป็นของตัวเอง ได้ทรัพย์มาก แต่ฟ้าจะเสียหาย',
-    cast: p => { p.wealth += 15; p.flags.drain = (p.flags.drain || 0) + 1; p.happy -= 2; return 'ทองในกระเป๋าคุณหนักขึ้น ส่วนฟ้าเหนือหัวหม่นลงอีกนิด'; } },
+    cast: p => { p.wealth += 15; p.flags.drain = (p.flags.drain || 0) + 1; p.happy -= 2; return 'ทองในกระเป๋าหนักขึ้น ส่วนฟ้าเหนือหัวหม่นลงอีกนิด'; } },
   { id: 'weave', s: 'thread', r: 3, n: 'ถักเส้นใย', cost: 8, d: 'ซ่อมเส้นใยบางส่วน ปีนี้คนในละแวกป่วยและอดอยากน้อยลง (ทอยปัญญา+เวทเส้นใย)', chk: ['INT', 'thread'],
-    cast: p => { if (check(p, 'INT', 'thread', 15)) { ymod(p, { ill: .7, plague: .7, famine: .5 }); p.happy += 8; p.flags.savedOther = true; return 'ฟ้าเหนือหมู่บ้านใสขึ้นตลอดฤดู เถ้าไม่ตกลงมาเลยทั้งปี'; } p.health -= 15; return 'เส้นใยดีดกลับมาบาดคุณจนสลบไปสามวัน'; } },
+    cast: p => { if (check(p, 'INT', 'thread', 15)) { ymod(p, { ill: .7, plague: .7, famine: .5 }); p.happy += 8; p.flags.savedOther = true; return 'ฟ้าเหนือหมู่บ้านใสขึ้นตลอดฤดู เถ้าไม่ตกลงมาเลยทั้งปี'; } p.health -= 15; return 'เส้นใยดีดกลับมาบาดจนสลบไปสามวัน'; } },
 ];
 const SPBY = Object.fromEntries(SPELLS.map(s => [s.id, s]));
 function ymod(p, m) { p.yearMod = p.yearMod || {}; for (const k in m) p.yearMod[k] = (p.yearMod[k] || 1) * m[k]; }
@@ -365,17 +365,17 @@ function castSpell(p, id) {
   const lines = [];
   // outside the church, using magic in Aurelis is a crime: someone may see
   if (has(p, 'aurelis', 'undercity') && !p.flags.churchMage) {
-    if (!check(p, 'CHA', 'illusion', 9)) { p.flags.hiddenMage = true; p.flags.secretMagic = (p.flags.secretMagic || 0) + 3; lines.push('มีคนเห็นคุณใช้เวท ข่าวลือเริ่มแพร่ไปถึงหูศาลศาสนา'); }
+    if (!check(p, 'CHA', 'illusion', 9)) { p.flags.hiddenMage = true; p.flags.secretMagic = (p.flags.secretMagic || 0) + 3; lines.push('มีคนเห็นตอนใช้เวท ข่าวลือเริ่มลอยไปถึงหูศาลศาสนา'); }
     else p.flags.secretMagic = (p.flags.secretMagic || 0) + 1;
   }
   lines.unshift(`ร่าย${sp.n}: ` + sp.cast(p));
   norm(p); gainXP(p, 3);
   const sk = p.skills[sp.s]; sk.x += 4;
-  if (sk.x >= 100 && sk.r < MAX_RANK) { sk.x = 0; sk.r++; lines.push(`เพราะใช้เวทบ่อย ${SBY[sp.s].n}ของคุณจึงเพิ่มเป็นขั้น ${sk.r}`); }
+  if (sk.x >= 100 && sk.r < MAX_RANK) { sk.x = 0; sk.r++; lines.push(`ใช้เวทบ่อยจน${SBY[sp.s].n}ขึ้นเป็นขั้น ${sk.r}`); }
   return lines;
 }
 EVENTS.push(
-  { w: 4, c: p => (p.flags.drain || 0) >= 2, t: () => 'เถ้าตกลงมาเฉพาะเหนือหมู่บ้านของคุณ ไม่มีใครรู้สาเหตุ นอกจากคุณ', f: p => { p.happy -= 4; p.health -= 3; } },
+  { w: 4, c: p => (p.flags.drain || 0) >= 2, t: () => 'เถ้าตกลงมาเฉพาะเหนือหมู่บ้านคุณ ไม่มีใครรู้ว่าทำไม ยกเว้นคุณ', f: p => { p.happy -= 4; p.health -= 3; } },
   { w: 3, c: p => p.flags.hiddenMage && (p.flags.secretMagic || 0) >= 4, t: () => 'นักบวชจากศาลศาสนามาถามเพื่อนบ้านเรื่องแสงแปลกๆ ในบ้านคุณ', f: p => { p.happy -= 4; } },
 );
 LEGENDS.push(

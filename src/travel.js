@@ -67,7 +67,7 @@ function startTrip(p, to) {
   }
   if (p.flags.fugitive && ['aurelis', 'kragmor', 'serenth'].includes(dest) && roll(.25)) {
     const fine = Math.min(p.wealth, 20); p.wealth -= fine; p.health -= 10; led(p, 'travel', -fine);
-    lines.push(`ทหารที่ด่านจำหน้าคุณได้จากใบประกาศจับ คุณถูกขังอยู่หลายวัน และต้องจ่ายค่าไถ่ตัว ${money(fine)} ก่อนถูกไล่กลับไป`);
+    lines.push(`ทหารที่ด่านจำหน้าได้จากใบประกาศจับ โดนขังอยู่หลายวัน ต้องจ่ายค่าไถ่ตัว ${money(fine)} ก่อนโดนไล่กลับไป`);
     return { text: lines.join(' · ') };
   }
   // the road
@@ -78,7 +78,7 @@ function startTrip(p, to) {
       let lostM = 0; for (const m of MAT_IDS) { const k = Math.ceil((inv(p)[m] || 0) / 2); if (k) { inv(p)[m] -= k; lostM += k; } }
       lines.push(`ระหว่างทาง โจรดักปล้นขบวนของคุณ คุณเสียเงินไป ${money(lostC)}${lostM ? ` และของอีก ${lostM} ชิ้น` : ''}`);
     }
-  } else if (roll(.3)) lines.push(pick(['ระหว่างทางคุณพักค้างคืนกับกองคาราวานอื่น และได้ฟังข่าวจากแดนไกล', 'ทางที่คุณเดินผ่านเต็มไปด้วยซากหมู่บ้านร้าง', 'คุณเห็นเมืองลอยเซเรนธ์ลอยอยู่บนฟ้าตลอดทาง', 'ฝนเถ้าตกลงมาเบาๆ ตลอดสองวันที่เดินทาง']));
+  } else if (roll(.3)) lines.push(pick(['ระหว่างทางได้พักค้างแรมกับคาราวานอื่น ได้ฟังข่าวจากแดนไกล', 'ทางที่เดินผ่านมีแต่ซากหมู่บ้านร้าง', 'เห็นเมืองลอยเซเรนธ์ลอยอยู่บนฟ้าตลอดทาง', 'ฝนเถ้าตกปรอยๆ ตลอดสองวันที่เดินทาง']));
   p.trip = { to: dest, from };
   const kin = (p.fam || []).filter(m => m.alive && m.realm === dest && famBorn(p, m) && m.rel !== 'child' && m.rel !== 'spouse');
   if (kin.length && !ambush) { p.happy += 6; lines.push(`คุณแวะไปหา${kin.map(m => `${m.name} ${relName(p, m)}`).join(' และ')}ที่ย้ายมาอยู่ที่นี่`); }
@@ -95,7 +95,7 @@ const tripBuyPrice = (p, m) => atRealm(p, () => buyPrice(p, m));
 function endTrip(p) {
   if (!p.trip) return null;
   const to = p.trip.to; p.trip = null;
-  return `คุณกลับจาก${RBY[to].short}ถึงบ้าน`;
+  return `กลับจาก${RBY[to].short}ถึงบ้านแล้ว`;
 }
 
 // ---- moving for good ----
@@ -113,15 +113,15 @@ function moveTo(p, to) {
   const c = moveCost(p, to), from = p.realm;
   const out = [];
   p.wealth = clampW(p.wealth - c.total); led(p, 'travel', -c.total);
-  if (p.biz) { const v = sellValue(p); out.push(`คุณขาย${BIZ[p.biz.id].n}ก่อนย้าย ได้เงินคืน ${money(v)}`); p.wealth += v; led(p, 'sales', v); p.biz = null; if (p.focus === 'biz') p.focus = 'work'; }
+  if (p.biz) { const v = sellValue(p); out.push(`ขาย${BIZ[p.biz.id].n}ก่อนย้าย ได้เงินคืน ${money(v)}`); p.wealth += v; led(p, 'sales', v); p.biz = null; if (p.focus === 'biz') p.focus = 'work'; }
   move(p, RBY[to]); p.flags.movedAge = p.age; p.flags.moves = (p.flags.moves || 0) + 1; p.happy -= 4;
   // spouse and young children come along; parents and grown siblings stay
   for (const m of p.fam || []) if (m.alive && (m.rel === 'spouse' || (m.rel === 'child' && famAge(p, m) < 18))) m.realm = to;
-  out.unshift(`คุณเก็บข้าวของทั้งหมด แล้วย้ายจาก${from.name}ไปตั้งรกรากที่${RBY[to].name} ใช้เงินไป ${money(c.total)}`);
+  out.unshift(`เก็บข้าวของทั้งหมด ย้ายจาก${from.name}ไปตั้งรกรากที่${RBY[to].name} ใช้เงินไป ${money(c.total)}`);
   const left = (p.fam || []).filter(m => m.alive && m.realm === from.id && (m.rel === 'mother' || m.rel === 'father'));
-  if (left.length) out.push(`${left.map(m => relName(p, m)).join('กับ')}ยืนส่งคุณอยู่ที่ปากทาง`);
-  if (p.career && !CBY[p.career].base) { const cm = careerMissing(p, CBY[p.career]); if (cm.some(x => x.startsWith('ต้องอยู่ที่'))) { const was = careerTitle(p); setCareer(p, defaultCareer(p)); out.push(`ที่นี่ไม่มีงาน${was}ให้ทำ คุณต้องเริ่มใหม่เป็น${careerTitle(p)}`); } }
-  if (p.flags.fugitive && to !== 'aurelis' && to !== 'kragmor' && roll(.5)) { p.flags.fugitive = false; out.push('ที่นี่ไม่มีใครรู้จักหน้าคุณ คุณเริ่มต้นชีวิตใหม่ได้โดยไม่ต้องหลบซ่อน'); }
+  if (left.length) out.push(`${left.map(m => relName(p, m)).join('กับ')}ยืนส่งอยู่ที่ปากทาง`);
+  if (p.career && !CBY[p.career].base) { const cm = careerMissing(p, CBY[p.career]); if (cm.some(x => x.startsWith('ต้องอยู่ที่'))) { const was = careerTitle(p); setCareer(p, defaultCareer(p)); out.push(`ที่นี่ไม่มีงาน${was}ให้ทำ ต้องเริ่มใหม่เป็น${careerTitle(p)}`); } }
+  if (p.flags.fugitive && to !== 'aurelis' && to !== 'kragmor' && roll(.5)) { p.flags.fugitive = false; out.push('ที่นี่ไม่มีใครรู้จักหน้า เริ่มชีวิตใหม่ได้โดยไม่ต้องหลบๆ ซ่อนๆ'); }
   return out.join(' · ');
 }
 LEGENDS.push(
@@ -131,4 +131,4 @@ LEGENDS.push(
 // you can only carry so much: a pack on your back, more with a cart or a caravan
 const carryCap = p => 15 + (p.cls <= 1 ? 15 : 0) + (p.biz && p.biz.id === 'caravan' ? 45 : 0);
 const carried = p => MAT_IDS.reduce((s, m) => s + (inv(p)[m] || 0), 0);
-extend('buyMat', 'travel: you cannot carry more than your pack holds', inner => function (p, m) { if (carried(p) >= carryCap(p)) return `ย่ามของคุณเต็มแล้ว ขนได้ไม่เกิน ${carryCap(p)} ชิ้น`; return inner(p, m); });
+extend('buyMat', 'travel: you cannot carry more than your pack holds', inner => function (p, m) { if (carried(p) >= carryCap(p)) return `ย่ามเต็มแล้ว ขนได้ไม่เกิน ${carryCap(p)} ชิ้น`; return inner(p, m); });

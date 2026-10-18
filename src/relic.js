@@ -1,40 +1,40 @@
 // ===== RELICS: old things with real power, and a real price =====
 // every relic exists once in the whole world. it passes to your heir, or is lost where you die and can be found again in a later life
 const RELICS = {
-  crown: { n: 'มงกุฎเถ้า', src: 'royal', v: 150, d: 'มงกุฎเหล็กดำที่กษัตริย์องค์แรกสวมในปีที่เถ้าตกจากฟ้า',
+  crown: { n: 'มงกุฎเถ้า', src: 'royal', v: 150, d: 'มงกุฎเหล็กดำที่กษัตริย์องค์แรกสวมในปีที่เถ้าตกลงมาจากฟ้า',
     good: 'ทอยเสน่ห์ +3 · ขุนนางนับถือมากขึ้นทุกปี', bad: 'ฝันร้ายถึงไฟทุกคืน ความสุขลดลงปีละ 3',
-    chk: { CHA: 3 }, yr: { happy: -3, rep: { noble: 1 } }, yrT: ['คืนนี้คุณฝันถึงเมืองที่ลุกเป็นไฟอีกแล้ว เสียงคนในฝันเรียกคุณว่าฝ่าบาท'] },
-  sword: { n: 'ดาบบรรพบุรุษ', src: 'noble', v: 80, d: 'ดาบที่บรรพบุรุษคนแรกของตระกูลใช้ตัดหัวขุนศึก ใบดาบยังคมเหมือนวันที่ตีขึ้น',
+    chk: { CHA: 3 }, yr: { happy: -3, rep: { noble: 1 } }, yrT: ['คืนนี้ฝันถึงเมืองที่ไฟลุกท่วมอีกแล้ว คนในฝันเรียกว่าฝ่าบาท'] },
+  sword: { n: 'ดาบบรรพบุรุษ', src: 'noble', v: 80, d: 'ดาบที่บรรพบุรุษคนแรกของตระกูลใช้ตัดหัวขุนศึก ป่านนี้ใบดาบยังคมกริบเหมือนวันที่ตีเสร็จ',
     good: 'โจมตี +2 ในการต่อสู้', bad: 'ใครๆ ก็รู้ว่าคุณมีมัน โจรหมายตาคุณบ่อยขึ้นมาก',
-    atk: 2, theft: 2.5, yrT: ['ชายแปลกหน้าคนหนึ่งยืนมองดาบที่เอวคุณนานผิดปกติ'] },
-  ring: { n: 'แหวนตราตระกูล', src: 'noble', v: 60, d: 'แหวนทองที่ประทับตราของตระกูลเก่า ใครเห็นก็รู้ว่าคุณมาจากไหน',
+    atk: 2, theft: 2.5, yrT: ['ชายแปลกหน้าคนหนึ่งจ้องดาบที่เอวอยู่นานจนผิดสังเกต'] },
+  ring: { n: 'แหวนตราตระกูล', src: 'noble', v: 60, d: 'แหวนทองประทับตราตระกูลเก่า ใครเห็นก็รู้ว่ามาจากไหน',
     good: 'ทอยพูดจา +3 · ขุนนางนับถือขึ้นเล็กน้อยทุกปี', bad: 'หนี้เก่าของตระกูลตามมาเก็บทุกปี',
-    chk: { speech: 3 }, yr: { debt: 2, rep: { noble: .5 } }, yrT: ['เจ้าหนี้ของปู่ทวดส่งคนมาทวงหนี้อีกปี'] },
-  knife: { n: 'มีดกระดูกไร้เงา', src: 'undercity', v: 70, d: 'มีดที่ทำจากกระดูกของอะไรบางอย่าง มันไม่มีเงาแม้ยืนกลางแดด',
+    chk: { speech: 3 }, yr: { debt: 2, rep: { noble: .5 } }, yrT: ['คนของเจ้าหนี้ปู่ทวดมาทวงหนี้อีกแล้ว ปีนี้ก็ไม่เว้น'] },
+  knife: { n: 'มีดกระดูกไร้เงา', src: 'undercity', v: 70, d: 'มีดที่ทำจากกระดูกของอะไรสักอย่าง ยืนกลางแดดแล้วก็ไม่มีเงา',
     good: 'โจมตี +3 · ทอยมีดสั้น +2', bad: 'มันกระซิบถึงเลือดทุกคืน คุณรู้สึกผิดเพิ่มขึ้นทุกปี',
-    atk: 3, chk: { dagger: 2 }, yr: { guilt: 2 }, yrT: ['เสียงกระซิบจากมีดดังขึ้นอีกครั้งตอนที่คุณกำลังจะหลับ'] },
-  amulet: { n: 'เครื่องรางผ้าแดง', src: 'mulvane', v: 50, d: 'ห่อผ้าแดงที่หมอผีแห่งหนองพิษผูกด้วยผมคนตายเจ็ดคน',
+    atk: 3, chk: { dagger: 2 }, yr: { guilt: 2 }, yrT: ['กำลังจะหลับ มีดก็เริ่มกระซิบอีกแล้ว'] },
+  amulet: { n: 'เครื่องรางผ้าแดง', src: 'mulvane', v: 50, d: 'ห่อผ้าแดงที่หมอผีแห่งหนองพิษผูกไว้ด้วยผมของคนตายเจ็ดคน',
     good: 'โอกาสป่วยหนักและตายด้วยโรคระบาดลดลงครึ่งหนึ่ง', bad: 'ศาสนจักรถือว่าเป็นของนอกรีต ชื่อเสียงกับศาสนจักรลดลงทุกปี',
-    haz: { ill: .5, plague: .5 }, yr: { rep: { church: -2 } }, yrT: ['นักบวชคนหนึ่งเหลือบเห็นผ้าแดงที่คอคุณ แล้วทำเครื่องหมายดวงอาทิตย์ที่อก'] },
-  eye: { n: 'ตาแก้วใต้ทราย', src: 'dunes', v: 90, d: 'ลูกแก้วขนาดเท่าลูกตาที่ขุดได้จากเมืองใต้ทราย มองผ่านมันแล้วเห็นสิ่งที่ซ่อนอยู่',
+    haz: { ill: .5, plague: .5 }, yr: { rep: { church: -2 } }, yrT: ['นักบวชคนหนึ่งเหลือบไปเห็นผ้าแดงที่คอ แล้วรีบทำเครื่องหมายดวงอาทิตย์ที่อก'] },
+  eye: { n: 'ตาแก้วใต้ทราย', src: 'dunes', v: 90, d: 'ลูกแก้วขนาดเท่าลูกตา ขุดได้จากเมืองใต้ทราย ส่องผ่านมันแล้วจะเห็นของที่ถูกซ่อนไว้',
     good: 'ทอยปัญญาและไหวพริบ +2', bad: 'บางครั้งมันให้คุณเห็นสิ่งที่ไม่อยากเห็น ความสุขลดลงปีละ 2',
-    chk: { INT: 2, WIS: 2 }, yr: { happy: -2 }, yrT: ['คุณมองผ่านตาแก้วแล้วเห็นเงาของคนที่ตายไปแล้วยืนอยู่ในห้อง'] },
-  lantern: { n: 'ตะเกียงไม่มีวันดับ', src: 'kragmor', v: 60, d: 'ตะเกียงทองเหลืองของนักขุดคนแรก ไฟข้างในไม่เคยดับมาสามร้อยปี',
+    chk: { INT: 2, WIS: 2 }, yr: { happy: -2 }, yrT: ['ส่องตาแก้วดูเล่นๆ แล้วเห็นเงาของคนที่ตายไปแล้วยืนอยู่มุมห้อง'] },
+  lantern: { n: 'ตะเกียงไม่มีวันดับ', src: 'kragmor', v: 60, d: 'ตะเกียงทองเหลืองของนักขุดรุ่นแรก ไฟข้างในไม่เคยดับเลยตลอดสามร้อยปี',
     good: 'ทอยเอาชีวิตรอด +3 · สัตว์ร้ายและเหมืองถล่มอันตรายน้อยลงครึ่งหนึ่ง', bad: 'แสงของมันเห็นได้จากไกล โจรหมายตาคุณบ่อยขึ้น',
     chk: { survival: 3 }, haz: { beast: .5, mine: .5 }, theft: 1.8 },
-  needle: { n: 'เข็มเย็บฟ้า', src: 'thread', v: 120, d: 'เข็มเงินเล่มเล็กที่ว่ากันว่าใช้เย็บรอยขาดของท้องฟ้าครั้งแรก',
+  needle: { n: 'เข็มเย็บฟ้า', src: 'thread', v: 120, d: 'เข็มเงินเล่มเล็ก เขาว่ากันว่าเป็นเล่มที่ใช้เย็บฟ้าที่ขาดเป็นครั้งแรก',
     good: 'ทอยเวทเส้นใย +3', bad: 'ทุกปีมีโอกาสที่เส้นใยจะสาปคุณ',
     chk: { thread: 3 }, yr: { curse: .06 } },
-  bone: { n: 'กระดูกนักบุญ', src: 'aurelis', v: 100, d: 'กระดูกนิ้วของนักบุญคนแรกแห่งดวงอาทิตย์ ในกล่องเงินที่ไม่มีใครควรเปิด',
+  bone: { n: 'กระดูกนักบุญ', src: 'aurelis', v: 100, d: 'กระดูกนิ้วของนักบุญองค์แรกแห่งดวงอาทิตย์ อยู่ในกล่องเงินที่ไม่ควรมีใครเปิด',
     good: 'ความรู้สึกผิดลดลงทุกปี · ศาสนจักรนับถือมากขึ้นทุกปี', bad: 'ทั้งโจรและคนของศาสนจักรอยากได้มันคืน มีคนมาเอามันบ่อยมาก',
     yr: { guilt: -2, rep: { church: 2 } }, theft: 3 },
-  tooth: { n: 'ฟันทองของราชาโจร', src: 'undercity', v: 70, d: 'ฟันทองซี่สุดท้ายของราชาโจรที่ถูกแขวนคอเมื่อร้อยปีก่อน',
+  tooth: { n: 'ฟันทองของราชาโจร', src: 'undercity', v: 70, d: 'ฟันทองซี่สุดท้ายของราชาโจรที่โดนแขวนคอไปเมื่อร้อยปีก่อน',
     good: 'ทอยลอบเร้น +3 · โลกใต้ดินนับถือมากขึ้นทุกปี', bad: 'ขุนนางและชาวบ้านไว้ใจคุณน้อยลงทุกปี',
     chk: { stealth: 3 }, yr: { rep: { under: 2, noble: -1.5, folk: -.5 } } },
-  bell: { n: 'ระฆังจมน้ำ', src: 'mulvane', v: 90, d: 'ระฆังสำริดที่ดึงขึ้นมาจากก้นหนอง มันดังเองทุกครั้งที่มีคนใกล้ตัวคุณกำลังจะตาย',
+  bell: { n: 'ระฆังจมน้ำ', src: 'mulvane', v: 90, d: 'ระฆังสำริดที่ดึงขึ้นมาจากก้นหนอง ใครใกล้ตัวจะตายเมื่อไหร่ มันจะดังขึ้นเอง',
     good: 'คุณแก่ช้าลง โอกาสตายด้วยวัยชราลดลงมาก', bad: 'มันเอาปีชีวิตจากคนรอบตัวมาให้คุณ คนในครอบครัวตายง่ายขึ้น',
-    haz: { old: .55 }, fam: .35, yr: { happy: -1 }, yrT: ['ระฆังดังเบาๆ กลางดึก ทั้งบ้านไม่มีใครหลับได้อีกเลยคืนนั้น'] },
-  hammer: { n: 'ฆ้อนของช่างคนแรก', src: 'kragmor', v: 80, d: 'ฆ้อนที่ตีขวานเล่มแรกของครากมอร์ หนักเกินกว่าคนธรรมดาจะยกได้ทั้งวัน',
+    haz: { old: .55 }, fam: .35, yr: { happy: -1 }, yrT: ['ระฆังดังแผ่วๆ กลางดึก คืนนั้นทั้งบ้านไม่มีใครข่มตาหลับได้อีก'] },
+  hammer: { n: 'ฆ้อนของช่างคนแรก', src: 'kragmor', v: 80, d: 'ฆ้อนที่ใช้ตีขวานเล่มแรกของครากมอร์ หนักเสียจนคนธรรมดายกได้ไม่ถึงครึ่งวัน',
     good: 'ทอยงานช่างตีเหล็ก +3 · ทอยพลัง +1', bad: 'ร่างกายทรุดลงเพราะยกมันทุกวัน สุขภาพลดลงปีละ 1',
     chk: { smith: 3, STR: 1 }, yr: { health: -1 } },
 };
@@ -54,7 +54,7 @@ function gainRelic(p, id, how) {
   if (hasRelic(p, id)) return '';
   relics(p).push({ id, since: p.age, how: how || 'ได้มาระหว่างทาง', gens: 1 });
   p.flags.relicsFound = (p.flags.relicsFound || 0) + 1;
-  return `คุณได้ของวิเศษ: ${relicN(id)}`;
+  return `ได้ของวิเศษมา: ${relicN(id)}`;
 }
 function loseRelic(p, id, why) {
   if (!hasRelic(p, id)) return '';
@@ -97,14 +97,14 @@ extend('applyFocus', 'relic: yearly price of each relic; the enslaved lose them'
   if (!p.alive || !(p.relics || []).length) return t;
   const out = [];
   // a slave or serf owns nothing, not even this
-  if (p.cls >= 3 && !p.royal) { for (const x of [...p.relics]) out.push(loseRelic(p, x.id, 'ถูกนายยึดไปพร้อมกับอิสรภาพของคุณ')); return [t, ...out].filter(Boolean).join(' · '); }
+  if (p.cls >= 3 && !p.royal) { for (const x of [...p.relics]) out.push(loseRelic(p, x.id, 'ถูกนายยึดไปพร้อมกับอิสรภาพ')); return [t, ...out].filter(Boolean).join(' · '); }
   for (const x of p.relics) {
     const R = RELICS[x.id], y = R.yr; if (!y) continue;
     if (y.happy) p.happy += y.happy;
     if (y.health) p.health += y.health;
     if (y.guilt || y.rep) addRep(p, Object.assign({}, y.rep || {}, y.guilt ? { guilt: y.guilt } : {}));
     if (y.debt) { const d = Math.min(p.wealth, y.debt * priceF(p)); if (d > 0) { p.wealth -= d; led(p, 'living', -d); } }
-    if (y.curse && p.age >= 14 && Math.random() < y.curse) { const c = addCurse(p, 'thread', 'เข็มเย็บฟ้าบาดนิ้วคุณ เส้นใยสีเงินพันรอบข้อมือแล้วไม่ยอมหลุด'); if (c) out.push(c); }
+    if (y.curse && p.age >= 14 && Math.random() < y.curse) { const c = addCurse(p, 'thread', 'เข็มเย็บฟ้าบาดนิ้ว เส้นใยสีเงินพันข้อมือไว้แล้วไม่ยอมคลาย'); if (c) out.push(c); }
     if (R.yrT && Math.random() < .12) out.push(pick(R.yrT));
   }
   return [t, ...out].filter(Boolean).join(' · ');
@@ -140,7 +140,7 @@ extend('payQuest', 'relic: quests can turn up relics, including lost ones', inne
   if (p.auto) return t;
   const r = questRealm(p), lost = lostHere(p, r.id);
   const fresh = RIDS.filter(id => RELICS[id].src === r.id && freeRelic(p, id));
-  if (lost.length && Math.random() < .25) { const id = pick(lost); t += ` · ระหว่างทางคุณเจอ${relicN(id)} ที่ใครบางคนทำหายไว้ในชีวิตก่อน · ` + gainRelic(p, id, `พบที่${r.short}`); }
+  if (lost.length && Math.random() < .25) { const id = pick(lost); t += ` · ระหว่างทางไปเจอ${relicN(id)} ที่ใครสักคนทำหล่นไว้ตั้งแต่ชาติก่อน · ` + gainRelic(p, id, `พบที่${r.short}`); }
   else if (fresh.length && Math.random() < base / 160) { const id = pick(fresh); t += ` · ` + gainRelic(p, id, `พบที่${r.short}`) + ` (${RELICS[id].d})`; }
   return t;
 });
@@ -153,37 +153,37 @@ const topRelic = p => [...relics(p)].sort((a, b) => RELICS[b.id].v - RELICS[a.id
 const relicPrice = (p, id) => Math.round(RELICS[id].v * (p.realm.wealth / 50 + .4) * 10) / 10;
 CHOICES.push(
   { id: 'relicThief', repeat: 6, when: p => !p.auto && relics(p).length && p.age >= 14 && roll(.04 * theftMult(p)),
-    prompt: p => { const x = topRelic(p); p.kin.relic = x.id; return `อายุ ${p.age} ปี กลางดึกคุณได้ยินเสียงคนงัดหน้าต่าง มีคนมาเอา${relicN(x.id)}`; },
+    prompt: p => { const x = topRelic(p); p.kin.relic = x.id; return `อายุ ${p.age} ปี กลางดึกได้ยินเสียงคนงัดหน้าต่าง มีคนมาเอา${relicN(x.id)}`; },
     options: p => [
-      fightOpt('ออกไปสู้', 'bandit', { lethal: .12, intro: 'ขโมยชักมีดออกมาทันทีที่เห็นคุณ', death: 'ถูกขโมยที่มาเอาของวิเศษแทงเสียชีวิต',
-        onEnd: (q, r) => r === 'win' ? `ขโมยวิ่งหนีไปมือเปล่า ${relicN(q.kin.relic)}ยังอยู่กับคุณ` : r === 'dead' ? '' : loseRelic(q, q.kin.relic, 'ถูกขโมยไปในคืนนั้น') }),
-      Object.assign(opt('รีบเอาไปซ่อน', q => check(q, 'DEX', 'stealth', 13) ? `คุณซ่อนมันไว้ใต้พื้นทันเวลา ขโมยรื้อบ้านจนเละแต่หาไม่เจอ` : loseRelic(q, q.kin.relic, 'ถูกขโมยไป เพราะคุณซ่อนไม่ทัน')), { chk: ['DEX', 'stealth'] }),
-      opt('ปล่อยให้เอาไป', q => { q.happy -= 4; return loseRelic(q, q.kin.relic, 'ถูกขโมยไป คุณนอนนิ่งฟังเสียงฝีเท้าเดินจากไป อย่างน้อยก็ยังมีชีวิตอยู่'); }),
+      fightOpt('ออกไปสู้', 'bandit', { lethal: .12, intro: 'ขโมยเห็นเข้าก็ชักมีดออกมาทันที', death: 'ถูกขโมยที่มาเอาของวิเศษแทงเสียชีวิต',
+        onEnd: (q, r) => r === 'win' ? `ขโมยวิ่งหนีไปมือเปล่า ${relicN(q.kin.relic)}ยังอยู่ที่เดิม` : r === 'dead' ? '' : loseRelic(q, q.kin.relic, 'ถูกขโมยไปในคืนนั้น') }),
+      Object.assign(opt('รีบเอาไปซ่อน', q => check(q, 'DEX', 'stealth', 13) ? `เอาไปซ่อนใต้พื้นได้ทัน ขโมยรื้อบ้านกระจุยแต่หาไม่เจอ` : loseRelic(q, q.kin.relic, 'ถูกขโมยไป เพราะซ่อนไม่ทัน')), { chk: ['DEX', 'stealth'] }),
+      opt('ปล่อยให้เอาไป', q => { q.happy -= 4; return loseRelic(q, q.kin.relic, 'ถูกขโมยไป ได้แต่นอนนิ่งๆ ฟังเสียงฝีเท้าเดินห่างออกไป อย่างน้อยก็ยังรอดมาได้'); }),
     ] },
   { id: 'relicBuyer', repeat: 3, when: p => !p.auto && relics(p).length && p.age >= 18 && roll(.05),
-    prompt: p => { const x = topRelic(p); p.kin.relic = x.id; p.kin.relicOffer = Math.round(relicPrice(p, x.id) * 1.4 * 10) / 10; return `อายุ ${p.age} ปี นักสะสมจากออเรลิสขอซื้อ${relicN(x.id)}ของคุณ เขาให้ราคา ${money(p.kin.relicOffer)} ซึ่งสูงกว่าที่ใครเคยเสนอ`; },
+    prompt: p => { const x = topRelic(p); p.kin.relic = x.id; p.kin.relicOffer = Math.round(relicPrice(p, x.id) * 1.4 * 10) / 10; return `อายุ ${p.age} ปี นักสะสมจากออเรลิสมาขอซื้อ${relicN(x.id)} ให้ราคา ${money(p.kin.relicOffer)} สูงกว่าที่ใครเคยเสนอมา`; },
     options: p => [
-      opt('ขายให้เขา', q => { const v = q.kin.relicOffer; q.wealth += v; led(q, 'sales', v); return loseRelic(q, q.kin.relic, `ตกเป็นของนักสะสม คุณได้เงิน ${money(v)}`); }),
-      opt('ไม่ขาย', q => `คุณปฏิเสธ นักสะสมยิ้มแล้วบอกว่าเขาจะรอ`),
+      opt('ขายให้เขา', q => { const v = q.kin.relicOffer; q.wealth += v; led(q, 'sales', v); return loseRelic(q, q.kin.relic, `ตกเป็นของนักสะสมไปแล้ว ได้เงินมา ${money(v)}`); }),
+      opt('ไม่ขาย', q => `ปฏิเสธไป นักสะสมยิ้มแล้วบอกว่าไม่เป็นไร เขารอได้`),
     ] },
   { id: 'relicPeddler', repeat: 2, when: p => !p.auto && p.age >= 16 && relics(p).length < 3 && roll(.025) && RIDS.some(id => RELICS[id].src !== 'royal' && RELICS[id].src !== 'thread' && freeRelic(p, id)),
     prompt: p => { const id = pick(RIDS.filter(id => RELICS[id].src !== 'royal' && RELICS[id].src !== 'thread' && freeRelic(p, id))); p.kin.relic = id; p.kin.relicCost = Math.round(relicPrice(p, id) * .5 * 10) / 10; p.kin.relicFake = Math.random() < .4;
-      return `อายุ ${p.age} ปี พ่อค้าเร่หน้าตาเจ้าเล่ห์คนหนึ่งอ้างว่ามี${relicN(id)}ของแท้ ขายให้ในราคา ${money(p.kin.relicCost)} ของแบบนี้มีปลอมเยอะ`; },
+      return `อายุ ${p.age} ปี พ่อค้าเร่หน้าตาไม่น่าไว้ใจคนหนึ่งบอกว่ามี${relicN(id)}ของแท้ จะขายให้ในราคา ${money(p.kin.relicCost)} แต่ของแบบนี้ของปลอมเกลื่อนตลาด`; },
     options: p => [
-      opt('ซื้อเลย', q => { q.wealth -= q.kin.relicCost; led(q, 'buy', -q.kin.relicCost); return q.kin.relicFake ? `กลับถึงบ้านคุณถึงรู้ว่ามันเป็นของปลอม พ่อค้าหายไปจากเมืองแล้ว` : gainRelic(q, q.kin.relic, 'ซื้อจากพ่อค้าเร่'); }, q => q.wealth >= q.kin.relicCost, `ต้องมี ${money(p.kin.relicCost)}`),
+      opt('ซื้อเลย', q => { q.wealth -= q.kin.relicCost; led(q, 'buy', -q.kin.relicCost); return q.kin.relicFake ? `กลับมาถึงบ้านถึงรู้ว่าโดนหลอก ของปลอมทั้งนั้น พ่อค้าก็หายหัวไปจากเมืองแล้ว` : gainRelic(q, q.kin.relic, 'ซื้อจากพ่อค้าเร่'); }, q => q.wealth >= q.kin.relicCost, `ต้องมี ${money(p.kin.relicCost)}`),
       Object.assign(opt('ตรวจดูให้ละเอียดก่อน', q => {
-        if (!check(q, 'INT', 'history', 13)) { q.wealth -= q.kin.relicCost; led(q, 'buy', -q.kin.relicCost); return q.kin.relicFake ? 'คุณดูไม่ออก ซื้อมาแล้วถึงรู้ว่าเป็นของปลอม' : 'คุณดูไม่ออก แต่ตัดสินใจซื้อ โชคดีที่มันเป็นของจริง · ' + gainRelic(q, q.kin.relic, 'ซื้อจากพ่อค้าเร่'); }
-        if (q.kin.relicFake) return 'คุณเห็นรอยต่อที่ไม่ควรมี มันเป็นของปลอม คุณวางมันลงแล้วเดินจากมา';
-        q.wealth -= q.kin.relicCost; led(q, 'buy', -q.kin.relicCost); return 'ทุกรายละเอียดตรงกับที่ตำราเขียนไว้ มันเป็นของจริง · ' + gainRelic(q, q.kin.relic, 'ซื้อจากพ่อค้าเร่');
+        if (!check(q, 'INT', 'history', 13)) { q.wealth -= q.kin.relicCost; led(q, 'buy', -q.kin.relicCost); return q.kin.relicFake ? 'ดูไม่ออก ซื้อมาแล้วเพิ่งรู้ว่าเป็นของปลอม' : 'ดูไม่ออก แต่ก็ยอมเสี่ยงซื้อ โชคดีที่ของจริง · ' + gainRelic(q, q.kin.relic, 'ซื้อจากพ่อค้าเร่'); }
+        if (q.kin.relicFake) return 'เห็นรอยต่อที่ไม่ควรมี ของปลอมชัดๆ เลยวางคืนแล้วเดินออกมา';
+        q.wealth -= q.kin.relicCost; led(q, 'buy', -q.kin.relicCost); return 'ทุกจุดตรงกับที่ตำราเขียนไว้เป๊ะ ของจริงแน่นอน · ' + gainRelic(q, q.kin.relic, 'ซื้อจากพ่อค้าเร่');
       }, q => q.wealth >= q.kin.relicCost, `ต้องมี ${money(p.kin.relicCost)}`), { chk: ['INT', 'history'] }),
-      opt('ไม่สนใจ', () => 'คุณเดินผ่านไป'),
+      opt('ไม่สนใจ', () => 'เดินผ่านไปเฉยๆ'),
     ] },
 );
 // selling on your own
 function sellRelic(p, id) {
   if (!hasRelic(p, id) || p.cls >= 3) return null;
   const v = relicPrice(p, id); p.wealth += v; led(p, 'sales', v);
-  return loseRelic(p, id, `ถูกขายให้นักสะสมที่${p.realm.short} ได้เงิน ${money(v)}`);
+  return loseRelic(p, id, `ขายให้นักสะสมที่${p.realm.short}ไป ได้เงิน ${money(v)}`);
 }
 LEGENDS.push(
   { id: 'heirloom', n: 'ผู้รักษามรดก', d: 'ถือของวิเศษที่ตกทอดมาในตระกูลของคุณ 3 รุ่นขึ้นไป', c: p => relics(p).some(x => (x.gens || 1) >= 3 && /ตกทอด/.test(x.how)) },

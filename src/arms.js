@@ -1,12 +1,12 @@
 // ===== WHAT A WEAPON IS FOR =====
 // 1) arenas and fighting pits: a fight you can choose, any year
 const ARENA = {
-  aurelis: { n: 'ลานประลองหลวง', d: 'ประลองตามกติกา มีกรรมการคอยห้าม คนดูเป็นขุนนางกับพ่อค้า' },
-  kragmor: { n: 'โถงประลองของคนแคระ', d: 'สู้ด้วยอาวุธทื่อตามธรรมเนียม แพ้ก็แค่กระดูกหัก' },
-  grieve: { n: 'ลานประลองงานวัด', d: 'ชาวบ้านมาวางเดิมพันกันด้วยไก่และเหรียญทองแดง' },
-  undercity: { n: 'บ่อต่อสู้ใต้กำแพง', d: 'ไม่มีกติกา ไม่มีกรรมการ เงินรางวัลดี แต่มีคนไม่ได้เดินออกมา', pit: true },
-  dunes: { n: 'หลุมทรายเดิมพัน', d: 'พ่อค้าทะเลทรายเดิมพันกันด้วยน้ำและเกลือ คนแพ้ถูกทิ้งไว้กลางแดด', pit: true },
-  mulvane: { n: 'บ่อโคลนหลังโรงเหล้า', d: 'สู้กันในโคลนถึงเข่าต่อหน้าคนเมา', pit: true },
+  aurelis: { n: 'ลานประลองหลวง', d: 'ประลองกันตามกติกา มีกรรมการคอยห้าม คนดูมีแต่ขุนนางกับพ่อค้า' },
+  kragmor: { n: 'โถงประลองของคนแคระ', d: 'สู้กันด้วยอาวุธทื่อตามธรรมเนียม แพ้ก็แค่กระดูกหัก' },
+  grieve: { n: 'ลานประลองงานวัด', d: 'ชาวบ้านมาลงพนันกันด้วยไก่กับเหรียญทองแดง' },
+  undercity: { n: 'บ่อต่อสู้ใต้กำแพง', d: 'ไม่มีกติกา ไม่มีกรรมการ เงินรางวัลงาม แต่บางคนก็ไม่ได้เดินออกมา', pit: true },
+  dunes: { n: 'หลุมทรายเดิมพัน', d: 'พ่อค้าทะเลทรายพนันกันด้วยน้ำกับเกลือ ใครแพ้ก็ถูกทิ้งไว้กลางแดด', pit: true },
+  mulvane: { n: 'บ่อโคลนหลังโรงเหล้า', d: 'ลุยกันในโคลนท่วมเข่าต่อหน้าพวกขี้เมา', pit: true },
 };
 Object.assign(FOES, {
   arena1: { n: 'นักสู้มือใหม่', v: 'ฟาด', hp: 14, ac: 12, atk: 4, die: 6, plus: 1, lethal: .02, flee: 99, yield: true },
@@ -37,20 +37,20 @@ function startArena(p, tier) {
   p.flags.arenaN++;
   const pay = Math.round(T.pay * qF(questRealm(p)) * (pit ? 1.6 : 1) * 10) / 10;
   const lethal = FOES[T.foe].lethal * (pit ? 3 : 1);
-  return { id: 'arena', prompt: `อายุ ${p.age} ปี คุณก้าวลงไปใน${A.n} คนดูส่งเสียงโห่ร้อง รางวัลรอบนี้ ${money(pay)}${pit ? ' · ในบ่อแบบนี้ ยอมแพ้แล้วก็ยังอาจโดนซ้ำ' : ''}`, options: [
-    fightOpt(`สู้ (${T.n})`, T.foe, { lethal, intro: pit ? 'คู่ต่อสู้ไม่รอสัญญาณ เขาพุ่งเข้ามาทันที' : 'กรรมการตีฆ้องเริ่มการประลอง', death: pit ? `เสียชีวิตใน${A.n}` : `เสียชีวิตจากอุบัติเหตุใน${A.n}`,
+  return { id: 'arena', prompt: `อายุ ${p.age} ปี ก้าวลงไปใน${A.n} คนดูโห่ร้องกันลั่น รางวัลรอบนี้ ${money(pay)}${pit ? ' · บ่อแบบนี้ ต่อให้ยอมแพ้แล้วก็ยังอาจโดนกระทืบซ้ำ' : ''}`, options: [
+    fightOpt(`สู้ (${T.n})`, T.foe, { lethal, intro: pit ? 'อีกฝ่ายไม่รอสัญญาณ พุ่งเข้ามาเลย' : 'กรรมการตีฆ้อง เริ่มได้', death: pit ? `เสียชีวิตใน${A.n}` : `เสียชีวิตจากอุบัติเหตุใน${A.n}`,
       onEnd: (q, r) => {
         if (r === 'win') {
           q.wealth += pay; led(q, 'quest', pay); q.flags.arenaWins = (q.flags.arenaWins || 0) + 1; q.happy += 3;
           if (tier === 2) { q.flags.champion = (q.flags.champion || 0) + 1; addRep(q, pit ? { under: 4 } : { folk: 3, noble: 2 }); }
           else if (pit) addRep(q, { under: 1 });
-          return `คุณชนะ ได้เงินรางวัล ${money(pay)}${tier === 2 ? ' · ชื่อของคุณถูกตะโกนไปทั่วลาน' : ''}`;
+          return `ชนะ ได้เงินรางวัล ${money(pay)}${tier === 2 ? ' · คนทั้งลานตะโกนชื่อกันลั่น' : ''}`;
         }
         if (r === 'dead') return '';
         q.health -= pit ? 6 : 3;
-        return pit ? 'คุณแพ้ และถูกลากออกจากบ่อทั้งที่เลือดยังไหล' : 'คุณแพ้ กรรมการยกมือให้อีกฝ่าย คุณเดินออกจากลานพร้อมรอยฟกช้ำ';
+        return pit ? 'แพ้ แล้วถูกลากออกจากบ่อทั้งที่เลือดยังไม่หยุดไหล' : 'แพ้ กรรมการยกมือให้อีกฝ่าย เดินออกจากลานมาพร้อมรอยช้ำเต็มตัว';
       } }),
-    opt('เปลี่ยนใจ ไม่ลงสู้', q => { q.flags.arenaN--; return 'คุณถอยกลับขึ้นไปนั่งดูอยู่บนอัฒจันทร์'; }),
+    opt('เปลี่ยนใจ ไม่ลงสู้', q => { q.flags.arenaN--; return 'ถอยกลับขึ้นไปนั่งดูบนอัฒจันทร์'; }),
   ] };
 }
 // 2) hunting: once a year, meat, hides and danger
@@ -66,15 +66,15 @@ function startHunt(p) {
   p.flags.huntAge = p.age;
   const beast = beastFor(p), r = questRealm(p);
   const meat = Math.round(3 * qF(r) * 10) / 10;
-  return { id: 'hunt', prompt: `อายุ ${p.age} ปี คุณออกไปล่าสัตว์ตั้งแต่ก่อนฟ้าสาง เจอรอยเท้าของ${FOES[beast].n}ขนาดใหญ่ และรอยกวางป่าฝูงเล็กๆ`, options: [
-    fightOpt(`ตามล่า${FOES[beast].n}`, beast, { lethal: .25, intro: 'มันได้กลิ่นคุณก่อน แล้วหันกลับมา', death: `ถูก${FOES[beast].n}ฆ่าระหว่างออกล่า`,
-      onEnd: (q, r) => r === 'win' ? (q.flags.bigGame = true, q.wealth += meat * 2, led(q, 'sales', meat * 2), `คุณลากซากมันกลับมา ขายเนื้อได้ ${money(meat * 2)}` + lootMats(q, [['hide', 3]])) : r === 'fled' ? 'คุณหนีกลับมาได้ มือเปล่า' : r === 'dead' ? '' : (q.health -= 8, 'มันฝากรอยแผลไว้ให้คุณ แล้วหายเข้าไปในพุ่มไม้') }),
+  return { id: 'hunt', prompt: `อายุ ${p.age} ปี ออกไปล่าสัตว์ตั้งแต่ฟ้ายังไม่สาง เจอรอยเท้า${FOES[beast].n}ตัวเบ้อเริ่ม กับรอยกวางป่าฝูงเล็กๆ`, options: [
+    fightOpt(`ตามล่า${FOES[beast].n}`, beast, { lethal: .25, intro: 'มันได้กลิ่นก่อน แล้วหันกลับมา', death: `ถูก${FOES[beast].n}ฆ่าระหว่างออกล่า`,
+      onEnd: (q, r) => r === 'win' ? (q.flags.bigGame = true, q.wealth += meat * 2, led(q, 'sales', meat * 2), `ลากซากมันกลับมาได้ ขายเนื้อได้ ${money(meat * 2)}` + lootMats(q, [['hide', 3]])) : r === 'fled' ? 'หนีกลับมาได้ แต่มือเปล่า' : r === 'dead' ? '' : (q.health -= 8, 'มันทิ้งรอยแผลไว้ให้ แล้วหายเข้าพุ่มไม้ไป') }),
     Object.assign(opt('ซุ่มยิงกวาง', q => {
       const bow = gear(q).w === 'bow' || gear(q).w === 'spear';
-      if (check(q, 'DEX', bow ? gear(q).w : 'survival', bow ? 11 : 14)) { q.wealth += meat; led(q, 'sales', meat); return `${bow ? 'อาวุธระยะไกลของคุณ' : 'คุณ'}ล้มกวางได้หนึ่งตัว ขายเนื้อได้ ${money(meat)}` + lootMats(q, [['hide', 1]]); }
-      return 'กวางได้ยินเสียงคุณแล้ววิ่งหนีไป';
+      if (check(q, 'DEX', bow ? gear(q).w : 'survival', bow ? 11 : 14)) { q.wealth += meat; led(q, 'sales', meat); return `${bow ? 'ยิงจากระยะไกล ' : ''}ล้มกวางได้ตัวหนึ่ง ขายเนื้อได้ ${money(meat)}` + lootMats(q, [['hide', 1]]); }
+      return 'กวางได้ยินเสียง เลยวิ่งหนีไปหมด';
     }), { chk: ['DEX', gear(p).w === 'bow' || gear(p).w === 'spear' ? gear(p).w : 'survival'] }),
-    opt('กลับบ้าน', () => 'คุณเดินกลับบ้านมือเปล่า แต่ได้อากาศบริสุทธิ์'),
+    opt('กลับบ้าน', () => 'เดินกลับบ้านมือเปล่า อย่างน้อยก็ได้สูดอากาศดีๆ'),
   ] };
 }
 // 3) a person who can fight survives battles and wild beasts more often

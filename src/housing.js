@@ -28,32 +28,32 @@ function houseYear(p) {
   const h = homeOf(p), out = [];
   // life (or a story event) moved you somewhere else: the old home is left behind
   if (h.realm && h.realm !== p.realm.id) {
-    if (h.status === 'own') { const v = HOUSES[h.tier].buy * priceF({ realm: RBY[h.realm] }) * .7; p.wealth += v; led(p, 'sales', v); out.push(`คุณฝากคนขายบ้านหลังเก่าที่${RBY[h.realm].short} ได้เงินมา ${money(v)}`); }
+    if (h.status === 'own') { const v = HOUSES[h.tier].buy * priceF({ realm: RBY[h.realm] }) * .7; p.wealth += v; led(p, 'sales', v); out.push(`ฝากคนขายบ้านหลังเก่าที่${RBY[h.realm].short} ได้เงินมา ${money(v)}`); }
     if (p.cls <= 2) Object.assign(h, { tier: p.cls <= 1 ? 3 : 2, status: 'rent', famOwned: false, damaged: false });
     h.realm = p.realm.id;
   }
   // tie-ups that follow class changes
   if (p.cls === 4 && h.status !== 'master') Object.assign(h, { tier: 1, status: 'master' });
   if (p.cls === 3 && h.status !== 'lord' && h.status !== 'own') Object.assign(h, { tier: 1, status: 'lord' });
-  if (p.cls <= 2 && (h.status === 'master' || h.status === 'lord')) { Object.assign(h, { tier: 1, status: 'rent' }); out.push('ตอนนี้คุณต้องหาที่อยู่เอง และเช่าเพิงพักเล็กๆ อยู่'); }
+  if (p.cls <= 2 && (h.status === 'master' || h.status === 'lord')) { Object.assign(h, { tier: 1, status: 'rent' }); out.push('ตอนนี้ต้องหาที่อยู่เอง ไปเช่าเพิงเล็กๆ อยู่'); }
   // when the family home's last parent dies, it passes to you or you start paying rent
   if (h.status === 'family' && p.fam && !famAlive(p, 'mother') && !famAlive(p, 'father') && p.age >= 14) {
     if (h.famOwned) { h.status = 'own'; out.push(`${HOUSES[h.tier].n}ของพ่อแม่ตกเป็นของคุณ`); }
-    else { h.status = 'rent'; out.push('พ่อแม่จากไปหมดแล้ว ตั้งแต่ปีนี้คุณต้องจ่ายค่าเช่าที่อยู่เอง'); }
+    else { h.status = 'rent'; out.push('พ่อแม่จากไปหมดแล้ว ตั้งแต่ปีนี้ต้องจ่ายค่าเช่าที่อยู่เอง'); }
   }
   if (p.age >= 14) {
-    if (h.status === 'rent') { const r = hRent(p, h.tier); p.wealth -= r; led(p, 'house', -r); if (p.wealth < 0) { p.wealth = 0; if (h.tier > 0) { h.tier = Math.max(0, h.tier - 1); out.push(`คุณจ่ายค่าเช่าไม่ไหว เจ้าของไล่ออก ตอนนี้คุณต้องไปอยู่${HOUSES[h.tier].n}`); } } }
+    if (h.status === 'rent') { const r = hRent(p, h.tier); p.wealth -= r; led(p, 'house', -r); if (p.wealth < 0) { p.wealth = 0; if (h.tier > 0) { h.tier = Math.max(0, h.tier - 1); out.push(`จ่ายค่าเช่าไม่ไหว เจ้าของไล่ออก ตอนนี้ต้องไปอยู่${HOUSES[h.tier].n}`); } } }
     if (h.status === 'own' && h.realm === p.realm.id) { const t = hPrice(p, h.tier) * TAX_RATE; p.wealth -= t; led(p, 'house', -t); }
   }
   // the roof affects body and mood
   const H = HOUSES[effTier(p)];
   p.health = clamp(p.health + H.hp * .6); p.happy = clamp(p.happy + H.hap * .5);
   // disasters
-  const DIS = { undercity: [.03, 'ไฟไหม้ลามไปทั้งซอยใต้กำแพง'], mulvane: [.05, 'น้ำในหนองล้นขึ้นมาท่วมบ้าน'], grieve: [.04, 'ทัพที่ผ่านมาเผาบ้านเรือนในหมู่บ้าน'], dunes: [.03, 'พายุแก้วพัดหลังคาบ้านหายไป'], kragmor: [.01, 'ถ้ำที่อยู่อาศัยถล่มไปบางส่วน'], aurelis: [.01, 'เกิดไฟไหม้ในย่านที่คุณอยู่'] };
+  const DIS = { undercity: [.03, 'ไฟไหม้ลามไปทั้งซอยใต้กำแพง'], mulvane: [.05, 'น้ำในหนองล้นขึ้นมาท่วมบ้าน'], grieve: [.04, 'ทัพที่ผ่านมาเผาบ้านเรือนในหมู่บ้าน'], dunes: [.03, 'พายุแก้วพัดหลังคาบ้านหายไป'], kragmor: [.01, 'ถ้ำที่อยู่อาศัยถล่มไปบางส่วน'], aurelis: [.01, 'เกิดไฟไหม้ในย่านที่อยู่'] };
   const d = DIS[p.realm.id];
   if (d && h.tier >= 1 && roll(d[0] * (h.tier >= 4 ? .4 : 1))) {
     if (h.status === 'own' && !h.damaged) { h.damaged = true; out.push(`${d[1]} ${HOUSES[h.tier].n}ของคุณเสียหาย ต้องซ่อมก่อนถึงจะอยู่ได้สบายเหมือนเดิม`); }
-    else if (h.status !== 'own') { const l = Math.min(p.wealth, 3 * priceF(p)); p.wealth -= l; out.push(l >= .01 ? `${d[1]} ข้าวของของคุณเสียหายไป ${money(l)}` : `${d[1]} โชคดีที่คุณแทบไม่มีอะไรให้เสียหาย`); }
+    else if (h.status !== 'own') { const l = Math.min(p.wealth, 3 * priceF(p)); p.wealth -= l; out.push(l >= .01 ? `${d[1]} ข้าวของเสียหายไป ${money(l)}` : `${d[1]} ยังดีที่แทบไม่มีอะไรให้เสีย`); }
   }
   return out.join(' · ') || null;
 }
@@ -68,7 +68,7 @@ function rentHome(p, t) {
   const h = homeOf(p); if (h.status === 'own') return null;
   const was = h.status === 'family';
   Object.assign(h, { tier: t, status: 'rent', damaged: false, realm: p.realm.id });
-  return t === 0 ? 'คุณเลิกเช่าที่อยู่ และออกไปนอนข้างทาง' : `คุณ${was ? 'ย้ายออกจากบ้านพ่อแม่ และ' : ''}เช่า${HOUSES[t].n}อยู่ ค่าเช่าปีละ ${money(hRent(p, t))}`;
+  return t === 0 ? 'เลิกเช่าที่อยู่ ออกไปนอนข้างทาง' : `คุณ${was ? 'ย้ายออกจากบ้านพ่อแม่ และ' : ''}เช่า${HOUSES[t].n}อยู่ ค่าเช่าปีละ ${money(hRent(p, t))}`;
 }
 function canBuyHome(p, t) {
   const w = canHouse(p); if (w) return w;
@@ -83,17 +83,17 @@ function buyHome(p, t) {
   const c = hPrice(p, t); p.wealth -= c; led(p, 'buy', -c);
   Object.assign(homeOf(p), { tier: t, status: 'own', damaged: false, realm: p.realm.id, paid: c });
   p.flags.boughtHome = true; if (t >= 5) p.flags.manor = true; p.happy += 6;
-  return `คุณซื้อ${HOUSES[t].n}เป็นของตัวเอง จ่ายไป ${money(c)}`;
+  return `ซื้อ${HOUSES[t].n}เป็นของตัวเอง จ่ายไป ${money(c)}`;
 }
 const homeValue = p => hPrice(p, homeOf(p).tier) * (homeOf(p).damaged ? .6 : .8);
 function sellHome(p) {
   const h = homeOf(p); if (h.status !== 'own') return null;
   const v = homeValue(p); p.wealth += v; led(p, 'sales', v);
   Object.assign(h, { tier: 2, status: 'rent', damaged: false });
-  return `คุณขายบ้านได้ ${money(v)} แล้วไปเช่าห้องอยู่แทน`;
+  return `ขายบ้านได้ ${money(v)} แล้วไปเช่าห้องอยู่แทน`;
 }
 const repairCost = p => hPrice(p, homeOf(p).tier) * .25;
-function repairHome(p) { const h = homeOf(p); if (!h.damaged || p.wealth < repairCost(p)) return null; const c = repairCost(p); p.wealth -= c; led(p, 'buy', -c); h.damaged = false; return `คุณซ่อมบ้านจนกลับมาเหมือนเดิม จ่ายไป ${money(c)}`; }
+function repairHome(p) { const h = homeOf(p); if (!h.damaged || p.wealth < repairCost(p)) return null; const c = repairCost(p); p.wealth -= c; led(p, 'buy', -c); h.damaged = false; return `ซ่อมบ้านจนกลับมาเหมือนเดิม หมดไป ${money(c)}`; }
 
 // ---- land ----
 const FARM = { grieve: 1, mulvane: .8, dunes: .6, kragmor: .9, aurelis: 1.2 };
@@ -111,23 +111,23 @@ function canBuyLand(p) {
 function buyLand(p) {
   if (canBuyLand(p)) return null;
   const c = plotPrice(p), L = landOf(p); p.wealth -= c; led(p, 'buy', -c); L.realm = p.realm.id; L.plots++;
-  return L.plots === 3 ? `คุณซื้อที่นาเพิ่มอีกแปลง ตอนนี้มี 3 แปลง มากเกินกว่าจะทำเอง ต้องให้ไพร่มาเช่าทำ` : `คุณซื้อที่นาหนึ่งแปลง จ่ายไป ${money(c)} ตอนนี้มี ${L.plots} แปลง`;
+  return L.plots === 3 ? `ซื้อที่นาเพิ่มอีกแปลง ตอนนี้มี 3 แปลง เยอะเกินกว่าจะทำเอง ต้องให้ไพร่มาเช่าทำ` : `ซื้อที่นาแปลงหนึ่ง จ่ายไป ${money(c)} ตอนนี้มี ${L.plots} แปลง`;
 }
-function sellLand(p) { const L = landOf(p); if (!L.plots) return null; const v = plotPrice(p, L.realm) * .8; L.plots--; if (!L.plots) L.realm = null; p.wealth += v; led(p, 'sales', v); return `คุณขายที่นาไปหนึ่งแปลง ได้ ${money(v)}`; }
-function setShare(p, s) { landOf(p).share = s; return s === .5 ? 'คุณประกาศว่าไพร่ที่เช่าที่นาต้องส่งผลผลิตให้ครึ่งหนึ่ง เหมือนที่เจ้าที่ดินทุกคนทำ' : 'คุณประกาศว่าไพร่ที่เช่าที่นาส่งผลผลิตแค่หนึ่งในสาม ข่าวนี้แพร่ไปทั่วหมู่บ้าน'; }
+function sellLand(p) { const L = landOf(p); if (!L.plots) return null; const v = plotPrice(p, L.realm) * .8; L.plots--; if (!L.plots) L.realm = null; p.wealth += v; led(p, 'sales', v); return `ขายที่นาไปแปลงหนึ่ง ได้ ${money(v)}`; }
+function setShare(p, s) { landOf(p).share = s; return s === .5 ? 'ประกาศว่าไพร่ที่เช่านาต้องส่งผลผลิตให้ครึ่งหนึ่ง เหมือนเจ้าที่ดินทุกคน' : 'ประกาศว่าไพร่ที่เช่านาส่งผลผลิตแค่หนึ่งในสามพอ ข่าวนี้ลือกันไปทั่วหมู่บ้าน'; }
 function landYear(p) {
   const L = landOf(p); if (!L.plots || p.age < 14) return null;
   const out = [];
   const R = RBY[L.realm], F = (R.wealth / 50 + .4) * .8;
-  let w = .5 + Math.random() * .8; if (roll(.12)) { w = .25; out.push('ปีนี้ฝนแล้ง ที่นาของคุณได้ผลผลิตแค่หนึ่งในสี่'); }
+  let w = .5 + Math.random() * .8; if (roll(.12)) { w = .25; out.push('ปีนี้ฝนแล้ง ที่นาได้ผลผลิตแค่หนึ่งในสี่'); }
   let y = L.plots * 1.6 * F * FARM[L.realm] * w;
   if (L.plots < 3) y *= .6; // you hire hands, which eats into the harvest
   else { y *= L.share === .5 ? 1 : .67; p.flags.landlord = true; if (L.share === .5) p.flags.harshLord = (p.flags.harshLord || 0) + 1; else { p.flags.fairLord = (p.flags.fairLord || 0) + 1; p.happy += 1; } }
   if (L.realm !== p.realm.id) y *= .8; // a steward takes his cut
   y -= y * .1; // the church's tithe
   p.wealth += y; led(p, 'land', y);
-  if (L.plots >= 3 && L.share === .5 && roll(.04)) { const l = y * .8; p.wealth -= l; led(p, 'land', -l); out.push('ไพร่ที่เช่าที่นาของคุณรวมตัวกันเผายุ้งข้าว ผลผลิตปีนี้แทบไม่เหลือ'); }
-  if (L.realm === 'grieve' && roll(.04)) { L.plots--; if (!L.plots) L.realm = null; out.push('ทัพขุนศึกยึดที่นาของคุณไปหนึ่งแปลง และไม่มีใครกล้าทวงคืน'); }
+  if (L.plots >= 3 && L.share === .5 && roll(.04)) { const l = y * .8; p.wealth -= l; led(p, 'land', -l); out.push('ไพร่ที่เช่านารวมหัวกันเผายุ้งข้าว ผลผลิตปีนี้แทบไม่เหลือ'); }
+  if (L.realm === 'grieve' && roll(.04)) { L.plots--; if (!L.plots) L.realm = null; out.push('ทัพขุนศึกยึดที่นาไปแปลงหนึ่ง ไม่มีใครกล้าไปทวงคืน'); }
   return out.join(' · ') || null;
 }
 
@@ -150,17 +150,17 @@ extend('moveTo', 'housing: moving away: a house cannot come with you', inner => 
   const v = owned ? homeValue(p) : 0;
   const t = inner(p, to); if (!t) return t;
   const extra = [];
-  if (owned) { p.wealth += v; led(p, 'sales', v); extra.push(`คุณขายบ้านหลังเก่าได้ ${money(v)}`); }
+  if (owned) { p.wealth += v; led(p, 'sales', v); extra.push(`ขายบ้านหลังเก่าได้ ${money(v)}`); }
   Object.assign(h, { tier: 2, status: 'rent', damaged: false, realm: to, famOwned: false });
-  extra.push('ที่บ้านใหม่ คุณเช่าห้องอยู่ไปก่อน');
+  extra.push('ที่บ้านใหม่ เช่าห้องอยู่ไปก่อน');
   return [t, ...extra].join(' · ');
 });
 // creditors take the house before they take you
 extend('loanYear', 'housing: creditors take the house before they take you', inner => function (p) {
   const L = p.loan;
   if (L && p.wealth < L.pay && L.missed >= 2 && !p.biz) {
-    if (homeOf(p).status === 'own') { const n = HOUSES[p.home.tier].n; Object.assign(p.home, { tier: 1, status: 'rent', damaged: false }); p.loan = null; p.flags.badCredit = true; p.happy -= 10; return `คุณค้างหนี้ติดกันสามปี เจ้าหนี้จึงยึด${n}ของคุณไป ตอนนี้คุณต้องไปเช่าเพิงพักอยู่`; }
-    if (landOf(p).plots) { const n = p.land.plots; p.land.plots = 0; p.land.realm = null; p.loan = null; p.flags.badCredit = true; p.happy -= 8; return `คุณค้างหนี้ติดกันสามปี เจ้าหนี้จึงยึดที่นาทั้ง ${n} แปลงของคุณไป`; }
+    if (homeOf(p).status === 'own') { const n = HOUSES[p.home.tier].n; Object.assign(p.home, { tier: 1, status: 'rent', damaged: false }); p.loan = null; p.flags.badCredit = true; p.happy -= 10; return `ค้างหนี้ติดกันสามปี เจ้าหนี้เลยยึด${n}ไป ตอนนี้ต้องไปเช่าเพิงอยู่`; }
+    if (landOf(p).plots) { const n = p.land.plots; p.land.plots = 0; p.land.realm = null; p.loan = null; p.flags.badCredit = true; p.happy -= 8; return `ค้างหนี้ติดกันสามปี เจ้าหนี้เลยยึดที่นาไปทั้ง ${n} แปลง`; }
   }
   return inner(p);
 });

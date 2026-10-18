@@ -4,16 +4,16 @@ const AGE_SHIFT = { aurelis: 2, undercity: 5, grieve: 5, mulvane: 7, dunes: 4, k
 for (const r of REALMS) { r.agingStart += AGE_SHIFT[r.id] || 0; r.infant *= .4; r.child *= .45; r.adult *= .55; r.war *= .45; r.famine *= .5; }
 
 const ILLS = {
-  ashfever: { n: 'ไข้เถ้าดำ', d: 'ไอเป็นเถ้าสีดำ ถ้าไม่รักษาอาการจะหนักขึ้นทุกปี', acute: true, doc: 3, cures: { doctor: .8, heal: [1, .7], potion: .45, temple: .35 } },
+  ashfever: { n: 'ไข้เถ้าดำ', d: 'ไอออกมาเป็นเถ้าสีดำ ถ้าไม่รักษาจะหนักขึ้นทุกปี', acute: true, doc: 3, cures: { doctor: .8, heal: [1, .7], potion: .45, temple: .35 } },
   ashlung: { n: 'ปอดเถ้า', d: 'เถ้าสะสมในปอด หายใจไม่เต็มอิ่ม สุขภาพทรุดลงช้าๆ', doc: 10, cures: { doctor: .4, heal: [3, .6], temple: .25 }, suppress: 'potion' },
   swampfever: { n: 'ไข้หนอง', d: 'ไข้ที่กลับมาเป็นซ้ำทุกฤดูฝน', doc: 4, cures: { doctor: .6, heal: [2, .7], temple: .3 }, suppress: 'potion' },
   glassskin: { n: 'ผิวแก้ว', d: 'ผิวค่อยๆ แข็งเป็นแก้ว ขยับตัวได้ช้าลงเรื่อยๆ หมอทั่วไปรักษาไม่ได้', doc: 20, cures: { doctor: .08, heal: [4, .6], serenth: .6 } },
-  wither: { n: 'อาการเหี่ยวเฉา', d: 'โรคของเอลฟ์ที่มีชีวิตนานเกินไป ร่างกายไม่ได้ป่วย แต่ใจไม่อยากอยู่ต่อ', doc: 6, cures: { doctor: .15, temple: .2 } },
+  wither: { n: 'อาการเหี่ยวเฉา', d: 'โรคของเอลฟ์ที่อยู่มานานเกินไป ร่างกายไม่ได้ป่วย แต่ใจไม่อยากอยู่ต่อแล้ว', doc: 6, cures: { doctor: .15, temple: .2 } },
 };
 const CURSES = {
-  thread: { n: 'คำสาปเส้นใย', d: 'เส้นใยที่คุณแตะต้องดึงร่างกายคุณไปทีละน้อย เหมือนที่มันดึงฟ้า' },
-  ruin: { n: 'คำสาปจากซากเมือง', d: 'ของที่คุณหยิบมาจากซากเมืองมีบางอย่างติดมาด้วย โชคร้ายตามคุณไปทุกที่' },
-  blood: { n: 'คำสาปตระกูล', d: 'คำสาปที่ส่งต่อทางสายเลือด คนในครอบครัวเจ็บป่วยและล้มตายง่ายกว่าปกติ' },
+  thread: { n: 'คำสาปเส้นใย', d: 'เส้นใยที่ไปแตะต้องค่อยๆ ดึงร่างกายไปทีละนิด เหมือนที่มันดึงฟ้า' },
+  ruin: { n: 'คำสาปจากซากเมือง', d: 'ของที่หยิบมาจากซากเมืองมีอะไรบางอย่างติดมาด้วย โชคร้ายตามไปทุกที่' },
+  blood: { n: 'คำสาปตระกูล', d: 'คำสาปที่ตกทอดทางสายเลือด คนในบ้านเจ็บป่วยล้มตายง่ายกว่าปกติ' },
 };
 const ills = p => p.ills || (p.ills = []);
 const curses = p => p.curses || (p.curses = []);
@@ -32,15 +32,15 @@ function contractYear(p) {
   const poor = 1.3 - Math.min(p.wealth, 100) / 100 * .8;
   const roof = typeof effTier === 'function' ? HOUSES[effTier(p)].ill : 1;
   const k = a < 15 ? .4 : 1;
-  if (roll(r.plague / .6 * 4 * poor * roof * k * hazardMod(p, 'plague'))) out.push(catchIll(p, 'ashfever', 'คุณเริ่มไอออกมาเป็นเถ้าสีดำ หมอในละแวกบอกว่าเป็นไข้เถ้าดำ'));
+  if (roll(r.plague / .6 * 4 * poor * roof * k * hazardMod(p, 'plague'))) out.push(catchIll(p, 'ashfever', 'เริ่มไอออกมาเป็นเถ้าสีดำ หมอแถวบ้านบอกว่าเป็นไข้เถ้าดำ'));
   const dusty = ['laborer', 'farmer', 'serf', 'slave', 'smith', 'soldier'].includes(p.career) || has(p, 'kragmor');
-  if (a >= 16 && has(p, 'kragmor', 'undercity', 'grieve') && dusty && roll(.012)) out.push(catchIll(p, 'ashlung', 'คุณไอไม่หยุดมาหลายเดือน หมอบอกว่าปอดของคุณเต็มไปด้วยเถ้า'));
-  if (a >= 5 && has(p, 'mulvane', 'grieve') && roll(has(p, 'mulvane') ? .04 : .01)) out.push(catchIll(p, 'swampfever', 'ฝนแรกของปีมาพร้อมไข้หนอง คุณนอนสั่นอยู่บนเสื่อทั้งเดือน'));
-  if (a >= 10 && has(p, 'dunes') && roll(OUTDOOR.includes(p.career) ? .025 : .012)) out.push(catchIll(p, 'glassskin', 'ผิวที่หลังมือของคุณเริ่มแข็งและใส เหมือนแก้วที่ยังไม่เย็นตัว'));
-  if (p.race === 'เอลฟ์' && a >= 120 && roll(.03)) out.push(catchIll(p, 'wither', 'เช้าวันหนึ่งคุณตื่นมาแล้วไม่อยากลุกจากเตียง และวันต่อๆ มาก็เหมือนเดิม'));
+  if (a >= 16 && has(p, 'kragmor', 'undercity', 'grieve') && dusty && roll(.012)) out.push(catchIll(p, 'ashlung', 'ไอไม่หยุดมาหลายเดือน หมอบอกว่าปอดเต็มไปด้วยเถ้า'));
+  if (a >= 5 && has(p, 'mulvane', 'grieve') && roll(has(p, 'mulvane') ? .04 : .01)) out.push(catchIll(p, 'swampfever', 'ฝนแรกของปีมาพร้อมไข้หนอง นอนหนาวสั่นอยู่บนเสื่อทั้งเดือน'));
+  if (a >= 10 && has(p, 'dunes') && roll(OUTDOOR.includes(p.career) ? .025 : .012)) out.push(catchIll(p, 'glassskin', 'ผิวที่หลังมือเริ่มแข็งและใส เหมือนแก้วที่ยังไม่ทันเย็นตัว'));
+  if (p.race === 'เอลฟ์' && a >= 120 && roll(.03)) out.push(catchIll(p, 'wither', 'เช้าวันหนึ่งตื่นมาแล้วไม่อยากลุกจากที่นอน วันต่อๆ มาก็เป็นแบบนั้น'));
   // curses
-  if ((p.flags.usurper || p.flags.plotted) && !p.flags.bloodChecked) { p.flags.bloodChecked = true; if (roll(.6)) out.push(addCurse(p, 'blood', 'แม่มดชราคนหนึ่งยืนรออยู่หน้าประตูบ้าน เธอบอกว่าเลือดที่คุณทำให้หลั่งจะตามลูกหลานคุณไปอีกหลายรุ่น')); }
-  if (p.cls <= 1 && a >= 20 && roll(.002)) out.push(addCurse(p, 'blood', 'คุณได้ยินว่าตระกูลคู่แข่งจ้างแม่มดสาปแช่งตระกูลของคุณ ปีนั้นคนในบ้านเริ่มเจ็บป่วยกันไม่หยุด'));
+  if ((p.flags.usurper || p.flags.plotted) && !p.flags.bloodChecked) { p.flags.bloodChecked = true; if (roll(.6)) out.push(addCurse(p, 'blood', 'แม่มดแก่คนหนึ่งยืนรออยู่หน้าประตูบ้าน บอกว่าเลือดที่คุณทำให้หลั่งจะตามลูกหลานไปอีกหลายรุ่น')); }
+  if (p.cls <= 1 && a >= 20 && roll(.002)) out.push(addCurse(p, 'blood', 'ได้ยินมาว่าตระกูลคู่แข่งจ้างแม่มดมาสาปแช่ง ปีนั้นคนในบ้านเจ็บป่วยกันไม่เว้นวัน'));
   return out.filter(Boolean);
 }
 function illYear(p) {
@@ -50,24 +50,24 @@ function illYear(p) {
     if (x.treated === p.age) continue;
     const rest = p.focus === 'rest';
     // children are looked after by their family, if the family can pay
-    if (p.age < 14 && p.cls <= 2 && roll(p.cls <= 1 ? .9 : .5) && (I.cures.doctor || 0) >= .4) { if (roll(I.cures.doctor)) { healIll(p, x); out.push(`พ่อแม่พาคุณไปหาหมอ และ${I.n}ก็หายไป`); continue; } }
+    if (p.age < 14 && p.cls <= 2 && roll(p.cls <= 1 ? .9 : .5) && (I.cures.doctor || 0) >= .4) { if (roll(I.cures.doctor)) { healIll(p, x); out.push(`พ่อแม่พาไปหาหมอ แล้ว${I.n}ก็หาย`); continue; } }
     switch (x.id) {
       case 'ashfever':
-        if (roll(rest ? .5 : .3)) { healIll(p, x); out.push('ไข้เถ้าดำของคุณค่อยๆ หายไปเอง'); break; }
+        if (roll(rest ? .5 : .3)) { healIll(p, x); out.push('ไข้เถ้าดำค่อยๆ หายไปเอง'); break; }
         if (roll(.35)) x.stage++;
         p.health -= 5 * x.stage;
         if (x.stage >= 4) { if (roll(.2)) { die(p, 'เสียชีวิตด้วยไข้เถ้าดำที่ไม่ได้รักษา'); return 'ไข้เถ้าดำลุกลามจนร่างกายรับไม่ไหว'; } x.stage = 3; }
-        out.push(['', 'คุณยังไอเป็นเถ้าอยู่', 'ไข้เถ้าดำหนักขึ้น คุณมีไข้สูงทั้งฤดู', 'ไข้เถ้าดำเข้าระยะวิกฤต ถ้าไม่รักษาปีหน้าอาจไม่รอด'][x.stage]);
+        out.push(['', 'ยังไอเป็นเถ้าอยู่', 'ไข้เถ้าดำหนักขึ้น ไข้สูงอยู่ทั้งฤดู', 'ไข้เถ้าดำเข้าระยะวิกฤตแล้ว ถ้าไม่รักษา ปีหน้าอาจไม่รอด'][x.stage]);
         break;
-      case 'ashlung': p.health -= 2; p.happy -= 1; if (roll(.3)) out.push('คุณหอบทุกครั้งที่เดินขึ้นเนิน'); break;
-      case 'swampfever': if (roll(.5)) { p.health -= 6; p.happy -= 2; out.push('ไข้หนองกำเริบอีกแล้วในฤดูฝนปีนี้'); } break;
-      case 'glassskin': p.health -= 1; if (roll(.25) && p.attrs.DEX > 6) { p.attrs.DEX--; out.push('ผิวแก้วลามขึ้นไปถึงข้อศอก คุณขยับนิ้วได้ช้าลงอีก (ว่องไว −1)'); } break;
-      case 'wither': p.happy -= 5; if (p.focus === 'love' && roll(.3)) { healIll(p, x); out.push('การได้อยู่กับคนที่รักทำให้คุณอยากมีชีวิตอยู่ต่ออีกครั้ง'); } break;
+      case 'ashlung': p.health -= 2; p.happy -= 1; if (roll(.3)) out.push(pick(['เดินขึ้นเนินทีไรก็หอบทุกที', 'ไอจนซี่โครงร้าว หมอสั่งให้เลิกทำงานหนัก พูดน่ะง่าย แต่ทำจริงไม่ได้', 'หายใจเสียงหวีดทั้งคืนจนคนในบ้านนอนไม่หลับ'])); break;
+      case 'swampfever': if (roll(.5)) { p.health -= 6; p.happy -= 2; out.push(pick(['ไข้หนองกำเริบอีกแล้วในฤดูฝนปีนี้', 'ไข้หนองกลับมาตามนัด ห่มผ้าสามผืนก็ยังหนาวสั่นอยู่ทั้งอาทิตย์', 'ไข้หนองขึ้นสูงจนเพ้อ เรียกหาคนที่ตายไปแล้ว', 'ปีนี้ไข้หนองมาเร็วกว่าทุกปี ก่อนฝนแรกจะตกเสียอีก'])); } break;
+      case 'glassskin': p.health -= 1; if (roll(.25) && p.attrs.DEX > 6) { p.attrs.DEX--; out.push('ผิวแก้วลามขึ้นไปถึงข้อศอก นิ้วขยับช้าลงอีก (ว่องไว −1)'); } break;
+      case 'wither': p.happy -= 5; if (p.focus === 'love' && roll(.3)) { healIll(p, x); out.push('ได้อยู่กับคนที่รัก เลยกลับมาอยากมีชีวิตอยู่ต่ออีกครั้ง'); } break;
     }
   }
   for (const c of curses(p)) {
-    if (c.id === 'thread' && roll(.2)) { p.health -= 8; out.push('เส้นใยในตัวคุณกระตุกแรงจนคุณล้มลงกลางทาง'); }
-    if (c.id === 'ruin' && roll(.25)) { if (roll(.5)) { const l = p.wealth * .1; p.wealth -= l; out.push(`โชคร้ายตามคุณมาอีกแล้ว คุณทำเงินหายไป ${money(l)}`); } else { p.happy -= 4; out.push('ทุกอย่างที่คุณแตะดูเหมือนจะพังลงไปหมด'); } }
+    if (c.id === 'thread' && roll(.2)) { p.health -= 8; out.push(pick(['เส้นใยในตัวกระตุกแรงจนล้มลงกลางทาง', 'กลางตลาด เส้นใยกระตุกตัวคุณลอยขึ้นจากพื้นเกือบคืบ คนแถวนั้นถอยกรูด', 'สะดุ้งตื่นกลางดึก เส้นใยรัดคอจนหายใจไม่ออก'])); }
+    if (c.id === 'ruin' && roll(.25)) { if (roll(.5)) { const l = p.wealth * .1; p.wealth -= l; out.push(`โชคร้ายตามมาอีกแล้ว ทำเงินหายไป ${money(l)}`); } else { p.happy -= 4; out.push('แตะอะไรก็ดูจะพังไปหมด'); } }
     if (c.id === 'blood') p.happy -= 2;
   }
   return out;
@@ -93,10 +93,10 @@ function treat(p, idx, m) {
   const I = ILLS[x.id], cost = treatCost(p, x, m);
   if (cost) { p.wealth -= cost; led(p, 'buy', -cost); }
   x.tried = x.tried || {}; x.tried[m] = p.age; x.treated = p.age;
-  if (m === 'potion') { inv(p).herb -= 2; if (I.cures.potion && roll(I.cures.potion + rank(p, 'alchemy') * .05)) { healIll(p, x); return `คุณต้มยาจากสมุนไพรกินเอง และ${I.n}หายไปในที่สุด`; } if (x.stage > 1) x.stage--; return `ยาที่ต้มเองช่วยให้${I.n}ทุเลาลงในปีนี้`; }
+  if (m === 'potion') { inv(p).herb -= 2; if (I.cures.potion && roll(I.cures.potion + rank(p, 'alchemy') * .05)) { healIll(p, x); return `ต้มยาสมุนไพรกินเอง สุดท้าย${I.n}ก็หาย`; } if (x.stage > 1) x.stage--; return `ยาต้มเองช่วยให้${I.n}ทุเลาลงในปีนี้`; }
   const c = (m === 'heal' ? I.cures.heal[1] : I.cures[m]) + (m === 'temple' && p.rep && p.rep.church >= 30 ? .2 : 0);
-  if (roll(c)) { healIll(p, x); return { doctor: `หมอรักษา${I.n}ของคุณจนหายขาด`, heal: `คุณใช้เวทรักษา${I.n}ของตัวเองจนหาย`, temple: `หลังสวดอยู่เจ็ดวัน ${I.n}ของคุณก็หายไป นักบวชบอกว่าเป็นพรของดวงอาทิตย์`, serenth: `ผู้รักษาชาวเอลฟ์ดึงเถ้าออกจากผิวคุณทีละเส้น ${I.n}หายไปหมด` }[m]; }
-  return { doctor: `หมอให้ยามากินทั้งปี แต่${I.n}ยังไม่หาย`, heal: `เวทของคุณยังไม่แรงพอจะไล่${I.n}ออกไป`, temple: `คุณบริจาคเงินให้วิหาร แต่${I.n}ยังอยู่เหมือนเดิม`, serenth: `แม้แต่ผู้รักษาชาวเอลฟ์ก็ยังรักษา${I.n}ไม่หาย` }[m];
+  if (roll(c)) { healIll(p, x); return { doctor: `หมอรักษา${I.n}จนหายขาด`, heal: `ใช้เวทรักษา${I.n}ของตัวเองจนหาย`, temple: `สวดอยู่เจ็ดวัน ${I.n}ก็หายไป นักบวชบอกว่าเป็นพรจากดวงอาทิตย์`, serenth: `ผู้รักษาชาวเอลฟ์ดึงเถ้าออกจากผิวทีละเส้น จน${I.n}หายเกลี้ยง` }[m]; }
+  return { doctor: `หมอให้ยามากินทั้งปี แต่${I.n}ก็ยังไม่หาย`, heal: `เวทยังไม่แรงพอจะไล่${I.n}ออกไป`, temple: `ทำบุญให้วิหารไปแล้ว แต่${I.n}ก็ยังอยู่เหมือนเดิม`, serenth: `ขนาดผู้รักษาชาวเอลฟ์ยังรักษา${I.n}ไม่หาย` }[m];
 }
 // lifting curses
 function curseActs(p, c) {
@@ -108,21 +108,21 @@ function curseActs(p, c) {
 function curseAct(p, cid, aid) {
   const c = curses(p).find(x => x.id === cid); if (!c) return null;
   const a = curseActs(p, c).find(x => x.id === aid); if (!a || a.why) return null;
-  if (c.tried === p.age) return 'ปีนี้คุณลองแก้คำสาปไปแล้ว';
+  if (c.tried === p.age) return 'ปีนี้ลองแก้คำสาปไปแล้ว';
   c.tried = p.age;
-  if (aid === 'release') { inv(p).shard = 0; const best = SKILLS.filter(s => s.magic).sort((x, y) => rank(p, y.id) - rank(p, x.id))[0]; if (best && rank(p, best.id) > 0) p.skills[best.id].r--; liftCurse(p, cid); return 'คุณปล่อยเศษเส้นใยลอยขึ้นฟ้าทีละชิ้น ร่างกายเบาลงจนแทบลอยได้ แต่บางอย่างในตัวคุณก็หายไปด้วย'; }
-  if (aid === 'serenth') { p.wealth -= 30; led(p, 'buy', -30); liftCurse(p, cid); return 'ผู้ดูแลเส้นใยตัดเส้นที่พันตัวคุณออกทีละเส้น โดยไม่ถามสักคำว่าคุณไปแตะมันมาจากไหน'; }
-  if (aid === 'return') { inv(p).glass = 0; liftCurse(p, cid); return 'คุณวางของทุกชิ้นคืนไว้ในห้องใต้ดินของซากเมือง แล้วเดินออกมาโดยไม่หันหลังกลับไปมอง'; }
-  if (aid === 'priest') { p.wealth -= 10; led(p, 'buy', -10); if (roll(.5)) { liftCurse(p, cid); return 'พิธีได้ผล คุณรู้สึกเหมือนมีอะไรหลุดออกไปจากบ่า'; } return 'นักบวชสวดอยู่ทั้งคืน แต่ไม่มีอะไรเปลี่ยนไป'; }
-  if (aid === 'atone') { p.wealth -= 30; led(p, 'buy', -30); if (check(p, 'CHA', 'speech', 14)) { liftCurse(p, cid); p.happy += 6; return 'หัวหน้าตระกูลรับเงินและคำขอโทษของคุณ เขาบอกว่าลูกหลานของคุณจะไม่ต้องแบกเรื่องนี้อีกแล้ว'; } return 'พวกเขารับเงินไป แต่ไม่ยอมรับคำขอโทษ'; }
+  if (aid === 'release') { inv(p).shard = 0; const best = SKILLS.filter(s => s.magic).sort((x, y) => rank(p, y.id) - rank(p, x.id))[0]; if (best && rank(p, best.id) > 0) p.skills[best.id].r--; liftCurse(p, cid); return 'ปล่อยเศษเส้นใยลอยขึ้นฟ้าทีละชิ้น ตัวเบาจนแทบลอยได้ แต่อะไรบางอย่างในตัวก็หายไปด้วย'; }
+  if (aid === 'serenth') { p.wealth -= 30; led(p, 'buy', -30); liftCurse(p, cid); return 'ผู้ดูแลเส้นใยตัดเส้นที่พันตัวออกทีละเส้น ไม่ถามสักคำว่าไปแตะมันมาจากไหน'; }
+  if (aid === 'return') { inv(p).glass = 0; liftCurse(p, cid); return 'วางของทุกชิ้นคืนไว้ในห้องใต้ดินของซากเมือง แล้วเดินออกมาโดยไม่หันกลับไปมอง'; }
+  if (aid === 'priest') { p.wealth -= 10; led(p, 'buy', -10); if (roll(.5)) { liftCurse(p, cid); return 'พิธีได้ผล รู้สึกเหมือนมีอะไรหลุดออกไปจากบ่า'; } return 'นักบวชสวดอยู่ทั้งคืน แต่ไม่มีอะไรเปลี่ยน'; }
+  if (aid === 'atone') { p.wealth -= 30; led(p, 'buy', -30); if (check(p, 'CHA', 'speech', 14)) { liftCurse(p, cid); p.happy += 6; return 'หัวหน้าตระกูลรับเงินและคำขอโทษ บอกว่าลูกหลานของคุณไม่ต้องแบกเรื่องนี้อีกแล้ว'; } return 'พวกเขารับเงินไป แต่ไม่ยอมรับคำขอโทษ'; }
   return null;
 }
 // curses arrive from risky things you already do
-extend('addMat', 'disease: curses arrive from risky things you already do', inner => function (p, m, n) { const r = inner(p, m, n); if (m === 'shard' && n > 0 && roll(.15)) { const t = addCurse(p, 'thread', 'เศษเส้นใยที่คุณเก็บมาพันรอบข้อมือคุณ และไม่ยอมคลายออก'); if (t) (p.pendingNotes = p.pendingNotes || []).push(t); } return r; });
+extend('addMat', 'disease: curses arrive from risky things you already do', inner => function (p, m, n) { const r = inner(p, m, n); if (m === 'shard' && n > 0 && roll(.15)) { const t = addCurse(p, 'thread', 'เศษเส้นใยที่เก็บมาพันรอบข้อมือ แล้วไม่ยอมคลายออก'); if (t) (p.pendingNotes = p.pendingNotes || []).push(t); } return r; });
 (() => {
   const q = QBY.ruins; if (!q) return;
   const ob = q.build;
-  q.build = p => { const b = ob(p); b.options = b.options.map(o => Object.assign({}, o, { act: z => { const t = o.act(z); if (z.alive && /ห้องเก็บของ|ของมีค่า/.test(t) && roll(.25)) { addCurse(z, 'ruin'); return t + ' · คืนนั้นคุณฝันว่ามีคนเดินตามหลังมาจากซากเมือง'; } return t; } })); return b; };
+  q.build = p => { const b = ob(p); b.options = b.options.map(o => Object.assign({}, o, { act: z => { const t = o.act(z); if (z.alive && /ห้องเก็บของ|ของมีค่า/.test(t) && roll(.25)) { addCurse(z, 'ruin'); return t + ' · คืนนั้นฝันว่ามีคนเดินตามหลังมาจากซากเมือง'; } return t; } })); return b; };
 })();
 // the family curse follows the blood
 onBorn('disease: the family curse follows the blood', (p, parent) => { if (parent && parent.curses && parent.curses.some(c => c.id === 'blood')) { p.curses = [{ id: 'blood', since: 0, inherited: true }]; } });

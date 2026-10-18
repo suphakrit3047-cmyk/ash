@@ -1,6 +1,6 @@
-# Ashborn
+# เกิดจากเถ้าถ่าน (Ashborn)
 
-A dark-fantasy life simulator about inequality. Everything ships as one file, `index.html`.
+A dark-fantasy life simulator about inequality. Everything ships as one file, `เกิดจากเถ้าถ่าน.html`.
 
 ## Layout
 
@@ -23,16 +23,19 @@ src/        game source; each file is one system
   heir.js       an heir or sibling starts at their real age
   relic.js      unique relics that pass down or get lost in the world
   arms.js       arenas, hunting, what fighting skill is worth
+  content4.js   more small events and one-off choices
+  threads.js    people who come back: friend, rival, mentor, first love... (multi-step choices)
+  story.js      yearly lines drawn from your life; season air per realm; memory of what was seen
   shell.html    the page: layout, styles, all UI code
   map.js        the realm map
-tools/build.py  joins src/ into index.html (order matters)
+tools/build.py  joins src/ into เกิดจากเถ้าถ่าน.html (order matters)
 tests/          golden master + browser tests
 ```
 
 ## Build and test
 
 ```
-python3 tools/build.py          # writes index.html and build/engine.js
+python3 tools/build.py          # writes เกิดจากเถ้าถ่าน.html and build/engine.js
 node tests/golden.js --check    # deterministic fingerprint of ~250 lives; must not change in a refactor
 sh tests/run_all.sh             # build, syntax check, golden, then every browser test
 ```
@@ -66,4 +69,4 @@ was lost, and so on.
 ## Saved data in the browser
 
 `ash-save-v1` the current life · `ash-world` buildings that persist · `ash-relics` where lost relics lie ·
-`ash-ws` cached realm statistics · `ash-tut` tutorial · `ash-notes` notification settings
+`ash-ws` cached realm statistics · `ash-tut` tutorial · `ash-notes` notification settings · `ash-seen` what you have seen across lives (to avoid repeats)

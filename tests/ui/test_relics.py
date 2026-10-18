@@ -4,7 +4,7 @@ async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':1000,'height':1300})
         errs=[]; pg.on('pageerror',lambda e:errs.append(str(e)[:300]))
-        await pg.goto('http://localhost:8765/index.html', wait_until='domcontentloaded')
+        await pg.goto('http://localhost:8765/เกิดจากเถ้าถ่าน.html', wait_until='domcontentloaded')
         await pg.evaluate("localStorage.clear()"); await pg.reload(wait_until='domcontentloaded')
         await pg.wait_for_function("!document.getElementById('startBtn').disabled", timeout=60000)
         await pg.evaluate("tutState = () => ({seen:[],off:true}); setSpeed(0); SEC_DEFAULT.push('')")

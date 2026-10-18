@@ -2,7 +2,7 @@
 import os, asyncio
 from playwright.async_api import async_playwright
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-INDEX = os.path.join(ROOT, 'index.html')
+INDEX = os.path.join(ROOT, 'เกิดจากเถ้าถ่าน.html')
 async def open_game(b, w=1000, h=1200, errs=None):
     pg = await b.new_page(viewport={'width': w, 'height': h})
     if errs is not None: pg.on('pageerror', lambda e: errs.append(str(e)[:300]))

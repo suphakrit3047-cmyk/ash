@@ -178,10 +178,10 @@ afterYear('family: births, deaths, marriages', famYear);
     } }));
   }
   // childhood lines that need a living parent
-  const momLine = p => famAlive(p, 'mother') ? null : 'คุณเติบโตมาโดยไม่มีแม่ ป้าข้างบ้านช่วยเลี้ยงคุณแทน';
-  CHILD_ANY[0] = p => momLine(p) || `คุณเดินได้ก้าวแรก แล้วล้มลงในอ้อมแขนของ${p.kin.mother}`;
-  CHILD_ANY[2] = p => momLine(p) || `${p.kin.mother}ร้องเพลงกล่อมคุณทุกคืน`;
-  CHILD_ANY[4] = p => famAlive(p, 'father') ? `คุณกลัวเสียงฟ้าร้องจนต้องมุดไปนอนข้าง${p.kin.father}` : 'คืนที่ฟ้าร้อง คุณมุดเข้าไปนอนกับพี่น้อง เพราะไม่มีพ่อให้กอดแล้ว';
+  const momLine = p => famAlive(p, 'mother') ? null : 'โตมาโดยไม่มีแม่ ป้าข้างบ้านช่วยเลี้ยงแทน';
+  CHILD_ANY[0] = p => momLine(p) || `ก้าวเดินได้ก้าวแรก แล้วล้มลงในอ้อมแขนของ${p.kin.mother}`;
+  CHILD_ANY[2] = p => momLine(p) || `${p.kin.mother}ร้องเพลงกล่อมให้ฟังทุกคืน`;
+  CHILD_ANY[4] = p => famAlive(p, 'father') ? `กลัวเสียงฟ้าร้องจนต้องมุดไปนอนข้าง${p.kin.father}` : 'คืนไหนฟ้าร้อง ก็มุดเข้าไปนอนกับพี่น้อง เพราะไม่มีพ่อให้กอดแล้ว';
 })();
 LEGENDS.push(
   { id: 'bigfamily', n: 'บ้านที่ไม่เคยเงียบ', d: 'เกิดมามีพี่น้องอย่างน้อย 5 คน', c: p => p.fam && famOf(p, 'sibling').length >= 5 },
@@ -192,7 +192,7 @@ function famBirthLine(p) {
   const sib = famOf(p, 'sibling').filter(m => m.a0 > 0), alive = sib.filter(m => m.alive), dead = sib.filter(m => !m.alive);
   let t = `แม่อายุ ${famAge(p, famOf(p, 'mother')[0])} ปี พ่ออายุ ${famAge(p, famOf(p, 'father')[0])} ปี`;
   if (!sib.length) t += ' คุณเป็นลูกคนแรก';
-  else { t += ` คุณมีพี่ ${alive.length} คน`; if (dead.length) t += ` และมีพี่อีก ${dead.length} คนที่เสียชีวิตไปก่อนคุณเกิด`; }
-  const mom = famOf(p, 'mother')[0]; if (mom && !mom.alive) t += ` · ${mom.name}แม่ของคุณเสียชีวิตขณะคลอดคุณ`;
+  else { t += ` คุณมีพี่ ${alive.length} คน`; if (dead.length) t += ` และมีพี่อีก ${dead.length} คนที่ตายไปก่อนคุณเกิด`; }
+  const mom = famOf(p, 'mother')[0]; if (mom && !mom.alive) t += ` · ${mom.name}แม่ของคุณตายตอนคลอดคุณ`;
   return t;
 }

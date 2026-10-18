@@ -7,7 +7,7 @@ async def main():
         errs=[]; pg.on('pageerror',lambda e:errs.append(str(e)[:200]))
         cons=[]; pg.on('console',lambda m: cons.append(m.text[:150]) if m.type=='error' and 'fonts' not in m.text and 'ERR_' not in m.text else None)
         t0=time.time()
-        await pg.set_content('<!doctype html><meta charset=utf-8><body>'+open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)),'..','..','index.html'),encoding='utf-8').read()+'</body>')
+        await pg.set_content('<!doctype html><meta charset=utf-8><body>'+open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)),'..','..','เกิดจากเถ้าถ่าน.html'),encoding='utf-8').read()+'</body>')
         await pg.wait_for_function("!document.getElementById('startBtn').disabled", timeout=60000)
         print('load to ready: %.1fs'%(time.time()-t0))
         await pg.evaluate("tutState = () => ({seen:[],off:true}); setSpeed(2)")
