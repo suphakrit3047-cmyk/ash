@@ -1,0 +1,1198 @@
+<title>เกิดในเถ้า</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chonburi&family=Pridi:wght@300;400;600&family=Sarabun:wght@400;600&display=swap">
+<style>
+/* Layout: one narrow column like a ledger page in a dark archive; the life log reads newest-first */
+:root{
+  --bg:#121318; --surface:#1a1b22; --raise:#22232c; --line:#30313c;
+  --fg:#ddd3c1; --muted:#938a7b; --brass:#c09a5c; --brass-dim:#6e5a3a;
+  --blood:#a3443b; --moss:#9db06a;
+  --display:'Chonburi','Pridi',Georgia,serif;
+  --body:'Pridi','Sarabun',Georgia,serif;
+  --ui:'Sarabun','Noto Sans Thai',system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:16px;line-height:1.75;font-weight:300;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;
+  background-image:radial-gradient(ellipse at 50% -10%,#2a2620 0%,transparent 55%);background-attachment:fixed}
+main{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0;line-height:1.3}
+h1{font-size:clamp(2.6rem,9vw,4.2rem);color:var(--brass);letter-spacing:.01em}
+h2{font-size:1.6rem}
+h3{font-size:1.15rem}
+p{margin:0}
+.eyebrow{font-family:var(--ui);font-size:.78rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.muted{color:var(--muted)}
+.lede{font-size:1.12rem;max-width:58ch}
+.stack{display:flex;flex-direction:column;gap:14px}
+button{font-family:var(--ui);font-size:1rem;cursor:pointer;border-radius:3px}
+button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.btn{background:var(--brass);color:#16130e;border:0;padding:12px 26px;font-weight:600;letter-spacing:.02em}
+.btn:hover{background:#d3ad6c}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--brass-dim)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.note{font-family:var(--ui);font-size:.88rem;color:var(--muted);border-left:2px solid var(--blood);padding-left:12px;max-width:62ch}
+
+/* census table */
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-family:var(--ui);font-size:.92rem;font-variant-numeric:tabular-nums}
+caption{text-align:left;padding-bottom:8px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--muted);font-size:.8rem;letter-spacing:.04em}
+tr.me td{color:var(--brass)}
+.bar{display:inline-block;height:6px;background:var(--brass-dim);vertical-align:middle;margin-right:6px;border-radius:1px}
+
+/* birth */
+.wheel{font-family:var(--display);font-size:clamp(1.6rem,6vw,2.4rem);color:var(--brass);min-height:1.6em;transition:opacity .1s}
+.card{background:var(--surface);border:1px solid var(--line);padding:24px;display:flex;flex-direction:column;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--ui);font-size:.82rem;border:1px solid var(--line);padding:2px 10px;border-radius:99px;color:var(--muted)}
+.chip.hot{border-color:var(--blood);color:#e0a59d}
+.chip.trait{border-color:var(--brass-dim);color:var(--fg)}
+.chip.trait em{font-style:normal;color:var(--muted);margin-left:6px}
+.choice.fatal{border-color:var(--blood);background:linear-gradient(180deg,#a3443b1f,var(--surface) 60%)}
+.choice.fatal #cPrompt{color:#e8b3ab}
+.legends{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.legend{border:1px solid var(--line);padding:10px 12px;font-family:var(--ui);font-size:.85rem;line-height:1.45;display:flex;flex-direction:column;gap:2px;min-width:0}
+.legend b{font-family:var(--body);font-weight:600;font-size:.98rem;color:var(--brass)}
+.legend.locked{opacity:.45}
+.legend.locked b{color:var(--muted)}
+.legend.fresh{border-color:var(--brass)}
+.legend .tag{font-size:.72rem;letter-spacing:.1em;color:var(--brass)}
+
+/* life */
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;align-items:baseline}
+.age{font-family:var(--display);font-size:2.4rem;color:var(--brass);line-height:1;font-variant-numeric:tabular-nums}
+.age small{font-family:var(--ui);font-size:.9rem;color:var(--muted);margin-left:6px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 24px;font-family:var(--ui);font-size:.88rem}
+.stat{display:grid;grid-template-columns:5.5em 1fr 2.4em;gap:8px;align-items:center}
+.stat .track{height:6px;background:var(--raise);position:relative}
+.stat .fill{position:absolute;inset:0 auto 0 0;background:var(--brass);transition:width .4s}
+.stat .fill.low{background:var(--blood)}
+.stat b{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:520px){.stats{grid-template-columns:1fr}}
+.grid{display:flex;flex-wrap:wrap;gap:3px}
+.grid i{width:10px;height:10px;display:block;background:var(--raise)}
+.grid i.end{background:var(--blood)}
+.grid.big i{width:14px;height:14px}
+.panel{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{background:transparent;color:var(--fg);border:1px solid var(--line);padding:7px 14px;font-size:.92rem}
+.seg button[aria-pressed="true"]{border-color:var(--brass);color:var(--brass);background:#c09a5c14}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:transparent;color:var(--fg);border:1px dashed var(--line);padding:6px 10px;font-size:.85rem;text-align:left;max-width:100%}
+.chips button span{font-size:.72rem;color:var(--muted)}
+.chips button[aria-pressed="true"]{border-style:solid;border-color:var(--brass);color:var(--brass)}
+.chips button:disabled{opacity:.45;cursor:not-allowed}
+.careers{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.career{border:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-family:var(--ui);font-size:.85rem}
+.career.cur{border-color:var(--brass)}
+.career .why{color:var(--muted);font-size:.76rem}
+.career button{align-self:flex-start;margin-top:4px}
+.choice{background:var(--surface);border:1px solid var(--brass-dim);padding:20px;display:flex;flex-direction:column;gap:14px}
+.choice .opts{display:flex;flex-direction:column;gap:8px}
+.choice .opts button{text-align:left;background:var(--raise);color:var(--fg);border:1px solid var(--line);padding:12px 14px;line-height:1.4}
+.choice .opts button:hover:not(:disabled){border-color:var(--brass)}
+.choice .opts button:disabled{opacity:.45;cursor:not-allowed}
+.choice .opts small{display:block;color:var(--blood);font-size:.82rem}
+.yearbar{display:flex;flex-direction:column;gap:6px}
+.ytrack{position:relative;height:4px;background:var(--raise)}
+.ytrack span{position:absolute;inset:0 auto 0 0;width:0;background:var(--brass)}
+.ytrack i{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--bg)}
+#yseason{font-family:var(--ui);font-size:.82rem;color:var(--muted);letter-spacing:.04em}
+.seglabel{font-family:var(--ui);font-size:.85rem;color:var(--muted);align-self:center;margin-right:4px}
+.log li.current .y{color:var(--brass)}
+.log li p.event{color:var(--fg)}
+.log li p.picked{font-family:var(--ui);font-size:.8rem;color:var(--muted);margin-top:4px}
+.log li p.outcome{color:var(--brass)}
+.choice .opts .pv{display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:6px;font-size:.78rem;color:var(--muted)}
+.choice .opts .pv .up{color:var(--moss)}
+.choice .opts .pv .down{color:#d07a70}
+.choice .opts .pv .risk{color:#e8b3ab;font-weight:600}
+.dyn{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;counter-reset:g}
+.dyn li{border:1px solid var(--line);padding:8px 12px;display:flex;flex-direction:column;font-family:var(--ui);font-size:.82rem;min-width:0;counter-increment:g}
+.dyn li::before{content:"รุ่นที่ " counter(g);font-size:.72rem;letter-spacing:.08em;color:var(--brass)}
+.dyn li b{font-family:var(--body);font-size:1rem;font-weight:600}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.mode{text-align:left;background:var(--surface);color:var(--fg);border:1px solid var(--line);padding:18px 20px;display:flex;flex-direction:column;gap:6px;line-height:1.5}
+.mode b{font-family:var(--display);font-weight:400;font-size:1.15rem;color:var(--brass)}
+.mode span{color:var(--muted);font-size:.9rem}
+.mode:hover,.mode[aria-pressed="true"]{border-color:var(--brass)}
+.formrow{display:flex;flex-direction:column;gap:6px;min-width:0}
+.formrow label,.formrow .lbl{font-family:var(--ui);font-size:.82rem;letter-spacing:.06em;color:var(--muted)}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+input[type=text],select{font-family:var(--ui);font-size:1rem;background:var(--raise);color:var(--fg);border:1px solid var(--line);padding:9px 10px;border-radius:3px;min-width:0;width:100%}
+input[type=text]:focus-visible,select:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
+.formrow .row input{flex:1}
+.btn.small{padding:8px 14px;font-size:.88rem}
+.small{font-size:.86rem}
+.check{font-family:var(--ui);font-size:.92rem;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.chips .chip.pick{cursor:pointer;font-size:.88rem;padding:5px 12px;background:transparent;color:var(--fg)}
+.chips .chip.pick[aria-pressed="true"]{border-color:var(--brass);color:var(--brass);background:#c09a5c14}
+.cattrs{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}
+.cattr{border:1px solid var(--line);padding:8px 10px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;font-family:var(--ui)}
+.cattr .an{font-weight:600}
+.cattr .ad{grid-column:1/-1;font-size:.76rem;color:var(--muted);line-height:1.4}
+.cattr .ctl{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.cattr .ctl button{width:28px;height:28px;padding:0;background:var(--raise);color:var(--fg);border:1px solid var(--line)}
+.cattr .ctl b{min-width:2.2em;text-align:center;font-size:1.05rem}
+.cattr .rm{font-size:.76rem;color:var(--brass)}
+.attrline{font-family:var(--ui);font-size:.85rem;display:flex;flex-wrap:wrap;gap:4px 14px;font-variant-numeric:tabular-nums}
+.attrline b{color:var(--brass);font-weight:600}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{background:transparent;color:var(--muted);border:0;border-bottom:2px solid transparent;padding:8px 14px;font-size:.95rem;border-radius:0}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--brass)}
+.badge{display:inline-block;min-width:1.4em;padding:0 5px;border-radius:99px;background:var(--brass);color:#16130e;font-size:.75rem;font-weight:600;text-align:center}
+.lvl{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;font-family:var(--ui)}
+.lvl b{font-family:var(--display);font-weight:400;font-size:1.5rem;color:var(--brass)}
+.bar2{height:6px;background:var(--raise);position:relative}
+.bar2 span{position:absolute;inset:0 auto 0 0;background:var(--brass)}
+.attrs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:560px){.attrs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.attr{border:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;gap:2px;font-family:var(--ui);min-width:0}
+.attr .top{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.attr b{font-size:1.4rem;font-variant-numeric:tabular-nums}
+.attr .am{color:var(--brass);font-size:.9rem;font-variant-numeric:tabular-nums}
+.attr .an{font-size:.85rem;color:var(--muted)}
+.attr button{margin-top:6px;background:var(--brass);color:#16130e;border:0;padding:4px 8px;font-size:.8rem;font-weight:600}
+.skills{display:flex;flex-direction:column;gap:14px}
+.sgroup h4{margin:0 0 6px;font-family:var(--ui);font-size:.78rem;letter-spacing:.12em;color:var(--brass);font-weight:600}
+.skill{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:8px 0;border-bottom:1px solid #22232b;font-family:var(--ui);align-items:center}
+.skill .sn{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.skill .sn b{font-weight:600}
+.pips{letter-spacing:2px;color:var(--brass);font-size:.8rem}
+.skill .sa{grid-column:1/2;font-size:.78rem;color:var(--muted)}
+.skill .sa.no{color:#b97a72}
+.skill .sa.danger{color:#e8b3ab}
+.skill .bar2{grid-column:1/2}
+.skill button{grid-row:1/4;grid-column:2;background:transparent;color:var(--fg);border:1px solid var(--line);padding:6px 12px;font-size:.84rem}
+.skill button[aria-pressed="true"]{border-color:var(--brass);color:var(--brass);background:#c09a5c14}
+.skill button:disabled{opacity:.35;cursor:not-allowed}
+.choice .opts .pv .dice{color:#c9d1dc;border:1px solid #3a3f4c;padding:0 6px;border-radius:3px}
+.log li p.roll{font-family:var(--ui);font-size:.8rem;color:#c9d1dc;font-variant-numeric:tabular-nums}
+.log li p.roll.ok::before{content:"✓ ";color:var(--moss)}
+.log li p.roll.bad::before{content:"✗ ";color:#d07a70}
+.log li p.lvl{font-family:var(--ui);font-size:.85rem;color:var(--brass);font-weight:600}
+.spellbook{border:1px solid #3a3550;background:linear-gradient(180deg,#2a26401f,transparent);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.sbhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.mana{display:flex;align-items:center;gap:10px;font-family:var(--ui);font-size:.85rem;font-variant-numeric:tabular-nums}
+.mana .bar2{width:120px}
+.mana .bar2 span{background:#8f87d6}
+.mana b{color:#b9b2ef;font-weight:600}
+.spells{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.spell{text-align:left;background:var(--raise);color:var(--fg);border:1px solid var(--line);border-left:3px solid #8f87d6;padding:10px 12px;display:flex;flex-direction:column;gap:3px;line-height:1.4;min-width:0}
+.spell.s-fire{border-left-color:#d0784a}
+.spell.s-heal{border-left-color:#8fb36a}
+.spell.s-illusion{border-left-color:#b48ad6}
+.spell.s-thread{border-left-color:#c9d1dc}
+.spell:hover:not(:disabled){border-color:#8f87d6}
+.spell:disabled{opacity:.45;cursor:not-allowed}
+.spell .sh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.spell .cost{font-family:var(--ui);font-size:.75rem;color:#b9b2ef;white-space:nowrap}
+.spell .sd{font-family:var(--ui);font-size:.78rem;color:var(--muted)}
+.spell .sw{font-family:var(--ui);font-size:.75rem;color:#d07a70}
+.log li p.cast{color:#c8c2f2}
+.log li p.tale{font-style:italic;color:#d8c9a8;border-left:2px solid var(--brass-dim);padding-left:10px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.prologue{display:flex;flex-direction:column;gap:22px;border-left:1px solid var(--brass-dim);padding-left:22px;margin-left:4px}
+.ch{display:flex;flex-direction:column;gap:8px;position:relative;max-width:62ch}
+.ch::before{content:"";position:absolute;left:-27px;top:.6em;width:9px;height:9px;background:var(--bg);border:1px solid var(--brass)}
+.chn{font-family:var(--ui);font-size:.8rem;letter-spacing:.14em;color:var(--brass)}
+.ch p{font-size:1.04rem}
+.vote{font-family:var(--display);font-size:1.6rem;color:var(--muted);line-height:1}
+.vote b{font-weight:400;color:#e0a59d;font-size:2.2rem}
+.tales{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.tales figure{margin:0;border:1px solid var(--line);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.tales blockquote{margin:0;font-size:1rem;line-height:1.6}
+.tales blockquote::before{content:"“";color:var(--brass);margin-right:2px}
+.tales blockquote::after{content:"”";color:var(--brass);margin-left:2px}
+.tales figcaption{font-family:var(--ui);font-size:.8rem;color:var(--brass)}
+.skyfig{margin:0;border:1px solid var(--line);background:linear-gradient(180deg,#1b1d27,#15161c);padding:8px 8px 0}
+.skyfig svg{display:block;width:100%;height:auto;max-width:100%}
+.skyfig .thr path{fill:none;stroke:#8f87d6;stroke-width:1;opacity:.55}
+.skyfig .thrup path{fill:none;stroke:#b9b2ef;stroke-width:1.4;opacity:.9}
+.skyfig .gap{fill:#121318;opacity:.75}
+.skyfig .city path,.skyfig .city rect{fill:#3b3f4c}
+.skyfig .city rect{fill:#d6dbe6}
+.skyfig .ash circle{fill:#8a8478}
+.skyfig .ground{fill:#2a2620}
+.skyfig .pull{fill:none;stroke:#b9b2ef;stroke-width:1.4;stroke-dasharray:3 3}
+.skyfig .mage circle{fill:#c09a5c}
+.skyfig .mage path{fill:none;stroke:#c09a5c;stroke-width:1.6;stroke-linecap:round}
+.skyfig .lbl text{font-family:Sarabun,'Noto Sans Thai',sans-serif;font-size:13px;fill:#ddd3c1}
+.skyfig .lbl text.warn{fill:#e0a59d}
+.mrules{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px 24px}
+.mrules div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.mrules b{font-family:var(--ui);font-size:.86rem;letter-spacing:.06em;color:#b9b2ef;font-weight:600}
+.schools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.schools{grid-template-columns:1fr}}
+.school{border:1px solid var(--line);border-left:3px solid #8f87d6;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.school.s-fire{border-left-color:#d0784a}.school.s-heal{border-left-color:#8fb36a}.school.s-illusion{border-left-color:#b48ad6}.school.s-thread{border-left-color:#c9d1dc}
+.school .sk{font-family:var(--ui);font-weight:600;font-size:.92rem}
+.school p{font-size:.95rem}
+.school .use{font-family:var(--ui);font-size:.8rem;color:var(--muted)}
+.tip{border:1px solid var(--brass);background:linear-gradient(180deg,#c09a5c1a,var(--surface));padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.tip b{font-family:var(--display);font-weight:400;font-size:1.25rem;color:var(--brass)}
+.tip p{max-width:62ch}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;padding:6px 4px;font-size:.88rem}
+.linkbtn:hover{color:var(--fg)}
+.resume{border-color:var(--brass-dim)}
+.resume b{font-family:var(--display);font-weight:400;font-size:1.3rem}
+.combat{border:1px solid #a3443b;background:linear-gradient(180deg,#a3443b14,var(--surface) 70%);padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.cbhead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.cbhead b{font-family:var(--display);font-weight:400;font-size:1.25rem;color:#e8b3ab}
+.cbhead span{font-family:var(--ui);font-size:.8rem}
+.hpbars{display:flex;flex-direction:column;gap:8px}
+.hp{display:grid;grid-template-columns:minmax(4.5em,auto) 1fr 4.2em;gap:10px;align-items:center;font-family:var(--ui);font-size:.86rem}
+.hp b{text-align:right;font-variant-numeric:tabular-nums}
+.hptrack{height:8px;background:var(--raise);position:relative}
+.hptrack span{position:absolute;inset:0 auto 0 0;background:var(--moss);transition:width .3s}
+.hp.foe .hptrack span{background:#c96a5e}
+.cblog{list-style:none;margin:0;padding:0;font-family:var(--ui);font-size:.86rem;display:flex;flex-direction:column;gap:2px;max-height:7.5em;overflow-y:auto}
+.cblog li:first-child{color:var(--fg)}
+.cblog li{color:var(--muted)}
+.cbacts,.weps,.shop{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.cbacts button,.weps button,.shop button{text-align:left;background:var(--raise);color:var(--fg);border:1px solid var(--line);padding:9px 11px;display:flex;flex-direction:column;gap:2px;line-height:1.35;min-width:0}
+.cbacts button b,.weps button b,.shop button b{font-weight:600;font-size:.95rem}
+.cbacts button span,.weps button span,.shop button span{font-size:.76rem;color:var(--muted)}
+.cbacts button:hover:not(:disabled){border-color:#c96a5e}
+.weps button[aria-pressed="true"]{border-color:var(--brass);background:#c09a5c14}
+.cbacts button:disabled,.shop button:disabled{opacity:.45;cursor:not-allowed}
+.logbox{max-height:min(26rem,55vh);overflow-y:auto;border-top:1px solid var(--line);border-bottom:1px solid var(--line);overscroll-behavior:contain}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.log li .body{display:flex;flex-direction:column;gap:2px;min-width:0}
+.log li p{color:var(--muted)}
+.log li:first-child p{color:var(--fg)}
+.log li:first-child{padding-block:12px}
+.log li.quiet p{font-size:.95rem}
+.log li p.world{font-family:var(--ui);font-size:.92rem;color:#c9d1dc;border-left:2px solid #6f7d92;padding-left:10px;margin-block:2px}
+.deltas{display:flex;flex-wrap:wrap;gap:4px 10px;font-family:var(--ui);font-size:.78rem;font-variant-numeric:tabular-nums;margin-top:2px}
+.d.up{color:var(--moss)}
+.d.down{color:#d07a70}
+.log li{display:grid;grid-template-columns:3.2em minmax(0,1fr);gap:12px;padding:8px 0;border-bottom:1px solid #22232b}
+.log li .y{font-family:var(--ui);font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:3px}
+.log li.reflect p{font-style:italic;color:#c8bba3}
+.log li.outcome p:first-child{font-family:var(--ui);font-size:.8rem;letter-spacing:.04em;color:var(--muted)}
+.log li.outcome p{color:var(--brass)}
+.log li.death p{color:#e0a59d}
+.log li.new{animation:in .5s ease}
+@keyframes in{from{opacity:0;transform:translateY(-4px)}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.log li.new{animation:none}.stat .fill{transition:none}}
+
+/* end */
+.epitaph{font-family:var(--display);font-size:clamp(1.8rem,6vw,2.6rem);line-height:1.3}
+.cause{font-size:1.15rem;color:#e0a59d}
+.others{display:flex;flex-direction:column;gap:0}
+.other{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;padding:12px 0;border-bottom:1px solid var(--line)}
+.other .a{font-family:var(--display);font-size:1.4rem;color:var(--brass);text-align:right;font-variant-numeric:tabular-nums}
+.past{font-family:var(--ui);font-size:.88rem;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
+.map{display:block;width:100%;height:auto;aspect-ratio:800/520;max-width:100%;background:#16181f;border:1px solid var(--line);cursor:pointer;touch-action:manipulation}
+.realminfo{background:var(--surface);border:1px solid var(--line);padding:18px 20px;display:flex;flex-direction:column;gap:8px;min-height:9.5em}
+.realminfo h3{color:var(--brass)}
+.realminfo .facts{font-family:var(--ui);font-size:.85rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 16px;font-variant-numeric:tabular-nums}
+.realminfo .facts b{color:var(--fg);font-weight:600}
+.timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-left:1px solid var(--brass-dim);margin-left:4px}
+.timeline li{position:relative;padding:0 0 16px 20px;display:flex;flex-direction:column;gap:2px;max-width:62ch}
+.timeline li::before{content:"";position:absolute;left:-5px;top:.55em;width:9px;height:9px;background:var(--bg);border:1px solid var(--brass)}
+.timeline li.future::before{border-style:dashed;border-color:var(--muted)}
+.timeline .yr{font-family:var(--ui);font-size:.8rem;letter-spacing:.06em;color:var(--brass);font-variant-numeric:tabular-nums}
+.timeline li.future .yr{color:var(--muted)}
+.timeline b{font-weight:600}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
+.rules div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.rules h4{margin:0;font-family:var(--ui);font-size:.8rem;letter-spacing:.12em;color:var(--brass);font-weight:600}
+details.minimap summary{font-family:var(--ui);font-size:.85rem;color:var(--muted);cursor:pointer;letter-spacing:.06em}
+details.minimap .map{margin-top:8px;cursor:default}
+.eras{display:flex;flex-wrap:wrap;gap:8px}
+</style>
+
+<main>
+  <!-- INTRO -->
+  <section id="intro" class="stack" style="gap:28px">
+    <div class="stack">
+      <span class="eyebrow">แผ่นดินเวลมอร์ · ปี ห.ถ. 312 (312 ปีหลังเถ้าตก)</span>
+      <h1>เกิดในเถ้า</h1>
+      <p class="lede">ทุกขณะมีชีวิตใหม่ถือกำเนิดขึ้นบนแผ่นดินนี้ และคุณกำลังจะเป็นหนึ่งในนั้น คุณจะเกิดที่ไหน เป็นลูกของใคร คุณเลือกไม่ได้ เพราะไม่มีใครเลือกได้</p>
+    </div>
+    <div class="card resume" id="resumeCard" hidden>
+      <span class="eyebrow">ชีวิตที่บันทึกไว้</span>
+      <b id="resumeName"></b>
+      <span class="muted" id="resumeMeta"></span>
+      <div class="row"><button class="btn" id="resumeBtn">เล่นต่อ</button><button class="btn ghost" id="discardBtn">ทิ้งชีวิตนี้</button></div>
+    </div>
+    <section class="prologue" aria-labelledby="proH">
+      <h2 id="proH" class="sr">ตำนานเถ้า</h2>
+      <article class="ch">
+        <span class="chn">ก่อนเถ้าตก</span>
+        <p>ท้องฟ้าเหนือเวลมอร์เคยถักทอด้วยเส้นใยเวทนับล้านเส้น ใครที่เกิดมาพร้อมพลังเวทก็ดึงเส้นใยลงมาใช้ได้ ทั้งเรียกฝน รักษาโรค และทำให้ที่ราบกรีฟออกรวงสีทองทุกปี</p>
+        <p>เอลฟ์เป็นผู้ดูแลเส้นใย พวกเขาเตือนมาหลายร้อยปีว่าเส้นใยมีวันหมด แต่อาณาจักรมนุษย์ยังแข่งกันดึงเส้นใยไปใช้ในสงครามเวท จนท้องฟ้าบางลงทีละน้อย</p>
+      </article>
+      <article class="ch">
+        <span class="chn">การลงมติ</span>
+        <p>ปีที่ฟ้าเริ่มมีรอยร้าว สภาผู้อาวุโสของเอลฟ์ประชุมกันเป็นครั้งสุดท้าย หกเสียงเสนอให้ใช้เส้นใยที่เหลือซ่อมฟ้า อีกเจ็ดเสียงบอกว่าโลกเบื้องล่างช่วยไม่ได้แล้ว ให้รักษาสิ่งที่ยังรักษาได้ คือเมืองของพวกเขา ตำราของพวกเขา และคนของพวกเขาเอง</p>
+        <p class="vote"><b>7</b> ต่อ <b>6</b></p>
+      </article>
+      <article class="ch">
+        <span class="chn">คืนที่ฟ้าขาด · ห.ถ. 0</span>
+        <p>คืนนั้นเอลฟ์ดึงเส้นใยที่เหลือทั้งหมดมาพยุงนครเซเรนธ์ขึ้นสู่ฟ้า เมืองลอยขึ้นได้สำเร็จ แต่ท้องฟ้าที่ไม่มีเส้นใยเหลือแล้วก็ขาดออก และแหลกเป็นเถ้า</p>
+        <p>เถ้าตกลงมาสี่สิบปี ที่ราบทองกลายเป็นดินเถ้า ทรายตรงที่ความร้อนจากพิธีตกใส่หลอมเป็นแก้ว เส้นใยที่เหลืออยู่บางจนเด็กแค่ 1 ใน 20 คนที่เกิดมาพร้อมพลังเวท</p>
+      </article>
+      <article class="ch">
+        <span class="chn">312 ปีต่อมา</span>
+        <p>เซเรนธ์ยังลอยอยู่เหนือเมฆเถ้า มีแดดทุกวัน ส่วนคนข้างล่างเรียนรู้ที่จะอยู่กับเถ้า บางคนสร้างกำแพง บางคนขุดลงไปใต้ภูเขา บางคนรบแย่งหุบเขาที่ยังปลูกพืชได้</p>
+        <p>เมืองลอยอยู่ได้เพราะยังดึงเส้นใยที่งอกใหม่ขึ้นไปพยุงไว้ทุกวัน ฟ้าเหนือแผ่นดินจึงไม่เคยหายดี และเถ้าบางๆ ก็ยังตกลงมาทุกฤดู</p>
+        <p>คุณรู้แล้วว่าคืนนั้นเกิดอะไรขึ้น แต่คนส่วนใหญ่ในเวลมอร์ไม่รู้ และแต่ละแดนก็เล่าเรื่องนี้ให้ลูกหลานฟังไม่เหมือนกัน</p>
+      </article>
+    </section>
+    <div class="row"><button class="btn" id="startBtn">ถือกำเนิด</button></div>
+    <p class="note">ในเกมนี้มีเรื่องความตาย สงคราม โรคระบาด การเป็นทาส และการสูญเสียลูก ซึ่งเกิดขึ้นตามความน่าจะเป็นของโลกในเกม แต่จะไม่มีการบรรยายภาพความรุนแรง</p>
+    <section class="stack" style="gap:16px" aria-labelledby="worldH">
+      <h2 id="worldH">แผ่นดินเวลมอร์</h2>
+      <canvas class="map" id="worldMap" role="img" aria-label="แผนที่แผ่นดินเวลมอร์ แตะที่แดนเพื่ออ่านข้อมูล"></canvas>
+      <div class="realminfo" id="realmInfo" aria-live="polite"><span class="muted">แตะหรือเลื่อนเมาส์ไปที่แดนบนแผนที่ เพื่ออ่านเรื่องราวของแดนนั้น</span></div>
+    </section>
+    <section class="stack" style="gap:16px" aria-labelledby="talesH">
+      <h3 id="talesH">คนข้างล่างเล่าเรื่องนี้อย่างไร</h3>
+      <div class="tales">
+        <figure><blockquote>เถ้าคือโทษของคนบาปที่ใช้เวทโดยไม่ได้รับอนุญาต ดวงอาทิตย์คุ้มครองเฉพาะคนที่อยู่ในกำแพงนี้</blockquote><figcaption>นักบวชวิหารสุริยะ · ออเรลิส</figcaption></figure>
+        <figure><blockquote>ฟ้าของเรามีสองชั้น ชั้นแรกคือกำแพง ชั้นที่สองคือเมืองบนเมฆ</blockquote><figcaption>หญิงชราคนหนึ่ง · ใต้กำแพง</figcaption></figure>
+        <figure><blockquote>มนุษย์ดึงเส้นใยจนฟ้าพัง บรรพบุรุษของเราเตือนแล้ว เราแค่รักษาสิ่งที่ยังเหลือไว้</blockquote><figcaption>ตำราเรียนของเด็กเอลฟ์ · เซเรนธ์</figcaption></figure>
+        <figure><blockquote>ฟ้าขาดในชั่วโมงที่เมืองเอลฟ์ลอยขึ้น</blockquote><figcaption>บันทึกหินใต้ภูเขา · ครากมอร์ <span class="muted">(ที่นี่รู้ความจริง แต่ยังขายเหล็กให้เซเรนธ์)</span></figcaption></figure>
+        <figure><blockquote>ฝนไม่ตกเพราะพวกออร์คนำโชคร้ายมา / ฝนไม่ตกเพราะมนุษย์ขโมยหุบเขาของเรา</blockquote><figcaption>ชาวนามนุษย์ และนักรบออร์ค · กรีฟ</figcaption></figure>
+        <figure><blockquote>เถ้าจากทุกที่ไหลมาจบที่หนองเรา เหมือนกับทุกอย่างที่คนอื่นไม่ต้องการ</blockquote><figcaption>ก็อบลินเฒ่า · มูลเวน</figcaption></figure>
+        <figure><blockquote>คืนนั้นฟ้าเปิด ทรายร้องไห้ และเมืองของคนอื่นลอยขึ้นไปบนน้ำตาของเรา</blockquote><figcaption>เพลงของชนเผ่า · ทะเลทรายแก้ว</figcaption></figure>
+      </div>
+    </section>
+    <section class="stack" style="gap:18px" aria-labelledby="magicH">
+      <h3 id="magicH">เส้นใยและเวทมนตร์</h3>
+      <figure class="skyfig">
+        <svg viewBox="0 0 720 300" role="img" aria-labelledby="skyT skyD">
+          <title id="skyT">เส้นใยบนฟ้า เมืองลอย และผู้ใช้เวท</title>
+          <desc id="skyD">เส้นใยถักเป็นตาข่ายอยู่บนฟ้า เซเรนธ์ดึงเส้นใยจำนวนมากขึ้นไปพยุงเมือง ช่องว่างในตาข่ายทำให้เถ้าตกลงมา ผู้ใช้เวทบนพื้นดึงเส้นใยลงมาได้ทีละเส้น</desc>
+          <g class="thr">
+            <path d="M0 52 Q90 40 180 52 T360 52 T540 52 T720 52"/>
+            <path d="M0 74 Q90 62 180 74 T360 74 T540 74 T720 74"/>
+            <path d="M0 96 Q90 84 180 96 T360 96 T540 96 T720 96"/>
+            <path d="M40 30 L120 118 M150 30 L230 118 M470 30 L550 118 M590 30 L670 118"/>
+            <path d="M120 30 L40 118 M230 30 L150 118 M550 30 L470 118 M670 30 L590 118"/>
+          </g>
+          <g class="thrup">
+            <path d="M300 96 Q330 120 360 150"/><path d="M330 74 Q345 110 360 150"/><path d="M360 52 L360 150"/><path d="M390 74 Q375 110 360 150"/><path d="M420 96 Q390 120 360 150"/>
+            <path d="M270 74 Q320 120 352 152"/><path d="M450 74 Q400 120 368 152"/>
+          </g>
+          <path class="gap" d="M270 40 L450 40 L450 104 L270 104 Z"/>
+          <g class="city"><path d="M318 152 Q360 144 402 152 L388 164 L376 182 L366 170 L356 188 L346 168 L332 164 Z"/><rect x="340" y="138" width="4" height="14"/><rect x="354" y="132" width="4" height="20"/><rect x="368" y="136" width="4" height="16"/><rect x="382" y="140" width="4" height="12"/></g>
+          <g class="ash"><circle cx="300" cy="214" r="1.6"/><circle cx="330" cy="236" r="1.4"/><circle cx="392" cy="222" r="1.6"/><circle cx="420" cy="248" r="1.3"/><circle cx="286" cy="252" r="1.4"/><circle cx="440" cy="210" r="1.5"/><circle cx="356" cy="258" r="1.3"/><circle cx="310" cy="196" r="1.2"/><circle cx="408" cy="194" r="1.2"/></g>
+          <path class="ground" d="M0 276 Q180 266 360 274 T720 270 L720 300 L0 300 Z"/>
+          <path class="pull" d="M600 96 Q610 180 622 254"/>
+          <g class="mage"><circle cx="626" cy="250" r="5"/><path d="M626 255 L626 272 M626 260 L620 252 M626 262 L634 268 M626 272 L620 282 M626 272 L632 282"/></g>
+          <g class="lbl">
+            <text x="16" y="24">เส้นใยบนฟ้า</text>
+            <text x="360" y="32" text-anchor="middle" class="warn">ช่องว่างที่เส้นใยขาด</text>
+            <text x="420" y="176">เซเรนธ์ดึงเส้นใยขึ้นไปพยุงเมือง</text>
+            <text x="190" y="232" class="warn">เถ้าตกลงมาตรงนี้</text>
+            <text x="600" y="262" text-anchor="end">ผู้ใช้เวทดึงได้ทีละเส้น</text>
+          </g>
+        </svg>
+      </figure>
+      <div class="mrules">
+        <div><b>เส้นใยคืออะไร</b><p>ท้องฟ้าของเวลมอร์ถูกถักไว้ด้วยเส้นใยที่มองไม่เห็น เส้นใยกักแสงแดดและความชื้นไว้ ฝนจึงตกตามฤดูและพืชจึงเติบโต เส้นใยงอกใหม่ได้เอง แต่ช้ามาก เส้นหนึ่งใช้เวลาราวร้อยปี</p></div>
+        <div><b>ใครใช้เวทได้</b><p>คนที่เกิดมาพร้อมพลังเวทจะรู้สึกถึงเส้นใยได้ พลังนี้ตื่นตอนอายุราว 11 ปี ก่อนเถ้าตกมีคนแบบนี้ราว 1 ใน 3 แต่ตอนนี้เส้นใยบางลงมาก จนเหลือแค่ราว 1 ใน 20 ที่ยังรู้สึกได้</p></div>
+        <div><b>ร่ายเวทคืออะไร</b><p>การร่ายเวทคือการดึงเส้นใยลงมา แล้วเปลี่ยนพลังในนั้นเป็นคาถา ทุกคาถาจึงกินเส้นใยบนฟ้าไปเล็กน้อย ในเกม มานาคือปริมาณเส้นใยที่ร่างกายของคุณดึงได้ในหนึ่งปี ยิ่งฝึกมาก ร่างกายยิ่งรับได้มาก</p></div>
+        <div><b>ทำไมฟ้ายังไม่หาย</b><p>เซเรนธ์ต้องดึงเส้นใยมาพยุงเมืองไว้ทุกวัน เส้นใยที่งอกใหม่เหนือแผ่นดินแทบทั้งหมดจึงถูกดึงขึ้นไปเลี้ยงเมืองลอย เมืองเดียวใช้เส้นใยมากกว่าผู้ใช้เวททุกคนข้างล่างรวมกัน แต่คนที่ถูกศาสนจักรจับไปเผาคือคนธรรมดาที่ใช้เวทโดยไม่ขึ้นทะเบียน</p></div>
+      </div>
+      <div class="schools">
+        <div class="school s-fire"><span class="sk">เวทไฟ · ใช้ปัญญา</span><p>ปล่อยพลังในเส้นใยออกมาเป็นความร้อนในทันที เป็นสำนักที่ทำลายได้มากที่สุด</p><span class="use">ใช้สู้ ไล่สัตว์ร้าย รับจ้างคุ้มกันกองคาราวาน</span></div>
+        <div class="school s-heal"><span class="sk">เวทรักษา · ใช้สติ</span><p>ใช้เส้นใยเย็บเนื้อเยื่อที่ฉีกขาดเข้าหากัน และขับไข้ออกจากร่างกาย</p><span class="use">ใช้รักษาตัวเองและคนอื่น กันโรคระบาด ชะลอความชรา</span></div>
+        <div class="school s-illusion"><span class="sk">เวทมายา · ใช้เสน่ห์</span><p>บิดแสงที่ส่องผ่านเส้นใย ให้คนอื่นเห็นสิ่งที่ไม่มีอยู่จริง</p><span class="use">ใช้ปลอมตัว ซ่อนตัวจากศาลศาสนา และเดินเข้าไปในความฝันของคนอื่น</span></div>
+        <div class="school s-thread"><span class="sk">เวทเส้นใย · ใช้ปัญญา</span><p>จับเส้นใยโดยตรง จะถักซ่อมฟ้าหรือดึงพลังทั้งเส้นมาเป็นของตัวเองก็ได้ เป็นวิชาเดียวกับที่ใช้ยกนคร</p><span class="use">เรียนได้หลังจากรู้ความจริงเรื่องเถ้าเท่านั้น</span></div>
+      </div>
+      <p class="muted small" style="max-width:62ch">ที่เรียน: เซเรนธ์มีหอเวทสูงแต่ต้องเสียค่าเรียน ออเรลิสสอนให้เฉพาะคนที่ขึ้นทะเบียนกับศาสนจักร ถ้าแอบฝึกจะเสี่ยงถูกเผา ส่วนแดนอื่นไม่มีครู ต้องฝึกเองอย่างช้าๆ</p>
+    </section>
+    <section class="stack" style="gap:16px">
+      <h3>บันทึกปีหลังเถ้า</h3>
+      <ol class="timeline">
+        <li><span class="yr">ก่อน ห.ถ.</span><b>ยุคเส้นใย</b><span>ทุกอาณาจักรดึงเส้นใยจากฟ้ามาใช้ สงครามเวทระหว่างอาณาจักรมนุษย์ทำให้ฟ้าบางลงเรื่อยๆ</span></li>
+        <li><span class="yr">ห.ถ. 0</span><b>การลงมติและการยกนคร</b><span>สภาผู้อาวุโสของเอลฟ์ลงมติเจ็ดต่อหกให้ใช้เส้นใยที่เหลือยกเมืองของตัวเองขึ้นฟ้า แทนที่จะใช้ซ่อมฟ้า คืนเดียวกันนั้นฟ้าก็ขาด</span></li>
+        <li><span class="yr">ห.ถ. 0–40</span><b>ฝนเถ้า</b><span>เถ้าโปรยลงมานานสี่สิบปี ที่ราบทองกรีฟกลายเป็นดินเถ้า ทรายตรงที่ความร้อนจากพิธีตกใส่หลอมเป็นแก้ว</span></li>
+        <li><span class="yr">ห.ถ. 41</span><b>สัญญากำแพง</b><span>ผู้รอดชีวิตที่มีเสบียงจ้างแรงงานสร้างกำแพงออเรลิส โดยสัญญาว่าจะให้คนงานเข้าไปอยู่ข้างในเมื่องานเสร็จ</span></li>
+        <li><span class="yr">ห.ถ. 77</span><b>ก่อตั้งศาลศาสนา</b><span>ศาสนจักรสุริยะประกาศว่าคนธรรมดาที่ใช้เวทคือต้นเหตุของเถ้า ผู้ใช้เวทที่ไม่ได้ขึ้นทะเบียนกับศาสนจักรจะต้องถูกเผา</span></li>
+        <li><span class="yr">ห.ถ. 120</span><b>สงครามกรีฟครั้งแรก</b><span>มนุษย์กับออร์คเริ่มแย่งชิงหุบเขาที่ยังเพาะปลูกได้ จนถึงวันนี้ก็รบกันมาแล้วสามครั้ง</span></li>
+        <li><span class="yr">ห.ถ. 203</span><b>ไข้เถ้าดำระบาดใหญ่</b><span>คนในมูลเวนล้มตายไปครึ่งหนึ่ง ขณะที่ออเรลิสปิดประตูชั้นในจนกว่าโรคจะซา</span></li>
+        <li><span class="yr">ห.ถ. 288</span><b>ปิดท่าเรือลอยฟ้า</b><span>เซเรนธ์ประกาศว่าจะไม่รับผู้ลี้ภัยจากแผ่นดินเบื้องล่างอีกต่อไป</span></li>
+        <li><span class="yr">ห.ถ. 312</span><b>ปีที่คุณถือกำเนิด</b><span>ทุกชีวิตในเกมเริ่มต้นในปีนี้ ส่วนลูกหลานของคุณจะเกิดในปีหลังจากนั้น และอาจได้เจอเหตุการณ์ด้านล่าง</span></li>
+        <li class="future"><span class="yr">ห.ถ. 318 · 341 · 360 · 395</span><b>สิ่งที่ยังมาไม่ถึง</b><span>สงคราม โรคระบาด ฝนเถ้าครั้งที่สอง และเรื่องที่จะเกิดกับเซเรนธ์ ถ้าคุณมีชีวิตอยู่ถึงตอนนั้นก็จะรู้เอง</span></li>
+      </ol>
+    </section>
+    <section class="rules">
+      <div><h4>เวทมนตร์ที่ใครใช้ได้บ้าง</h4><span>ในเซเรนธ์ พลังเวทคือเกียรติ ในออเรลิส พลังเวทคือของที่ศาสนจักรควบคุม ส่วนในแดนอื่น พลังเวทคือสิ่งที่ต้องหัดใช้เองโดยไม่มีใครสอน</span></div>
+      <div><h4>ความจริงที่ไม่มีใครพูด</h4><span>คนที่รู้ว่าเถ้ามาจากการยกนครมีแค่สภาผู้อาวุโสกับบันทึกหินของคนแคระ ถ้าตัวละครของคุณหาหลักฐานได้ คุณจะเลือกป่าวประกาศ ขายความเงียบ หรือเก็บไว้ให้ลูกหลานก็ได้</span></div>
+      <div><h4>ใครได้ ใครเสีย</h4><span>แร่จากครากมอร์กลายเป็นอาวุธในกรีฟ แก้วจากทะเลทรายกลายเป็นหน้าต่างในออเรลิส คนจากมูลเวนกลายเป็นคนรับจ้างทดลองยา และเงินจากทุกเส้นทางไหลไปรวมที่เดียวกัน</span></div>
+    </section>
+    <div class="tablewrap">
+      <table id="census">
+        <caption><h3>สำมะโนแห่งเวลมอร์</h3><span class="muted" style="font-size:.85rem">ตัวเลขได้จากการจำลองชีวิต <span id="nSim"></span> ชีวิตต่อแดน และคำนวณใหม่ทุกครั้งที่เปิดหน้านี้</span></caption>
+        <thead><tr><th>แดน</th><th>สัดส่วนทารก</th><th>อายุขัยเฉลี่ย</th><th>รอดถึง 5 ขวบ</th><th>รอดถึง 50 ปี</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="stack">
+      <h3>ตำนานที่สะสมได้ <span class="muted" id="legCount" style="font-family:var(--ui);font-size:.9rem"></span></h3>
+      <div class="legends" id="legAll"></div>
+    </div>
+    <div id="pastWrap" class="stack" hidden>
+      <h3>ชีวิตที่ผ่านมาของคุณ</h3>
+      <div class="past" id="past"></div>
+    </div>
+    <div class="row"><button class="linkbtn" id="tutReset">เปิดบทสอนอีกครั้ง</button></div>
+  </section>
+
+  <!-- BIRTH -->
+  <section id="birth" class="stack" hidden style="gap:22px">
+    <span class="eyebrow" id="bEyebrow">กำลังสุ่มที่เกิด</span>
+    <div class="wheel" id="wheel" aria-live="polite">…</div>
+    <div class="card" id="birthCard" hidden>
+      <h2 id="bName"></h2>
+      <div class="chips" id="bChips"></div>
+      <p id="bBlurb" class="muted"></p>
+      <p id="bOdds" style="font-family:var(--ui);font-size:.92rem"></p>
+      <div class="attrline" id="bAttrs"></div>
+      <div id="bDyn" class="stack" style="gap:6px" hidden></div>
+      <div class="row"><button class="btn" id="liveBtn">เริ่มใช้ชีวิต</button></div>
+    </div>
+  </section>
+
+  <!-- LIFE -->
+  <section id="life" class="stack" hidden style="gap:20px">
+    <div class="head">
+      <div class="stack" style="gap:2px">
+        <h2 id="lName"></h2>
+        <span class="muted" id="lMeta" style="font-family:var(--ui);font-size:.9rem"></span>
+      </div>
+      <div class="age" id="lAge">0<small>ปี</small></div>
+    </div>
+    <div class="yearbar"><div class="ytrack"><span id="yfill"></span><i style="left:25%"></i><i style="left:50%"></i><i style="left:75%"></i></div><span id="yseason"></span></div>
+    <div class="tip" id="tip" hidden role="dialog" aria-labelledby="tipT">
+      <span class="eyebrow">บทสอน</span>
+      <b id="tipT"></b>
+      <div id="tipB" class="stack" style="gap:6px"></div>
+      <div class="row"><button class="btn small" id="tipOk">เข้าใจแล้ว</button><button class="linkbtn" id="tipOff">ปิดบทสอนทั้งหมด</button></div>
+    </div>
+    <div id="choice" class="choice" hidden>
+      <p id="cPrompt" style="font-size:1.08rem"></p>
+      <div class="opts" id="cOpts"></div>
+    </div>
+    <div id="combat" class="combat" hidden>
+      <div class="cbhead"><b id="cbFoe"></b><span class="muted" id="cbRound"></span></div>
+      <div class="hpbars">
+        <div class="hp"><span>คุณ</span><span class="hptrack"><span id="cbMeBar"></span></span><b id="cbMe"></b></div>
+        <div class="hp foe"><span id="cbFoeName"></span><span class="hptrack"><span id="cbFoeBar"></span></span><b id="cbFoeHp"></b></div>
+      </div>
+      <ol class="cblog" id="cbLog"></ol>
+      <div class="cbacts" id="cbActs"></div>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" id="tabLife" aria-selected="true">ชีวิต</button>
+      <button role="tab" id="tabChar" aria-selected="false">ตัวละคร <span class="badge" id="ptsBadge" hidden></span></button>
+    </div>
+    <div id="paneLife" class="stack" style="gap:20px">
+    <div class="stats" id="stats"></div>
+    <div class="spellbook" id="spellbook" hidden></div>
+    <div class="grid" id="grid" aria-label="แต่ละช่องคือหนึ่งปีของชีวิต สีสว่างคือปีที่มีความสุข"></div>
+    <div class="logbox" id="logbox"><ol class="log" id="log"></ol></div>
+    </div>
+    <div id="paneChar" class="stack" hidden style="gap:20px"></div>
+    <div class="panel" id="focusPanel">
+      <span class="eyebrow">ช่วงนี้ให้ความสำคัญกับอะไร</span>
+      <div class="seg" id="focus"></div>
+      <div class="chips" id="areaChips" hidden></div>
+      <span class="muted" id="focusHint" style="font-family:var(--ui);font-size:.85rem"></span>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <div class="seg" id="speed"></div>
+      <div class="row"><button class="btn ghost" id="skipBtn">ข้ามไปสิ้นปี</button><button class="btn ghost" id="pauseBtn">หยุดชั่วคราว</button></div>
+    </div>
+    <details class="minimap" id="miniWrap"><summary>แผนที่ · ตอนนี้คุณอยู่ที่ไหน</summary><canvas class="map" id="lifeMap" role="img" aria-label="แผนที่แสดงตำแหน่งของคุณ"></canvas></details>
+  </section>
+
+  <!-- END -->
+  <section id="end" class="stack" hidden style="gap:26px">
+    <div class="stack" style="gap:8px">
+      <span class="eyebrow" id="eEyebrow"></span>
+      <p class="epitaph" id="eTitle"></p>
+      <p class="cause" id="eCause"></p>
+    </div>
+    <div class="grid big" id="eGrid"></div>
+    <canvas class="map" id="endMap" role="img" aria-label="แผนที่เส้นทางชีวิต"></canvas>
+    <div class="stack" id="eErasWrap" style="gap:8px"><span class="eyebrow">เหตุการณ์ใหญ่ที่เกิดขึ้นในช่วงชีวิตคุณ</span><div class="eras" id="eEras"></div></div>
+    <p id="eSummary" style="max-width:62ch"></p>
+    <div class="stack" id="eLegWrap">
+      <h3>ตำนานที่ได้จากชีวิตนี้</h3>
+      <div class="legends" id="eLeg"></div>
+    </div>
+    <div class="card" id="sibCard" hidden>
+      <h3>ครอบครัวนี้ยังไม่จบ</h3>
+      <p class="muted" id="sibText"></p>
+      <div class="row"><button class="btn" id="sibBtn">เล่นต่อเป็นน้อง</button></div>
+    </div>
+    <div class="stack" id="dynWrap" hidden style="gap:8px"><h3>ตระกูลของคุณ</h3><div id="dynList"></div></div>
+    <div class="card" id="heirCard" hidden>
+      <h3 id="heirTitle"></h3>
+      <p class="muted" id="heirText"></p>
+      <div class="row"><button class="btn" id="heirBtn">เล่นต่อเป็นลูก</button></div>
+    </div>
+    <hr>
+    <div class="stack">
+      <h3>อีกสามคนที่เกิดในเวลาเดียวกับคุณ</h3>
+      <div class="others" id="others"></div>
+    </div>
+    <div class="tablewrap">
+      <table id="census2">
+        <caption><h3>ถ้าคุณเกิดที่อื่น</h3></caption>
+        <thead><tr><th>แดน</th><th>อายุขัยเฉลี่ย</th><th>รอดถึง 15 ปี</th><th>รอดถึง 50 ปี</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="muted" style="max-width:62ch">คุณไม่ได้เลือกที่เกิด สามคนข้างบนก็เหมือนกัน สิ่งที่คุณเลือกมีผลจริง แต่ตัวเลือกที่คุณมีถูกกำหนดไว้ตั้งแต่วันที่เกิดแล้ว</p>
+    <div class="row"><button class="btn" id="againBtn">ถือกำเนิดอีกครั้ง</button><button class="btn ghost" id="homeBtn">กลับหน้าแรก</button></div>
+  </section>
+</main>
+
+<script>
+/*ENGINE*/
+</script>
+<script>
+/*MAP*/
+</script>
+<script>
+const $ = id => document.getElementById(id);
+const N_SIM = 300;
+let WS = null;
+// compute one realm per tick so the page stays responsive while the census is built
+function computeWS(done) {
+  const out = {}; let i = 0;
+  const step = () => { const r = REALMS[i++]; out[r.id] = statsFor(r, N_SIM); $('startBtn').textContent = `กำลังคำนวณสำมะโน ${i}/${REALMS.length}`; if (i < REALMS.length) setTimeout(step, 0); else { WS = out; done(); } };
+  setTimeout(step, 30);
+}
+const pct = x => Math.round(x * 100) + '%';
+const yrs = x => Math.round(x);
+const FOCUS_L = { work: 'ทำงาน', ...Object.fromEntries(AREAS.map(a => ['a:' + a.g, a.n])), love: 'ครอบครัว', rest: 'พักฟื้น' };
+const FOCUS_H = { work: 'ทรัพย์เพิ่มขึ้น แต่ร่างกายจะทรุดลง', train: 'เลือกทักษะที่จะฝึกด้านล่าง', love: 'ใช้เวลากับครอบครัวและคนที่รัก ความสุขเพิ่มขึ้น', rest: 'สุขภาพดีขึ้น แต่ใช้เงินเก็บ' };
+const curArea = () => P.focus === 'train' && P.trainSkill ? SBY[P.trainSkill].g : (P.focus === 'train' ? P.trainArea : null);
+function renderFocus() {
+  const area = curArea();
+  for (const b of $('focus').children) {
+    const f = b.dataset.f, isA = f.startsWith('a:'), g = f.slice(2), A = isA && AREAS.find(x => x.g === g);
+    b.hidden = isA && A.magic && !(P.gifted && P.age >= 11);
+    b.disabled = P.age < 7;
+    b.setAttribute('aria-pressed', isA ? area === g : P.focus === f);
+  }
+  const box = $('areaChips');
+  if (!area || P.age < 7) { box.hidden = true; return; }
+  box.hidden = false;
+  box.innerHTML = areaSkills(P, area).map(sk => { const r = rank(P, sk.id), ac = access(P, sk.id), poor = ac.ok && ac.cost > P.wealth, ok = ac.ok && r < MAX_RANK && !poor;
+    return `<button data-sk="${sk.id}" aria-pressed="${P.trainSkill === sk.id}" ${ok ? '' : 'disabled'}><b>${sk.n} ${'●'.repeat(r)}${'○'.repeat(MAX_RANK - r)}</b><span>${r >= MAX_RANK ? 'ฝึกถึงขั้นสูงสุดแล้ว' : poor ? `ค่าเรียน ${ac.cost} แต่ทรัพย์ไม่พอ` : ac.ok ? ac.label : ac.why}</span></button>`; }).join('');
+}
+function focusHint() {
+  if (P.age < 7) return 'เด็กเล็กยังเลือกเองไม่ได้';
+  if (P.focus === 'work') {
+    if (P.age < 14) return P.cls === 4 ? 'เด็กทาสถูกใช้งานโดยไม่ได้อะไรเลย' : P.cls >= 2 ? 'ช่วยงานผู้ใหญ่ ได้ค่าแรงครึ่งเดียว และได้ฝึกฝีมือไปด้วย อายุ 14 จึงมีอาชีพเป็นของตัวเอง' : 'ช่วยงานในกิจการของครอบครัว อายุ 14 จึงมีอาชีพเป็นของตัวเอง';
+    ensureCareer(P); const c = CBY[P.career];
+    return c.id === 'slave' ? 'ทาส · ทำงานทั้งปีโดยไม่ได้ค่าแรง' : `${careerTitle(P)} · รายได้ราว ${Math.round(careerPay(P, c))} ค่าครองชีพราว ${Math.round(upkeep(P) - rent(P))} ต่อปี${c.phys >= 1.2 ? ' · งานหนัก ร่างกายทรุดเร็ว' : ''}${careerSkill(P) ? ` · ได้ฝึก${SBY[careerSkill(P)].n}ไปด้วย` : ''}`;
+  }
+  if (P.focus === 'train') return P.trainSkill ? `กำลังฝึก${SBY[P.trainSkill].n}` : 'ด้านนี้ยังไม่มีทักษะที่คุณเรียนได้';
+  return FOCUS_H[P.focus];
+}
+let P = null, timer = null, paused = false, speed = 1, pending = null, others = [];
+
+function show(id) { for (const s of ['intro', 'birth', 'life', 'end']) $(s).hidden = s !== id; window.scrollTo(0, 0); }
+
+function censusRows(tb, mark, cols) {
+  if (!WS) { tb.innerHTML = `<tr><td colspan="5" class="muted">กำลังคำนวณ…</td></tr>`; return; }
+  const max = Math.max(...REALMS.map(r => WS[r.id].mean));
+  tb.innerHTML = REALMS.map(r => {
+    const s = WS[r.id];
+    const cells = cols === 'intro'
+      ? `<td>${r.birth}%</td><td><span class="bar" style="width:${Math.max(2, s.mean / max * 60)}px"></span>${yrs(s.mean)} ปี</td><td>${pct(s.s5)}</td><td>${pct(s.s50)}</td>`
+      : `<td><span class="bar" style="width:${Math.max(2, s.mean / max * 60)}px"></span>${yrs(s.mean)} ปี</td><td>${pct(s.s15)}</td><td>${pct(s.s50)}</td>`;
+    return `<tr class="${r.id === mark ? 'me' : ''}"><td>${r.name}</td>${cells}</tr>`;
+  }).join('');
+}
+function loadPast() { try { return JSON.parse(localStorage.getItem('ash-lives') || '[]'); } catch (e) { return []; } }
+function savePast(e) { try { const a = loadPast(); a.unshift(e); localStorage.setItem('ash-lives', JSON.stringify(a.slice(0, 12))); } catch (er) { } }
+function loadLeg() { try { return JSON.parse(localStorage.getItem('ash-legends') || '[]'); } catch (e) { return []; } }
+function saveLeg(ids) { try { localStorage.setItem('ash-legends', JSON.stringify(ids)); } catch (e) { } }
+function legendHTML(l, state) {
+  if (state === 'locked') return `<div class="legend locked"><b>???</b><span>${l.d}</span></div>`;
+  return `<div class="legend ${state === 'fresh' ? 'fresh' : ''}">${state === 'fresh' ? '<span class="tag">ใหม่</span>' : ''}<b>${l.n}</b><span class="muted">${l.d}</span></div>`;
+}
+function renderIntro() {
+  const got = loadLeg();
+  $('legCount').textContent = `${got.length}/${LEGENDS.length}`;
+  $('legAll').innerHTML = LEGENDS.map(l => legendHTML(l, got.includes(l.id) ? 'got' : 'locked')).join('');
+  $('nSim').textContent = N_SIM.toLocaleString('th-TH');
+  censusRows(document.querySelector('#census tbody'), null, 'intro');
+  const past = loadPast();
+  $('pastWrap').hidden = !past.length;
+  $('past').innerHTML = past.map(x => `<span>${x.name} · ${x.cls}ใน${x.realm} · จากไปเมื่ออายุ ${x.age} ปี · ${x.cause}</span>`).join('');
+}
+
+// ---------- save ----------
+const SAVE_KEY = 'ash-save-v1';
+const toJSON = o => JSON.stringify(o, (k, v) => (v && typeof v === 'object' && v.classW) ? { __r: v.id } : v);
+const fromJSON = t => JSON.parse(t, (k, v) => (v && typeof v === 'object' && v.__r) ? RBY[v.__r] : v);
+function saveGame(stage) {
+  try {
+    const items = [...$('log').children].slice(0, 150).map(li => li.outerHTML).join('');
+    localStorage.setItem(SAVE_KEY, toJSON({ stage, P, others, speed, log: items, ts: Date.now() }));
+  } catch (e) { }
+}
+function loadSave() { try { const t = localStorage.getItem(SAVE_KEY); return t ? fromJSON(t) : null; } catch (e) { return null; } }
+function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { } }
+function setSpeed(i) { speed = i; for (const x of $('speed').querySelectorAll('button')) x.setAttribute('aria-pressed', +x.dataset.s === i); }
+function renderResume() {
+  const S = loadSave();
+  $('resumeCard').hidden = !S;
+  $('startBtn').textContent = S ? 'เริ่มชีวิตใหม่' : 'ถือกำเนิด';
+  if (!S) return;
+  const p = S.P;
+  $('resumeName').textContent = S.stage === 'end' ? `${p.name} · จบชีวิตแล้ว` : `${p.name} · อายุ ${p.age} ปี`;
+  $('resumeMeta').textContent = `${CLASSES[p.cls]} · ${p.race} · ${p.realm.name}${p.gen > 1 ? ` · รุ่นที่ ${p.gen}` : ''} · บันทึกไว้เมื่อ ${new Date(S.ts).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' })}`;
+  $('resumeBtn').textContent = S.stage === 'end' ? 'ดูหน้าจบ และเล่นต่อเป็นลูกหลาน' : 'เล่นต่อ';
+  $('discardBtn').textContent = 'ทิ้งชีวิตนี้'; $('discardBtn').dataset.arm = '';
+}
+function resumeGame() {
+  const S = loadSave(); if (!S || !WS) return;
+  P = S.P; ensureSkills(P); P.pendingFight = null; $('combat').hidden = true; others = S.others || []; setSpeed(S.speed ?? 0);
+  pending = null; paused = false; $('pauseBtn').textContent = 'หยุดชั่วคราว'; $('choice').hidden = true;
+  if (S.stage === 'end') { endLife(); return; }
+  show('life'); setTab('life');
+  $('log').innerHTML = S.log || '';
+  $('grid').innerHTML = ''; P.years.forEach(y => $('grid').appendChild(gridCell(y)));
+  renderLife(); beginYear();
+}
+
+// ---------- tutorial ----------
+const TUT_KEY = 'ash-tut';
+let tipOpen = false; const tipQ = [];
+function tutState() { try { return JSON.parse(localStorage.getItem(TUT_KEY) || '{"seen":[],"off":false}'); } catch (e) { return { seen: [], off: false }; } }
+function tutSave(t) { try { localStorage.setItem(TUT_KEY, JSON.stringify(t)); } catch (e) { } }
+const TIPS = {
+  start: ['ชีวิตแรกของคุณ', ['หนึ่งปีในเกมยาว 60 วินาที แบ่งเป็น 4 ฤดู แถบด้านบนบอกว่าปีนี้ผ่านไปแค่ไหน ถ้าอยากให้เร็วขึ้น เลือก 20 หรือ 5 วินาทีได้ที่ด้านล่าง หรือกด "ข้ามไปสิ้นปี"', 'แถบทั้งสี่คือสุขภาพ ความสุข ความรู้ และทรัพย์ ถ้าสุขภาพต่ำ คุณจะป่วยและตายง่ายขึ้น', 'ตอนนี้คุณยังเป็นทารกและทำอะไรเองไม่ได้ ระบบอื่นจะค่อยๆ เปิดเมื่อคุณโตขึ้น เกมบันทึกให้อัตโนมัติทุกต้นปี ปิดหน้าไปแล้วกลับมาเล่นต่อได้']],
+  choice: ['ถึงเวลาตัดสินใจ', ['เวลาจะหยุดจนกว่าคุณจะเลือก ใต้แต่ละตัวเลือกบอกผลที่น่าจะเกิด เช่น "ทรัพย์ ↑" หรือ "เสี่ยงตาย 10%"', 'ถ้ามีป้าย "ทอย" แปลว่าผลขึ้นกับลูกเต๋า d20 บวกค่าสถานะและทักษะของคุณ ป้ายนั้นบอกโอกาสสำเร็จไว้ด้วย ยิ่งฝึกมาก โอกาสยิ่งสูง']],
+  age7: ['อายุ 7 ขวบ: เลือกทางชีวิตได้แล้ว', ['ปุ่ม "ช่วงนี้ให้ความสำคัญกับอะไร" ด้านล่างเปิดแล้ว ทำงานได้ทรัพย์ ครอบครัวได้ความสุข พักฟื้นได้สุขภาพ', 'ปุ่มการต่อสู้ ความรู้ สังคม งานฝีมือ และเอาตัวรอด คือการฝึกทั้งปีในด้านนั้น กดแล้วจะมีทักษะในด้านนั้นให้เลือกอีกที บางทักษะเรียนไม่ได้ถ้าเกิดผิดที่ เช่น ทาสถูกห้ามเรียนหนังสือ ป้ายใต้ทักษะจะบอกเหตุผล', 'ทักษะที่ฝึกไว้จะเปิดทางไปสู่อาชีพตอนอายุ 14']],
+  lvl: ['เลเวลอัป', ['คุณได้แต้มค่าสถานะ เปิดแท็บ "ตัวละคร" แล้วกด "เพิ่ม +1" ที่ค่าที่อยากเพิ่ม ค่าสถานะที่สูงทำให้ทอยลูกเต๋าผ่านง่ายขึ้น']],
+  fate: ['ความตายมาเยือน', ['นี่คือฉากเฉียดตาย ถ้าเลือกผิดหรือทอยไม่ผ่าน ชีวิตนี้จะจบลง', 'ทางรอดที่มีให้เลือกขึ้นกับฐานะ ทักษะ และค่าสถานะของคุณ คนที่มีเงินจะมีทางเลือกมากกว่าเสมอ']],
+  fight: ['การต่อสู้', ['เวลาจะหยุดระหว่างต่อสู้ ทุกยกให้เลือกหนึ่งท่า ตัวเลข "โดน ~%" คือโอกาสที่ท่านั้นจะโดนศัตรู', 'ถ้าพลังชีวิตหมด คุณอาจตายหรือบาดเจ็บสาหัส หนีหรือยอมจ่ายได้ถ้าสู้ไม่ไหว อาวุธ เกราะ และทักษะที่ฝึกมาทำให้ชนะง่ายขึ้นมาก ซื้ออาวุธได้ในแท็บตัวละครตั้งแต่อายุ 12']],
+  gear: ['อาวุธและเกราะ', ['อายุ 12 แล้ว คุณเลือกอาวุธประจำตัวและซื้อเกราะได้ในแท็บตัวละคร แต่ละอาวุธมีท่าพิเศษไม่เหมือนกัน', 'คนที่มีเงินจะซื้ออาวุธดีๆ ได้ตั้งแต่ยังหนุ่มสาว ส่วนคนจนต้องเริ่มจากของทำเอง ทาสถูกห้ามพกอาวุธ']],
+  career: ['อายุ 14: อาชีพแรก', ['ตอนนี้คุณมีอาชีพแรกตามฐานะที่เกิดมา ดูได้ในแท็บ "ตัวละคร" หัวข้ออาชีพ เมื่อเลือก "ทำงาน" รายได้จะมาจากอาชีพนี้', 'ถ้าฝึกทักษะถึงขั้นที่ต้องการ คุณเปลี่ยนไปทำอาชีพอื่นได้ ทำงานไปเรื่อยๆ จะได้เลื่อนขั้น แต่บางตำแหน่งสูงสุดสงวนไว้ให้คนที่มีฐานะ', 'ไพร่และทาสเปลี่ยนอาชีพเองไม่ได้ ต้องหาทางพ้นจากนายก่อน']],
+  magic: ['พลังเวทตื่นขึ้น', ['คุณเป็นหนึ่งในราว 20 คนที่ยังรู้สึกถึงเส้นใยบนฟ้าได้ กดปุ่ม "เวทมนตร์" ด้านล่าง แล้วฝึกสำนักเวทให้ถึงขั้น 1', 'เมื่อได้คาถาแรก ตำราเวทจะปรากฏในหน้าชีวิต ร่ายคาถาได้ปีละครั้งต่อคาถา โดยใช้มานาซึ่งเต็มใหม่ทุกต้นปี ถ้าอยู่ในออเรลิสและไม่ได้ขึ้นทะเบียนกับศาสนจักร ระวังมีคนเห็น']],
+};
+function tip(id) {
+  const t = tutState(); if (t.off || t.seen.includes(id) || tipQ.includes(id)) return;
+  tipQ.push(id); if (!tipOpen) nextTip();
+}
+function nextTip() {
+  const id = tipQ.shift(); if (!id) { tipOpen = false; $('tip').hidden = true; return; }
+  tipOpen = true;
+  const [title, body] = TIPS[id];
+  $('tipT').textContent = title;
+  $('tipB').innerHTML = body.map(x => `<p>${esc(x)}</p>`).join('');
+  $('tip').hidden = false; $('tip').dataset.id = id;
+  $('tipOk').focus({ preventScroll: true });
+}
+$('tipOk').onclick = () => { const t = tutState(); t.seen.push($('tip').dataset.id); tutSave(t); nextTip(); };
+$('tipOff').onclick = () => { const t = tutState(); t.off = true; tutSave(t); tipQ.length = 0; nextTip(); };
+$('tutReset').onclick = () => { tutSave({ seen: [], off: false }); $('tutReset').textContent = 'เปิดบทสอนแล้ว จะเริ่มในชีวิตถัดไป'; };
+function checkTips() {
+  if (!P || !P.alive) return;
+  if (P.age >= 7) tip('age7');
+  if (P.age >= 7 && P.pts > 0) tip('lvl');
+  if (P.gifted && P.age >= 11) tip('magic');
+  if (P.age >= 12 && P.cls < 4) tip('gear');
+  if (P.age >= 14) tip('career');
+}
+
+// ---------- birth ----------
+function startBirth(parent, sib) {
+  show('birth');
+  $('birthCard').hidden = true;
+  clearSave();
+  P = sib ? makeSibling(sib) : parent ? makePerson(null, parent) : makePerson();
+  $('bEyebrow').textContent = sib ? 'น้องคนถัดไป' : parent ? 'รุ่นถัดไปของตระกูล' : 'กำลังสุ่มที่เกิด';
+  setTab('life');
+  others = [0, 1, 2].map(() => simLife());
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let n = 0; const total = (reduce || parent || sib) ? 1 : 18;
+  const spin = () => {
+    n++;
+    $('wheel').textContent = n < total ? pick(REALMS).name : P.realm.name;
+    if (n < total) setTimeout(spin, 40 + n * n * .9); else revealBirth();
+  };
+  spin();
+}
+function revealBirth() {
+  const r = P.realm;
+  $('bName').textContent = `${P.sex === 'ญ' ? 'เด็กหญิง' : 'เด็กชาย'}${P.name}`;
+  const chips = [r.name, P.race, 'ลูกของ' + CLASS_OF[P.cls]];
+  if (P.gen > 1) chips.push(`ทายาทรุ่นที่ ${P.gen} ของ${P.ancestor}`);
+  if (P.sibling) chips.push('น้องของคนที่จากไปก่อน');
+  if (P.gifted) chips.push('ในตัวคุณมีบางอย่างแปลกไป');
+  $('bChips').innerHTML = chips.map((c, i) => `<span class="chip ${i === 2 && P.cls >= 3 ? 'hot' : ''}">${c}</span>`).join('')
+    + P.traits.map(t => `<span class="chip trait">${TBY[t].n}<em>${TBY[t].d}</em></span>`).join('');
+  $('bBlurb').textContent = r.blurb;
+  $('bAttrs').innerHTML = attrLine(P);
+  const s = WS[r.id];
+  $('bOdds').innerHTML = `ทารกทุก 100 คนในเวลมอร์ เกิดที่นี่ ${r.birth} คน ทารกที่นี่รอดถึงอายุ 5 ขวบ ${pct(s.s5)} และมีอายุขัยเฉลี่ย <b>${yrs(s.mean)} ปี</b>`;
+  const line = P.dyn.line;
+  $('bDyn').hidden = !line.length;
+  if (line.length) $('bDyn').innerHTML = `<span class="eyebrow">ตระกูลของ${P.dyn.founder}</span>` + dynHTML(line) + `<span class="muted">เป้าหมายของตระกูล: ${goalText()}</span>`;
+  $('birthCard').hidden = false;
+  $('liveBtn').focus();
+}
+
+// ---------- life ----------
+const STATS = [['health', 'สุขภาพ'], ['happy', 'ความสุข'], ['know', 'ความรู้'], ['wealth', 'ทรัพย์']];
+function renderLife() {
+  $('lName').textContent = P.name;
+  $('lMeta').textContent = `${CLASSES[P.cls]}${P.career && !['slave', 'serf'].includes(P.career) ? ` · ${careerTitle(P)}` : ''} · ${P.race} · ${P.realm.name} · ${P.traits.map(t => TBY[t].n).join(' ')}${P.gen > 1 ? ` · รุ่นที่ ${P.gen}` : ''}${P.kin.spouse ? ` · คู่ชีวิต ${P.kin.spouse}` : ''}${P.kidNames.length ? ` · ลูก ${P.kidNames.length} คน` : ''}`;
+  $('lAge').innerHTML = `${P.age}<small>ปี · ห.ถ. ${yearOf(P)}</small>`;
+  if ($('miniWrap').open) VMAP.draw($('lifeMap'), { marks: [{ id: P.realm.id, text: 'คุณอยู่ที่นี่' }], path: P.places.map(x => x.id) });
+  $('stats').innerHTML = STATS.map(([k, l]) => { const v = Math.round(P[k]); return `<div class="stat"><span>${l}</span><span class="track"><span class="fill ${v < 25 ? 'low' : ''}" style="width:${v}%"></span></span><b>${v}</b></div>`; }).join('');
+  renderFocus();
+  $('focusHint').textContent = focusHint();
+  $('ptsBadge').hidden = !P.pts; $('ptsBadge').textContent = P.pts;
+  const kid = P.age < 7;
+  $('focusPanel').hidden = kid; $('tabs').hidden = kid;
+  if (kid && !$('paneChar').hidden) setTab('life');
+  renderSpells();
+  if (!$('paneChar').hidden) renderChar();
+}
+// ---------- spellbook ----------
+function renderSpells() {
+  const mx = manaMax(P), list = knownSpells(P);
+  $('spellbook').hidden = !mx;
+  if (!mx) return;
+  const next = SPELLS.filter(sp => list.includes(sp) && rank(P, sp.s) < sp.r);
+  const ready = list.filter(sp => rank(P, sp.s) >= sp.r);
+  let h = `<div class="sbhead"><span class="eyebrow">ตำราเวท</span><span class="mana"><span class="bar2"><span style="width:${Math.round((P.mana || 0) / mx * 100)}%"></span></span><b>มานา ${P.mana || 0}/${mx}</b></span></div>`;
+  h += `<p class="muted small">มานาคือปริมาณเส้นใยที่ร่างกายของคุณดึงได้ในปีนี้ เต็มใหม่ทุกต้นปี · ทุกคาถากินเส้นใยบนฟ้าไปเล็กน้อย</p>`;
+  if (!ready.length) h += `<p class="muted small">คุณยังไม่รู้คาถาใดเลย ฝึกสำนักเวทในแท็บตัวละครให้ถึงขั้น 1 เพื่อปลดล็อกคาถาแรก</p>`;
+  h += `<div class="spells">` + ready.map(sp => {
+    const st = spellState(P, sp), dis = !st.ok || !!pending;
+    return `<button class="spell s-${sp.s}" data-cast="${sp.id}" ${dis ? 'disabled' : ''}><span class="sh"><b>${sp.n}</b><span class="cost">${sp.cost} มานา</span></span><span class="sd">${sp.d}${sp.cd ? ` · ใช้ได้ทุก ${sp.cd} ปี` : ''}</span>${!st.ok ? `<span class="sw">${st.why}</span>` : ''}</button>`;
+  }).join('') + `</div>`;
+  if (next.length) h += `<p class="muted small">คาถาถัดไป: ${next.slice(0, 3).map(sp => `${sp.n} (${SBY[sp.s].n}ขั้น ${sp.r})`).join(' · ')}</p>`;
+  $('spellbook').innerHTML = h;
+}
+$('spellbook').addEventListener('click', e => {
+  const b = e.target.closest('[data-cast]'); if (!b || b.disabled || pending) return;
+  const lines = castSpell(P, b.dataset.cast); if (!lines) return;
+  lines.forEach((t, i) => appendYear(t, i === 0 ? 'cast' : 'event'));
+  flushRolls(); flushUps(); renderLife();
+});
+
+// ---------- character sheet ----------
+function attrLine(p) { return ATTRS.map(a => `<span>${a.n} <b>${p.attrs[a.id]}</b> (${fmtMod(am(p, a.id))})</span>`).join(''); }
+const fmtMod = m => (m >= 0 ? '+' : '−') + Math.abs(m);
+function renderChar() {
+  const need = xpNeed(P.lv);
+  let h = `<div class="lvl"><b>เลเวล ${P.lv}</b><div class="bar2"><span style="width:${Math.round(P.xp / need * 100)}%"></span></div><span class="muted small">XP ${Math.round(P.xp)}/${need}</span></div>`;
+  h += `<div class="stack" style="gap:8px"><span class="eyebrow">ค่าสถานะ${P.pts ? ` · มีแต้มให้แจก ${P.pts} แต้ม` : ''}</span><div class="attrs">` + ATTRS.map(a => `<div class="attr"><div class="top"><span class="an">${a.n}</span><span class="am">${fmtMod(am(P, a.id))}</span></div><b>${P.attrs[a.id]}</b><span class="muted" style="font-size:.74rem;line-height:1.4">${a.d}</span>${P.pts && P.attrs[a.id] < 20 ? `<button data-up="${a.id}">เพิ่ม +1</button>` : ''}</div>`).join('') + `</div></div>`;
+  if (P.age >= 12) {
+    const g = gear(P), why = canArm(P);
+    h += `<div class="stack" style="gap:8px"><span class="eyebrow">อาวุธและเกราะ</span>`;
+    h += `<p class="muted small">ค่าต่อสู้ตอนนี้: โจมตี ${fmtMod(pAtk(P))} · ป้องกัน ${pAC(P)} · พลังชีวิตในการต่อสู้ ${hpMax(P)}</p>`;
+    if (why) h += `<p class="muted small">${why}</p>`;
+    else {
+      h += `<div class="weps">` + Object.entries(WEAPONS).map(([id, W]) => { const r = W.skill ? rank(P, W.skill) : 0, t = id === 'none' ? 0 : (g.own[id] || 0); return `<button data-wep="${id}" aria-pressed="${g.w === id}"><b>${W.n}</b><span>${W.skill ? `ฝีมือขั้น ${r} · ` : ''}${id === 'none' ? 'ไม่ต้องใช้อาวุธ' : TIER[t]}${W.sp ? ` · ท่าพิเศษ: ${W.sp.n}` : ''}</span></button>`; }).join('') + `</div>`;
+      h += `<div class="shop">` + shopList(P).map(x => `<button data-buy="${x.id}" ${x.why ? 'disabled' : ''}><b>ซื้อ${x.n}</b><span>ทรัพย์ ${x.cost}${x.why ? ` · ${x.why}` : ''}</span></button>`).join('') + `</div>`;
+      h += `<p class="muted small">ดาบ หอก และขวานใช้พลัง ธนูกับมีดสั้นใช้ว่องไว ฝึกอาวุธได้ในหมวดการต่อสู้ด้านล่าง ${has(P, 'kragmor') ? '· ที่ครากมอร์อาวุธถูกกว่าที่อื่น' : ''}${rank(P, 'smith') >= 2 ? ' · คุณตีอาวุธเองได้ ราคาจึงลดลงครึ่งหนึ่ง' : ''}</p>`;
+    }
+    h += `</div>`;
+  }
+  if (P.age >= 14) {
+    ensureCareer(P); const c = CBY[P.career];
+    h += `<div class="stack" style="gap:8px"><span class="eyebrow">อาชีพ</span>`;
+    h += `<p style="margin:0"><b>${careerTitle(P)}</b> <span class="muted small">· ${c.d}${c.id === 'slave' ? '' : ` · รายได้ราว ${Math.round(careerPay(P, c))} ต่อปีเมื่อเลือก "ทำงาน"`}</span></p>`;
+    if (P.cls < 4) { const net = rent(P) - upkeep(P); h += `<p class="muted small" style="margin:0">ค่ากิน ค่าเช่า และภาษีราว ${Math.round(upkeep(P))} ต่อปี ต้องจ่ายทุกปีไม่ว่าจะทำอะไร${rent(P) ? ` · รายได้จากที่ดินและกิจการของตระกูล ${Math.round(rent(P))} ต่อปี` : ''}${net < 0 && P.wealth < -net * 2 ? ' · <b>เงินเก็บใกล้หมด ถ้าไม่ทำงานจะอดอยาก</b>' : ''}</p>`; }
+    if (!c.base && (P.careerRank || 0) < 2) { const m = careerMissing(P, c, (P.careerRank || 0) + 1), need = 3 + (P.careerRank || 0) * 3 - (P.careerYears || 0);
+      h += `<p class="muted small" style="margin:0">เลื่อนเป็น${c.n[(P.careerRank || 0) + 1]}: ${need > 0 ? `ทำงานอีก ${need} ปี` : 'ทำงานครบปีแล้ว'}${m.length ? ` · ต้องมี ${m.join(', ')}` : ''}${(P.careerRank || 0) === 1 && c.topCls != null && P.cls > c.topCls ? ' · ตำแหน่งนี้มักสงวนไว้ให้คนที่มีฐานะสูงกว่าคุณ' : ''}</p>`; }
+    if (P.cls >= 3) h += `<p class="muted small" style="margin:0">${careerMissing(P, CBY.scribe)[0]}</p><button class="btn ghost" data-bond ${P.flags.bondTried === P.age || pending ? 'disabled' : ''} style="align-self:flex-start">${P.flags.bondTried === P.age ? 'ปีนี้ลองไปแล้ว' : 'หาทางเป็นอิสระ'}</button>`;
+    else {
+      const list = CAREERS.filter(x => !x.base && x.id !== P.career && (!x.req || !x.req.skills || !Object.keys(x.req.skills.all || {}).concat(x.req.skills.any || []).some(s => SBY[s].magic) || P.gifted));
+      list.sort((a, b) => careerMissing(P, a).length - careerMissing(P, b).length);
+      h += `<div class="careers">` + list.map(x => { const m = careerMissing(P, x); return `<div class="career"><b>${x.n[0]}</b><span class="muted small">${x.area} · ${x.d} · ทางก้าวหน้า: ${x.n[1]} → ${x.n[2]}</span><span class="why">${m.length ? 'ยังขาด: ' + m.join(' · ') : `รายได้เริ่มต้นราว ${Math.round(x.pay[0] * (P.realm.wealth / 50 + .4) * .9 * incomeMod(P))} ต่อปี${x.cost ? ` · ใช้ทุน ${x.cost}` : ''}${fee(P, x) ? ` · ค่าเข้ากิลด์ ${fee(P, x)}` : ''}`}</span>${m.length ? '' : `<button class="btn ghost" data-career="${x.id}" ${canSwitch(P) ? '' : 'disabled'}>${canSwitch(P) ? 'เปลี่ยนมาทำอาชีพนี้' : 'ปีนี้เปลี่ยนอาชีพไปแล้ว'}</button>`}</div>`; }).join('') + `</div>`;
+      h += `<p class="muted small" style="margin:0">เปลี่ยนอาชีพแล้วจะเริ่มจากขั้นแรกใหม่ · ทำงานทุกปีจะได้ฝึกทักษะหลักของอาชีพไปด้วยช้าๆ แบบลูกมือ · อายุเกิน 30 จะหาคนรับเป็นลูกมือยาก</p>`;
+    }
+    h += `</div>`;
+  }
+  h += `<div class="stack" style="gap:8px"><span class="eyebrow">ทักษะ · กด &quot;ฝึกปีนี้&quot; เพื่อใช้เวลาทั้งปีฝึกทักษะนั้น</span><div class="skills">`;
+  const groups = [...new Set(SKILLS.map(x => x.g))];
+  for (const g of groups) {
+    const list = SKILLS.filter(x => x.g === g);
+    if (g === 'เวทมนตร์' && !P.gifted) { h += `<div class="sgroup"><h4>${g}</h4><p class="muted small">คุณไม่ได้เกิดมาพร้อมพลังเวท</p></div>`; continue; }
+    if (g === 'เวทมนตร์') h += `<p class="muted small" style="margin-top:4px">เวทมนตร์คือการดึงเส้นใยบนฟ้าลงมาใช้ ทุกสำนักมี 4 คาถา ปลดล็อกที่ขั้น 1, 2, 3 และ 5 · มานาคือปริมาณเส้นใยที่ร่างกายดึงได้ต่อปี ยิ่งฝึกเวทมาก มานายิ่งเพิ่ม · ร่ายคาถาได้จากตำราเวทในแท็บชีวิต</p>`;
+    h += `<div class="sgroup"><h4>${g}</h4>` + list.map(sk => {
+      const r = rank(P, sk.id), ac = access(P, sk.id), on = P.focus === 'train' && P.trainSkill === sk.id;
+      const pips = '●'.repeat(r) + '○'.repeat(MAX_RANK - r);
+      const lab = ac.ok ? `${ac.label}${ac.cost ? '' : ''}` : ac.why;
+      return `<div class="skill"><div class="sn"><b>${sk.n}</b>${sk.md ? `<span class="muted" style="font-size:.76rem;flex-basis:100%">${sk.md}</span>` : ''}<span class="pips" aria-label="ขั้น ${r} จาก ${MAX_RANK}">${pips}</span><span class="muted" style="font-size:.76rem">ใช้${ABY[sk.a].n}</span></div><div class="bar2"><span style="width:${Math.round(P.skills[sk.id].x)}%"></span></div><span class="sa ${ac.ok ? (ac.danger ? 'danger' : '') : 'no'}">${lab}</span><button data-train="${sk.id}" aria-pressed="${on}" ${ac.ok && r < MAX_RANK && P.age >= 7 ? '' : 'disabled'}>${on ? 'กำลังฝึก' : 'ฝึกปีนี้'}</button></div>`;
+    }).join('') + `</div>`;
+  }
+  h += `</div></div>`;
+  $('paneChar').innerHTML = h;
+}
+$('paneChar').addEventListener('click', e => {
+  const up = e.target.closest('[data-up]'); if (up) { spendPoint(P, up.dataset.up); renderLife(); renderChar(); return; }
+  const wp = e.target.closest('[data-wep]'); if (wp) { setWeapon(P, wp.dataset.wep); renderLife(); renderChar(); return; }
+  const by = e.target.closest('[data-buy]'); if (by && !by.disabled) { buy(P, by.dataset.buy); renderLife(); renderChar(); return; }
+  const bd = e.target.closest('[data-bond]'); if (bd && !bd.disabled && !pending && P.alive) { P.flags.bondTried = P.age; pending = bondChoice(P); pending.before = snap(); setTab('life'); renderChoice(); return; }
+  const cr = e.target.closest('[data-career]'); if (cr && !cr.disabled) { takeCareer(P, cr.dataset.career); P.focus = 'work'; renderLife(); renderChar(); return; }
+  const tr = e.target.closest('[data-train]'); if (tr && !tr.disabled) { P.trainSkill = tr.dataset.train; P.focus = 'train'; renderLife(); renderChar(); }
+});
+function setTab(t) {
+  $('tabLife').setAttribute('aria-selected', t === 'life'); $('tabChar').setAttribute('aria-selected', t === 'char');
+  $('paneLife').hidden = t !== 'life'; $('paneChar').hidden = t !== 'char';
+  if (t === 'char') renderChar();
+}
+$('tabLife').onclick = () => setTab('life');
+$('tabChar').onclick = () => setTab('char');
+function gridCell(y, last) {
+  const i = document.createElement('i');
+  if (last) i.className = 'end';
+  else { const a = .15 + y.h / 100 * .85; i.style.background = `rgba(192,154,92,${a.toFixed(2)})`; }
+  return i;
+}
+const SNAP_K = [['health', 'สุขภาพ'], ['happy', 'ความสุข'], ['know', 'ความรู้'], ['wealth', 'ทรัพย์']];
+const snap = () => ({ health: P.health, happy: P.happy, know: P.know, wealth: P.wealth });
+function deltaHTML(a) {
+  if (!a) return '';
+  const out = SNAP_K.map(([k, l]) => { const d = Math.round(P[k] - a[k]); return d ? `<span class="d ${d > 0 ? 'up' : 'down'}">${l} ${d > 0 ? '+' : '−'}${Math.abs(d)}</span>` : ''; }).join('');
+  return out ? `<div class="deltas">${out}</div>` : '';
+}
+// one entry per year: lines[] may include '§' world lines
+function addLog(age, lines, cls = '', before = null) {
+  if (typeof lines === 'string') lines = [lines];
+  const li = document.createElement('li'); li.className = 'new ' + cls;
+  const body = lines.map(t => t.startsWith('§') ? `<p class="world">${esc(t.slice(1))}</p>` : `<p>${esc(t)}</p>`).join('');
+  li.innerHTML = `<span class="y">${age === 0 ? 'แรกเกิด' : age + ' ปี'}</span><div class="body">${body}${deltaHTML(before)}</div>`;
+  $('log').prepend(li);
+  $('logbox').scrollTop = 0;
+}
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function reflection(age) {
+  const r = P.born, s = WS[r.id];
+  const key = { 5: 's5', 15: 's15', 30: 's30', 50: 's50' }[age]; if (!key) return false;
+  const sorted = [...REALMS].sort((a, b) => WS[a.id][key] - WS[b.id][key]);
+  const lo = sorted[0], hi = sorted[sorted.length - 1];
+  addLog(age, `ทารกที่เกิดใน${r.short}รุ่นเดียวกับคุณ มีชีวิตมาถึงวันนี้ ${pct(s[key])} (ถ้าเกิดที่${hi.short}จะเป็น ${pct(WS[hi.id][key])} ถ้าเกิดที่${lo.short}จะเหลือ ${pct(WS[lo.id][key])})`, 'reflect');
+  return true;
+}
+// ---------- year clock: one year = YEAR_MS[speed], split into 4 seasons ----------
+const YEAR_MS = [60000, 20000, 5000];
+const SEASONS = ['ฤดูหว่าน', 'ฤดูแดด', 'ฤดูลมเถ้า', 'ฤดูหนาว'];
+const SEASON_ANY = [
+  ['ฤดูหว่านมาถึง อากาศเริ่มอุ่นขึ้น', 'ต้นไม้แตกใบอ่อนหลังผ่านหน้าหนาว', 'นกอพยพบินกลับมาจากทางใต้', 'ทุกบ้านเริ่มซ่อมหลังคาที่พังเพราะหิมะ', 'ตลาดคึกคักขึ้นหลังผ่านหน้าหนาว'],
+  ['แดดแรงจนแทบไม่มีใครออกจากบ้านตอนเที่ยง', 'ฝนตกหนักติดกันหลายวัน', 'กลางคืนร้อนอบอ้าวจนนอนไม่หลับ', 'บ่อน้ำในละแวกเริ่มแห้ง ต้องเดินไปตักน้ำไกลขึ้น', 'แมลงชุมจนต้องสุมควันไล่ทุกเย็น'],
+  ['ลมเถ้าพัดมาจากทิศเหนือ ทุกคนต้องเอาผ้าปิดจมูก', 'ท้องฟ้าเป็นสีเทาไปทั้งฤดู', 'เถ้าบางๆ เกาะอยู่บนหลังคาทุกเช้า', 'ใบไม้ร่วงหมดก่อนเวลา เพราะเถ้าเกาะจนใบดำ', 'คนแก่ในละแวกไอกันทั้งฤดู'],
+  ['อากาศหนาวจัด ทุกบ้านต้องจุดไฟทั้งคืน', 'หิมะสีเทาโปรยลงมาบางๆ', 'กลางคืนยาวขึ้น ผู้คนเข้านอนกันเร็ว', 'ทุกบ้านนั่งล้อมเตาไฟเล่านิทานกันจนดึก', 'น้ำในถังแข็งเป็นน้ำแข็งตั้งแต่ก่อนรุ่งสาง'],
+];
+const SEASON_REALM = {
+  aurelis: ['ขบวนแห่ประจำฤดูของศาสนจักรเดินผ่านถนนหลัก', 'ระฆังหอสุริยะตีบอกเวลาทุกชั่วโมงเหมือนทุกวัน', 'ขุนนางนั่งรถม้าผ่านถนนหลัก ผู้คนต้องหลบเข้าข้างทาง', 'พ่อค้าจากทุกแดนมาตั้งแผงในตลาดใหญ่'],
+  undercity: ['น้ำทิ้งจากเมืองชั้นในไหลล้นลงมาที่ใต้กำแพง', 'ยามเดินตรวจตราใต้กำแพงถี่ขึ้นกว่าเดิม', 'เสียงดนตรีจากงานเลี้ยงในเมืองชั้นในลอยข้ามกำแพงมาทั้งคืน', 'คนต่อแถวรอรับข้าวแจกจากวิหารยาวไปถึงปลายซอย'],
+  serenth: ['เหนือเมฆ อากาศยังใสเหมือนทุกฤดู', 'ดอกไม้ในสวนลอยฟ้าบานตามฤดูกาลที่นักเวทกำหนดไว้', 'นกขาวฝูงใหญ่บินวนรอบหอคอยตลอดเช้า', 'สภาผู้อาวุโสประชุมเงียบๆ ไม่มีใครรู้ว่าเรื่องอะไร'],
+  kragmor: ['ใต้ภูเขาไม่มีฤดูกาล มีแต่เสียงค้อนกับแสงคบเพลิง', 'หิมะบนยอดเขาปิดทางขึ้นลงอยู่หลายสัปดาห์', 'เตาหลอมทำงานทั้งวันทั้งคืน จนอุโมงค์อุ่นไปหมด', 'กองคาราวานจากออเรลิสมารับแร่ที่ปากถ้ำ'],
+  grieve: ['ได้ยินเสียงกลองศึกแว่วมาจากหุบเขาทางตะวันออก', 'ทุ่งเถ้าปลิวฝุ่นสีดำทุกครั้งที่ลมพัด', 'ทหารลาดตระเวนผ่านหมู่บ้านทุกเจ็ดวัน', 'หุบเขาที่ปลูกพืชได้เริ่มเขียวขึ้นอีกครั้ง'],
+  mulvane: ['หมอกพิษลอยต่ำอยู่เหนือหนองตลอดเช้า', 'ยุงในหนองชุมจนทุกบ้านต้องสุมควันไล่', 'น้ำในหนองลดลงจนเห็นซากเรือเก่าโผล่ขึ้นมา', 'กบร้องดังทั้งคืนจนนอนไม่หลับ'],
+  dunes: ['กลางวันร้อนจัด แต่กลางคืนหนาวจนฟันกระทบกัน', 'เนินทรายแก้วสะท้อนแสงจนแสบตา', 'ทั้งเผ่าเดินทางตอนกลางคืนเพื่อหลบแดด', 'ลมพัดทรายแก้วกระทบกันเป็นเสียงเหมือนกระดิ่ง'],
+};
+let clockT = null, progress = 0, slotDone = 0, choiceSlot = 2, yearLi = null, yearBefore = null, lastTs = 0;
+function seasonLine(i) {
+  const pool = [...SEASON_ANY[i], ...(SEASON_REALM[P.realm.id] || [])];
+  return pick(pool);
+}
+function curBody() { return yearLi.querySelector('.body'); }
+function appendYear(text, cls = '') {
+  const p = document.createElement('p'); if (cls) p.className = cls;
+  p.textContent = text; curBody().insertBefore(p, curBody().querySelector('.deltas')); $('logbox').scrollTop = 0;
+}
+function beginYear() {
+  saveGame('life');
+  checkTips();
+  P.mana = manaMax(P); P.cast = {}; P.yearMod = {};
+  yearBefore = snap(); progress = 0; slotDone = 0;
+  choiceSlot = 1 + Math.floor(Math.random() * 3);
+  yearLi = document.createElement('li'); yearLi.className = 'new current';
+  yearLi.innerHTML = `<span class="y">${P.age === 0 ? 'ขวบแรก' : P.age + ' ปี'}</span><div class="body"></div>`;
+  $('log').prepend(yearLi); $('logbox').scrollTop = 0;
+  renderClock();
+}
+// slots 0..3 = the four seasons; returns false when the clock must stop (a choice is waiting)
+function runSlot(i) {
+  if (i === 0) appendYear(`${SEASONS[0]} · ${seasonLine(0)}`);
+  if (i === 0 && P.age === 6 && P.realm.tale) appendYear(P.realm.tale, 'tale');
+  if (i === 1) appendYear(`${SEASONS[1]} · ${flavor(P)}`);
+  if ((i === 1 || i === 3) && P.age > 0) { const t = randomEvent(P); if (t) appendYear(t, 'event'); }
+  if (i === 2) appendYear(`${SEASONS[2]} · ${seasonLine(2)}`);
+  if (i === 3) appendYear(`${SEASONS[3]} · ${seasonLine(3)}`);
+  if (i === choiceSlot && P.age > 0) {
+    const ch = checkChoice(P);
+    if (ch) { pending = ch; pending.before = snap(); renderChoice(); return false; }
+  }
+  return true;
+}
+function renderClock() {
+  const pct = Math.min(1, progress) * 100;
+  $('yfill').style.width = pct + '%';
+  const si = Math.min(3, Math.floor(progress * 4));
+  $('yseason').textContent = `${SEASONS[si]} · ${P.age === 0 ? 'ขวบปีแรกของชีวิต' : `ปีที่ ${P.age + 1} ของชีวิต`}`;
+}
+function frame(ts) {
+  const dt = lastTs ? Math.min(ts - lastTs, 500) : 0; lastTs = ts;
+  if (P && P.alive && !paused && !pending && !tipOpen && !$('life').hidden) {
+    progress += dt / YEAR_MS[speed];
+    while (slotDone < 4 && progress >= slotDone / 4) { const i = slotDone++; if (!runSlot(i)) break; }
+    if (!pending && progress >= 1) endYear();
+    renderClock();
+  }
+  clockT = requestAnimationFrame(frame);
+}
+function skipYear() {
+  if (pending || tipOpen || !P.alive) return;
+  while (slotDone < 4) { const i = slotDone++; if (!runSlot(i)) { progress = Math.max(progress, slotDone / 4); return; } }
+  progress = 1; endYear();
+}
+function endYear() {
+  const age = P.age;
+  const res = finishYear(P, true);
+  res.lines.forEach(t => t.startsWith('§') ? appendYear(t.slice(1), 'world') : appendYear(t, 'event'));
+  flushUps();
+  if (res.fate) { pending = res.fate; pending.before = snap(); renderLife(); renderChoice(); return; }
+  closeYear();
+  if (!P.alive) { $('grid').appendChild(gridCell(null, true)); addLog(age, P.cause, 'death'); renderLife(); setTimeout(endLife, 1800); return; }
+  nextYear();
+}
+function closeYear() {
+  yearLi.classList.remove('current');
+  const d = deltaHTML(yearBefore); if (d) curBody().insertAdjacentHTML('beforeend', d);
+}
+function nextYear() {
+  $('grid').appendChild(gridCell(P.years[P.years.length - 1]));
+  reflection(P.age);
+  renderLife(); beginYear();
+}
+function renderChoice() {
+  tip(pending.fatal ? 'fate' : 'choice');
+  $('choice').hidden = false;
+  $('choice').classList.toggle('fatal', !!pending.fatal);
+  $('cPrompt').textContent = pending.prompt;
+  $('cOpts').innerHTML = '';
+  pending.options.forEach(o => {
+    const b = document.createElement('button');
+    const ok = !o.need || o.need(P);
+    b.disabled = !ok;
+    b.textContent = o.label;
+    if (!ok) { const s = document.createElement('small'); s.textContent = o.needText; b.appendChild(s); }
+    else {
+      const prv = previewOption(P, o, 60); let pv = previewText(prv);
+      const ck = chkOf(o);
+      if (ck) { const bonus = (ck[0] ? am(P, ck[0]) : 0) + (ck[1] ? rank(P, ck[1]) * 2 : 0); pv = `<span class="dice">ทอย ${[ck[0] ? ABY[ck[0]].n : '', ck[1] ? SKL(ck[1]) : ''].filter(Boolean).join('+')} ${fmtMod(bonus)}${prv && prv.chance != null ? ` · สำเร็จ ~${Math.round(prv.chance * 100)}%` : ''}</span>` + pv; }
+      if (pv) { const s = document.createElement('span'); s.className = 'pv'; s.innerHTML = pv; b.appendChild(s); }
+    }
+    b.onclick = () => choose(o);
+    $('cOpts').appendChild(b);
+  });
+  $('cOpts').querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
+}
+// ---------- combat ----------
+function openCombat(wasFate) {
+  pending = { fight: true, wasFate };
+  tip('fight');
+  $('combat').hidden = false; $('cbLog').innerHTML = '';
+  renderCombat();
+  $('combat').scrollIntoView({ block: 'nearest' });
+}
+function renderCombat() {
+  const F = P.pendingFight; if (!F) return;
+  $('cbFoe').textContent = `ต่อสู้กับ${F.foe.n}`;
+  $('cbRound').textContent = `ยกที่ ${F.round} · ${WEAPONS[gear(P).w].n}${wtier(P) ? TIER[wtier(P)] : ''}${gear(P).armor ? ' · ' + ARMOR[gear(P).armor] : ''}${gear(P).shield ? ' · โล่' : ''}`;
+  const me = Math.max(0, F.php), fo = Math.max(0, F.fhp);
+  $('cbMe').textContent = `${me}/${F.max}`; $('cbMeBar').style.width = (me / F.max * 100) + '%';
+  $('cbFoeName').textContent = F.foe.n; $('cbFoeHp').textContent = `${fo}/${F.foe.hp}`; $('cbFoeBar').style.width = (fo / F.foe.hp * 100) + '%';
+  $('cbActs').innerHTML = F.over ? '' : fightActions(P, F).map(a => `<button data-act="${a.id}" ${a.off ? 'disabled' : ''}><b>${a.n}</b><span>${a.d}${a.ch != null ? ` · โดน ~${Math.round(a.ch * 100)}%` : ''}${a.off ? ` · ${a.off}` : ''}</span></button>`).join('');
+}
+$('cbActs').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  const F = P.pendingFight; if (!F || F.over) return;
+  const lines = fightAct(P, F, b.dataset.act);
+  const li = document.createElement('li'); li.textContent = lines.join(' · '); $('cbLog').prepend(li);
+  renderCombat();
+  if (F.over) setTimeout(closeCombat, 900);
+});
+function closeCombat() {
+  const res = P.pendingFight.result;
+  const label = { win: 'ชนะ', lose: 'แพ้', fled: 'หนีพ้น', paid: 'ยอมจ่าย' }[res] || '';
+  const foe = P.pendingFight.foe.n;
+  const t = finishFight(P);
+  appendYear(`ผลการต่อสู้กับ${foe}: ${label}`, 'roll ' + (res === 'win' || res === 'fled' ? 'ok' : 'bad'));
+  if (t) appendYear(t, 'outcome');
+  flushRolls(); flushUps();
+  $('combat').hidden = true;
+  const wasFate = pending && pending.wasFate; pending = null;
+  afterChoice(wasFate);
+}
+const SKL = s => s ? SBY[s].n : '';
+function checkLine(c) {
+  const what = [c.a ? ABY[c.a].n : '', c.s ? SKL(c.s) : ''].filter(Boolean).join('+');
+  const tot = c.r + c.bonus;
+  const note = c.r === 20 ? ' · ได้ 20 สำเร็จแน่นอน' : c.r === 1 ? ' · ได้ 1 ล้มเหลวแน่นอน' : '';
+  return `ทอย d20 (${what}) ได้ ${c.r} ${c.bonus >= 0 ? '+' : '−'} ${Math.abs(c.bonus)} = ${tot} · ต้องการ ${c.dc}${note} · ${c.ok ? 'สำเร็จ' : 'ล้มเหลว'}`;
+}
+function flushRolls() { (P.checks || []).forEach(c => appendYear(checkLine(c), 'roll ' + (c.ok ? 'ok' : 'bad'))); P.checks = []; }
+function flushUps() { (P.ups || []).forEach(lv => appendYear(`เลเวลอัปเป็นเลเวล ${lv} · ได้แต้มค่าสถานะ 1 แต้ม ไปแจกได้ที่แท็บตัวละคร`, 'lvl')); P.ups = []; }
+function previewText(pr) {
+  if (!pr) return '';
+  const out = [];
+  if (pr.win != null) out.push(`<span class="dice">ต่อสู้ · ชนะ ~${Math.round(pr.win * 100)}%</span>`);
+  if (pr.dead >= .01) out.push(`<span class="risk">เสี่ยงตาย ${Math.max(1, Math.round(pr.dead * 100))}%</span>`);
+  SNAP_K.forEach(([k, l]) => { const v = pr.avg[k]; if (Math.abs(v) >= 1.5) out.push(`<span class="${v > 0 ? 'up' : 'down'}">${l} ${v > 0 ? (v >= 10 ? '↑↑' : '↑') : (v <= -10 ? '↓↓' : '↓')}</span>`); });
+  if (pr.down >= .1) out.push(`<span class="down">ฐานะอาจตกต่ำลง</span>`);
+  if (pr.up >= .1) out.push(`<span class="up">ฐานะอาจดีขึ้น</span>`);
+  if (pr.moved >= .1) out.push(`<span>อาจได้ย้ายแดน</span>`);
+  if (pr.late >= .1) out.push(`<span class="risk">อันตรายในปีต่อๆ ไป</span>`);
+  return out.length ? out.join('') : '<span>ไม่มีผลชัดเจนในตอนนี้</span>';
+}
+function choose(o) {
+  const wasFate = pending.fatal;
+  const t = resolveChoice(P, o);
+  pending = null; $('choice').hidden = true;
+  appendYear(`คุณเลือก: ${o.label.replace(/^\[[^\]]+\] /, '')}`, 'picked');
+  appendYear(t, 'outcome');
+  flushRolls(); flushUps();
+  if (P.pendingFight) { openCombat(wasFate); return; }
+  afterChoice(wasFate);
+}
+function afterChoice(wasFate) {
+  if (!P.alive) {
+    if (!wasFate) P.years.push({ h: P.happy });
+    closeYear(); $('grid').appendChild(gridCell(null, true)); addLog(P.age, P.cause, 'death'); renderLife(); setTimeout(endLife, 1800); return;
+  }
+  renderLife();
+  if (wasFate) { closeYear(); afterFate(P); nextYear(); }
+}
+function startLife() {
+  show('life');
+  $('log').innerHTML = ''; $('grid').innerHTML = ''; $('choice').hidden = true;
+  pending = null; paused = false; $('pauseBtn').textContent = 'หยุดชั่วคราว'; $('combat').hidden = true;
+  addLog(0, `คุณลืมตาดูโลกที่${P.realm.name} ในฐานะลูกของ${CLASS_OF[P.cls]} แม่ชื่อ${P.kin.mother} พ่อชื่อ${P.kin.father}${P.gen > 1 ? ` เป็นทายาทรุ่นที่ ${P.gen} ของ${P.ancestor}` : ''}`, 'reflect');
+  renderLife(); beginYear(); tip('start');
+}
+
+// ---------- dynasty ----------
+function dynHTML(line) { return `<ol class="dyn">${line.map(g => `<li><b>${g.name}</b><span>${g.cls} · ${g.realm}</span><span class="muted">${g.age} ปี</span></li>`).join('')}</ol>`; }
+function goalText() {
+  const f = P.dyn.founderCls;
+  if (f >= 3) return 'ไต่จากไพร่หรือทาสขึ้นไปเป็นพ่อค้าหรือขุนนาง';
+  if (f === 2) return 'ให้ลูกหลานได้เป็นพ่อค้าหรือขุนนาง หรือได้อยู่ในเมืองชั้นใน';
+  return 'รักษาฐานะของตระกูลไว้ให้ได้ทุกรุ่น';
+}
+
+// ---------- end ----------
+function endLife() {
+  const r = P.born, s = WS[r.id];
+  $('eEyebrow').textContent = `${P.sex === 'ญ' ? 'หญิง' : 'ชาย'} · ${P.race} · ลูกของ${CLASS_OF[P.bornCls]} · เกิดที่${r.name}`;
+  $('eTitle').textContent = P.age === 0 ? `${P.name} มีชีวิตอยู่ไม่ถึงหนึ่งขวบ` : `${P.name} มีชีวิตอยู่ ${P.age} ปี`;
+  $('eCause').textContent = P.cause;
+  const path = P.places.map(x => x.id);
+  VMAP.draw($('endMap'), { path, marks: path.length > 1 ? [{ id: path[0], text: 'เกิด' }, { id: P.realm.id, text: 'จากไป', color: '#a3443b' }] : [{ id: P.realm.id, text: 'เกิดและจากไปที่นี่', color: '#a3443b' }] });
+  const eras = erasLived(P);
+  $('eErasWrap').hidden = !eras.length;
+  $('eEras').innerHTML = eras.map(e => `<span class="chip">ห.ถ. ${e.from} ${e.n}</span>`).join('');
+  $('eGrid').innerHTML = ''; P.years.forEach((y, i) => $('eGrid').appendChild(gridCell(y, i === P.years.length - 1)));
+  const diff = P.age - s.mean;
+  let sum = `คนที่เกิดใน${r.short}มีอายุขัยเฉลี่ย ${yrs(s.mean)} ปี คุณมีชีวิต${diff >= 0 ? 'ยืนยาวกว่า' : 'สั้นกว่า'}ค่าเฉลี่ย ${Math.abs(yrs(diff))} ปี`;
+  if (P.realm !== P.born) sum += ` ภายหลังคุณย้ายไปอยู่ที่${P.realm.name}`;
+  if (P.career && P.age >= 14) sum += ` อาชีพสุดท้ายของคุณคือ${careerTitle(P)}`;
+  if (P.cls !== P.bornCls) sum += ` และฐานะของคุณเปลี่ยนจาก${CLASSES[P.bornCls]}เป็น${CLASSES[P.cls]}`;
+  if (P.lostKids) sum += ` ตลอดชีวิตคุณสูญเสียลูกไป ${P.lostKids} คน`;
+  const top = SKILLS.filter(x => rank(P, x.id) > 0).sort((a, b) => rank(P, b.id) - rank(P, a.id)).slice(0, 3);
+  sum += ` · จบชีวิตที่เลเวล ${P.lv}${top.length ? ` ทักษะเด่นคือ ${top.map(x => `${x.n} ขั้น ${rank(P, x.id)}`).join(', ')}` : ' โดยไม่ได้ฝึกทักษะใดเลย'}`;
+  $('eSummary').textContent = sum;
+  $('others').innerHTML = others.map(o => `<div class="other"><div><b style="font-weight:600">${o.name}</b> <span class="muted">· ${o.race} · ลูกของ${CLASS_OF[o.bornCls]}ใน${o.born.name}</span><div class="muted" style="font-size:.92rem">${o.cause}</div></div><div class="a">${o.age} ปี</div></div>`).join('');
+  censusRows(document.querySelector('#census2 tbody'), r.id, 'end');
+  const first = !P.ended;
+  if (first) {
+    savePast({ name: P.name, realm: r.short, cls: CLASSES[P.bornCls], age: P.age, cause: P.cause });
+    P.dyn.line.push({ name: P.name, cls: CLASSES[P.cls], realm: P.realm.short, age: P.age });
+  }
+  $('dynWrap').hidden = P.dyn.line.length < 2;
+  $('dynList').innerHTML = dynHTML(P.dyn.line);
+  const earned = legendsFor(P, WS), had = loadLeg();
+  if (first) P.freshLeg = earned.filter(l => !had.includes(l.id)).map(l => l.id);
+  $('eLegWrap').hidden = !earned.length;
+  $('eLeg').innerHTML = earned.map(l => legendHTML(l, (P.freshLeg || []).includes(l.id) ? 'fresh' : 'got')).join('');
+  saveLeg([...new Set([...had, ...earned.map(l => l.id)])]);
+  const heir = P.kidNames[0];
+  $('heirCard').hidden = !heir;
+  $('sibCard').hidden = !!heir || P.age >= 12;
+  $('sibText').textContent = `สองปีต่อมา ${P.kin.mother}มีลูกอีกคน ทารกที่เกิดใน${r.short} ${pct(1 - s.s5)} ไม่ได้มีชีวิตถึงอายุห้าขวบ เรื่องของครอบครัวนี้ยังไม่จบ`;
+  if (heir) {
+    P.heirName = heir;
+    $('heirTitle').textContent = `${heir} ลูกของคุณยังมีชีวิตอยู่`;
+    $('heirText').textContent = `ลูกของคุณจะเติบโตที่${P.realm.name}ในฐานะ${CLASSES[P.cls]} และได้รับมรดกส่วนหนึ่งจากทรัพย์ที่คุณทิ้งไว้ (${Math.round(P.wealth)}) ทุกสิ่งที่คุณสร้างหรือเสียไปจะส่งต่อถึงรุ่นถัดไป`;
+  }
+  P.ended = true;
+  saveGame('end');
+  show('end');
+}
+
+// ---------- wiring ----------
+$('focus').innerHTML = Object.keys(FOCUS_L).map(k => `<button data-f="${k}" aria-pressed="false">${FOCUS_L[k]}</button>`).join('');
+$('focus').onclick = e => { const b = e.target.closest('button'); if (!b || b.disabled) return; const f = b.dataset.f;
+  if (f.startsWith('a:')) { const g = f.slice(2); P.focus = 'train'; P.trainArea = g; if (!P.trainSkill || SBY[P.trainSkill].g !== g || !access(P, P.trainSkill).ok || rank(P, P.trainSkill) >= MAX_RANK) P.trainSkill = bestInArea(P, g); }
+  else P.focus = f;
+  renderLife(); };
+$('areaChips').onclick = e => { const b = e.target.closest('[data-sk]'); if (!b || b.disabled) return; P.trainSkill = b.dataset.sk; P.focus = 'train'; renderLife(); };
+$('speed').innerHTML = '<span class="seglabel">1 ปี =</span>' + ['60 วิ', '20 วิ', '5 วิ'].map((l, i) => `<button data-s="${i}" aria-pressed="${i === 0}">${l}</button>`).join('');
+speed = 0;
+$('speed').onclick = e => { const b = e.target.closest('button'); if (!b) return; setSpeed(+b.dataset.s); };
+$('pauseBtn').onclick = () => { paused = !paused; $('pauseBtn').textContent = paused ? 'เล่นต่อ' : 'หยุดชั่วคราว'; };
+$('skipBtn').onclick = skipYear;
+clockT = requestAnimationFrame(frame);
+$('startBtn').onclick = () => { if (WS) startBirth(); };
+$('startBtn').disabled = true;
+computeWS(() => { $('startBtn').disabled = false; renderIntro(); renderResume(); });
+$('heirBtn').onclick = () => startBirth(P);
+$('sibBtn').onclick = () => startBirth(null, P);
+$('liveBtn').onclick = startLife;
+$('resumeBtn').onclick = resumeGame;
+$('discardBtn').onclick = () => {
+  if ($('discardBtn').dataset.arm) { clearSave(); renderResume(); return; }
+  $('discardBtn').dataset.arm = '1'; $('discardBtn').textContent = 'กดอีกครั้งเพื่อยืนยัน';
+};
+$('againBtn').onclick = () => startBirth();
+$('homeBtn').onclick = () => { renderIntro(); renderResume(); show('intro'); };
+function realmInfo(id) {
+  const r = REALMS.find(x => x.id === id); if (!r || !WS) return;
+  const s = WS[r.id];
+  $('realmInfo').innerHTML = `<h3>${r.name}</h3><div class="facts"><span>ผู้อยู่อาศัย <b>${r.race.filter((v, i, a) => a.indexOf(v) === i).join(' · ')}</b></span><span>สัดส่วนทารกที่เกิดที่นี่ <b>${r.birth}%</b></span><span>อายุขัยเฉลี่ย <b>${Math.round(s.mean)} ปี</b></span><span>รอดถึง 5 ขวบ <b>${pct(s.s5)}</b></span></div><p>${r.blurb}</p><p class="muted">${r.lore}</p>`;
+}
+let hoverId = null;
+function drawWorld() { VMAP.draw($('worldMap'), { hl: hoverId }); }
+function pickAt(ev) { const [x, y] = VMAP.toMap($('worldMap'), ev); const id = VMAP.hit(x, y); if (id && id !== hoverId) { hoverId = id; drawWorld(); realmInfo(id); } }
+$('worldMap').addEventListener('pointermove', e => { if (e.pointerType === 'mouse') pickAt(e); });
+$('worldMap').addEventListener('click', pickAt);
+$('miniWrap').addEventListener('toggle', () => { if ($('miniWrap').open && P) renderLife(); });
+renderIntro();
+const fontsReady = (document.fonts && document.fonts.ready) ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 1500))]) : Promise.resolve();
+fontsReady.then(() => { try { VMAP.build(); drawWorld(); } catch (e) { console.error(e); } });
+</script>
