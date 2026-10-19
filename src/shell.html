@@ -369,6 +369,14 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
 .map{display:block;width:100%;height:auto;aspect-ratio:800/520;max-width:100%;background:#16181f;border:1px solid var(--line);cursor:pointer;touch-action:manipulation}
 .realminfo{background:var(--surface);border:1px solid var(--line);padding:18px 20px;display:flex;flex-direction:column;gap:8px;min-height:9.5em}
 .realminfo h3{color:var(--brass)}
+.rcard{display:flex;flex-direction:column;gap:10px;font-size:.93rem}
+.rcard ul{margin:4px 0 0;padding-left:1.1em}
+.rcard li{margin:2px 0}
+.rmark{border-left:3px solid var(--brass);padding:6px 0 6px 12px;background:var(--surface)}
+.rrow{display:grid;grid-template-columns:7.5em 1fr;gap:10px;align-items:start}
+.rrow>b{font-family:var(--ui);font-size:.82rem;color:var(--muted);font-weight:600;padding-top:2px}
+.rrow i{font-style:normal;color:var(--brass);font-weight:600}
+@media (max-width:560px){.rrow{grid-template-columns:1fr;gap:2px}}
 .realminfo .facts{font-family:var(--ui);font-size:.85rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 16px;font-variant-numeric:tabular-nums}
 .realminfo .facts b{color:var(--fg);font-weight:600}
 .timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-left:1px solid var(--brass-dim);margin-left:4px}
@@ -536,6 +544,7 @@ details.minimap .map{margin-top:8px;cursor:default}
       <div class="chips" id="bChips"></div>
       <p id="bBlurb" class="muted"></p>
       <p id="bOdds" style="font-family:var(--ui);font-size:.92rem"></p>
+      <details class="sec" id="bRealm"><summary><span class="st" id="bRealmT"></span></summary><div id="bRealmC"></div></details>
       <div class="attrline" id="bAttrs"></div>
       <div id="bDyn" class="stack" style="gap:6px" hidden></div>
       <div class="row"><button class="btn" id="liveBtn">เริ่มใช้ชีวิต</button></div>
@@ -852,6 +861,7 @@ function revealBirth() {
   $('bChips').innerHTML = chips.map((c, i) => `<span class="chip ${i === 2 && P.cls >= 3 ? 'hot' : i === 2 && P.royal ? 'royal' : ''}">${c}</span>`).join('')
     + P.traits.map(t => `<span class="chip trait">${TBY[t].n}<em>${TBY[t].d}</em></span>`).join('');
   $('bBlurb').textContent = r.blurb;
+  $('bRealmT').textContent = `รู้จัก${r.name}ให้มากขึ้น`; $('bRealmC').innerHTML = realmCardHTML(r);
   $('bAttrs').innerHTML = attrLine(P);
   const s = WS[r.id];
   $('bOdds').innerHTML = `ทารกทุก 100 คนในเวลมอร์ เกิดที่นี่ ${r.birth} คน ทารกที่นี่รอดถึงอายุ 5 ขวบ ${pct(s.s5)} และมีอายุขัยเฉลี่ย <b>${yrs(s.mean)} ปี</b>`;
@@ -1072,6 +1082,7 @@ function renderTravel() {
     $('paneTravel').innerHTML = moneyText(h); collapsify($('paneTravel')); return;
   }
   h += questHTML(live);
+  h += `<div class="stack" style="gap:8px"><span class="eyebrow">รู้จัก${P.realm.name} · ที่ที่คุณอยู่</span>${realmCardHTML(P.realm)}</div>`;
   h += `<div class="stack" style="gap:8px"><span class="eyebrow">เดินทาง · ตอนนี้คุณอยู่ที่${P.realm.name}</span><canvas class="map" id="travelMap" role="img" aria-label="แผนที่เส้นทาง"></canvas>`;
   const why = canTravel(P);
   h += `<p class="muted small" style="margin:0">${why || 'ไปค้าขายแบบไปกลับได้ปีละครั้ง ระหว่างอยู่ที่นั่นเวลาจะหยุด แต่จะขาดรายได้จากงานไปหนึ่งฤดู ส่วนการย้ายบ้านต้องจ่ายค่าตั้งตัวใหม่ และต้องขายกิจการทิ้ง'}</p>`;
@@ -1282,7 +1293,7 @@ const SEASON_ANY = [
   ['ลมเถ้าพัดมาจากทิศเหนือ ทุกคนต้องเอาผ้าปิดจมูก', 'ท้องฟ้าเป็นสีเทาไปทั้งฤดู', 'เถ้าบางๆ เกาะอยู่บนหลังคาทุกเช้า', 'ใบไม้ร่วงหมดก่อนเวลา เพราะเถ้าเกาะจนใบดำ', 'คนแก่ในละแวกไอกันทั้งฤดู'],
   ['อากาศหนาวจัด ทุกบ้านต้องจุดไฟทั้งคืน', 'หิมะสีเทาโปรยลงมาบางๆ', 'กลางคืนยาวขึ้น ผู้คนเข้านอนกันเร็ว', 'ทุกบ้านนั่งล้อมเตาไฟเล่านิทานกันจนดึก', 'น้ำในถังแข็งเป็นน้ำแข็งตั้งแต่ก่อนรุ่งสาง'],
 ];
-const SEASON_REALM = {
+const SEASON_REALM_BASE = {
   aurelis: ['ขบวนแห่ประจำฤดูของศาสนจักรเดินผ่านถนนหลัก', 'ระฆังหอสุริยะตีบอกเวลาทุกชั่วโมงเหมือนทุกวัน', 'ขุนนางนั่งรถม้าผ่านถนนหลัก ผู้คนต้องหลบเข้าข้างทาง', 'พ่อค้าจากทุกแดนมาตั้งแผงในตลาดใหญ่'],
   undercity: ['น้ำทิ้งจากเมืองชั้นในไหลล้นลงมาที่ใต้กำแพง', 'ยามเดินตรวจตราใต้กำแพงถี่ขึ้นกว่าเดิม', 'เสียงดนตรีจากงานเลี้ยงในเมืองชั้นในลอยข้ามกำแพงมาทั้งคืน', 'คนต่อแถวรอรับข้าวแจกจากวิหารยาวไปถึงปลายซอย'],
   serenth: ['เหนือเมฆ อากาศยังใสเหมือนทุกฤดู', 'ดอกไม้ในสวนลอยฟ้าบานตามฤดูกาลที่นักเวทกำหนดไว้', 'นกขาวฝูงใหญ่บินวนรอบหอคอยตลอดเช้า', 'สภาผู้อาวุโสประชุมเงียบๆ ไม่มีใครรู้ว่าเรื่องอะไร'],
@@ -1291,6 +1302,7 @@ const SEASON_REALM = {
   mulvane: ['หมอกพิษลอยต่ำอยู่เหนือหนองตลอดเช้า', 'ยุงในหนองชุมจนทุกบ้านต้องสุมควันไล่', 'น้ำในหนองลดลงจนเห็นซากเรือเก่าโผล่ขึ้นมา', 'กบร้องดังทั้งคืนจนนอนไม่หลับ'],
   dunes: ['กลางวันร้อนจัด แต่กลางคืนหนาวจนฟันกระทบกัน', 'เนินทรายแก้วสะท้อนแสงจนแสบตา', 'ทั้งเผ่าเดินทางตอนกลางคืนเพื่อหลบแดด', 'ลมพัดทรายแก้วกระทบกันเป็นเสียงเหมือนกระดิ่ง'],
 };
+const SEASON_REALM = Object.fromEntries(Object.entries(SEASON_REALM_BASE).map(([k, v]) => [k, [...v, ...(REALM_AIR[k] || [])]]));
 let clockT = null, progress = 0, slotDone = 0, choiceSlot = 2, yearLi = null, yearBefore = null, lastTs = 0;
 function curBody() { return yearLi.querySelector('.body'); }
 function appendYear(text, cls = '') {
@@ -1682,7 +1694,7 @@ $('homeBtn').onclick = () => { renderIntro(); renderResume(); show('intro'); };
 function realmInfo(id) {
   const r = REALMS.find(x => x.id === id); if (!r || !WS) return;
   const s = WS[r.id];
-  $('realmInfo').innerHTML = `<h3>${r.name}</h3><div class="facts"><span>ผู้อยู่อาศัย <b>${r.race.filter((v, i, a) => a.indexOf(v) === i).join(' · ')}</b></span><span>สัดส่วนทารกที่เกิดที่นี่ <b>${r.birth}%</b></span><span>อายุขัยเฉลี่ย <b>${Math.round(s.mean)} ปี</b></span><span>รอดถึง 5 ขวบ <b>${pct(s.s5)}</b></span></div><p>${r.blurb}</p><p class="muted">${r.lore}</p>${worksIn(r.id).length ? `<p class="muted small">สิ่งที่ชีวิตก่อนๆ ของคุณสร้างไว้ที่นี่: ${worksIn(r.id).map(x => `${WORKS[x.id].n}ของ${x.by} (ห.ถ. ${x.year})`).join(' · ')}</p>` : ''}`;
+  $('realmInfo').innerHTML = `<h3>${r.name}</h3><div class="facts"><span>ผู้อยู่อาศัย <b>${r.race.filter((v, i, a) => a.indexOf(v) === i).join(' · ')}</b></span><span>สัดส่วนทารกที่เกิดที่นี่ <b>${r.birth}%</b></span><span>อายุขัยเฉลี่ย <b>${Math.round(s.mean)} ปี</b></span><span>รอดถึง 5 ขวบ <b>${pct(s.s5)}</b></span></div><p>${r.blurb}</p>${realmCardHTML(r, false)}<details class="sec"><summary><span class="st">ปกครอง กฎ ชีวิต ความเชื่อ และสถานที่</span></summary>${realmCardHTML(r).replace(/<div class="rmark">[\s\S]*?<\/div>/, '')}</details><p class="muted">${r.lore}</p>${worksIn(r.id).length ? `<p class="muted small">สิ่งที่ชีวิตก่อนๆ ของคุณสร้างไว้ที่นี่: ${worksIn(r.id).map(x => `${WORKS[x.id].n}ของ${x.by} (ห.ถ. ${x.year})`).join(' · ')}</p>` : ''}`;
 }
 let hoverId = null;
 function drawWorld() { VMAP.draw($('worldMap'), { hl: hoverId }); }

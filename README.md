@@ -26,6 +26,7 @@ src/        game source; each file is one system
   content4.js   more small events and one-off choices
   threads.js    people who come back: friend, rival, mentor, first love... (multi-step choices)
   story.js      yearly lines drawn from your life; season air per realm; memory of what was seen
+  realms.js     what makes each realm its own: profile, yearly way of life, local events and choices
   shell.html    the page: layout, styles, all UI code
   map.js        the realm map
 tools/build.py  joins src/ into เกิดจากเถ้าถ่าน.html (order matters)

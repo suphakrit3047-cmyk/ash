@@ -153,7 +153,9 @@ extend('applyFocus', 'careers: a working year pays, tires, and can promote', inn
   }
   if (c.base && c.id === 'farmer' && rk === 0 && p.wealth >= 60) { p.careerRank = 2; return 'เก็บเงินจนซื้อที่นาเป็นของตัวเองได้'; }
   if (c.base && c.id === 'laborer' && rk === 0 && p.careerYears >= 10 && (am(p, 'STR') >= 1 || am(p, 'CHA') >= 1) && roll(.25)) { p.careerRank = 2; return 'นายจ้างให้คุมคนงานคนอื่น'; }
-  return Math.random() < .5 ? pick(c.flav) : null;
+  // ordinary work looks like the place it is done in
+  const pool = c.base && c.id !== 'noble' && WORK[p.realm.id] && Math.random() < .6 ? WORK[p.realm.id] : c.flav;
+  return Math.random() < .5 ? pick(pool) : null;
 });
 
 // ---- career risks and story beats ----

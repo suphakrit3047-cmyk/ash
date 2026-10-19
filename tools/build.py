@@ -3,7 +3,7 @@
 import os, re, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ORDER = ['engine', 'rpg', 'content', 'content3', 'combat', 'careers', 'family', 'economy', 'travel',
-         'housing', 'royal', 'adventure', 'disease', 'elder', 'morality', 'heir', 'relic', 'arms', 'content4', 'threads', 'story']
+         'housing', 'royal', 'adventure', 'disease', 'elder', 'morality', 'heir', 'relic', 'arms', 'content4', 'threads', 'story', 'realms']
 src = lambda f: open(os.path.join(ROOT, 'src', f), encoding='utf-8').read()
 js = ''.join(f'// ---- {f}.js ----\n' + src(f + '.js') + '\n' for f in ORDER)
 html = src('shell.html').replace('/*ENGINE*/', js).replace('/*MAP*/', src('map.js'))
