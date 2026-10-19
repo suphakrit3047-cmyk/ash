@@ -331,3 +331,61 @@ for (const [rid, P] of Object.entries(PLACE_LINES)) {
   );
 }
 LIFE.realm.forEach(e => { if (e.w === 2) e.w = 3; });
+
+// ---------- born in the same year as you ----------
+// three lives started the same year: someone of the other end of your own realm,
+// someone at the other end of the whole world, and someone picked by chance
+function simAs(realm, cls) {
+  let p = null;
+  for (let i = 0; i < 400; i++) { const q = makePerson(realm); if (cls == null || q.bornCls === cls) { p = q; break; } }
+  if (!p) p = makePerson(realm);
+  p.auto = true;
+  while (p.alive) {
+    if (p.age >= 7 && Math.random() < .15) p.focus = pick(FOCI);
+    const ch = checkChoice(p);
+    if (ch) { resolveChoice(p, autoChoose(p, ch)); if (!p.alive) { p.years.push({ h: p.happy }); break; } }
+    const r = finishYear(p);
+    if (r.fate) { resolveChoice(p, autoChoose(p, r.fate)); afterFate(p); }
+  }
+  return p;
+}
+function bornWith(me) {
+  const poor = me.bornCls >= 2, home = me.born;
+  const ends = home.classW.map((w, i) => w > 0 ? i : -1).filter(i => i >= 0);
+  const out = [];
+  // the other end of your own realm
+  const other = poor ? ends[0] : ends[ends.length - 1];
+  if (other !== me.bornCls) out.push(Object.assign(simAs(home, other), { why: poor ? 'เกิดที่เดียวกับคุณ แต่ในบ้านที่ไม่เคยต้องหิว' : 'เกิดที่เดียวกับคุณ ในบ้านที่ตระกูลคุณไม่เคยเหลียวมอง' }));
+  // the other end of the world
+  if (poor) out.push(Object.assign(simAs(home.id === 'aurelis' ? RBY.serenth : RBY.aurelis, 0), { why: 'เกิดในที่ที่ดีที่สุดที่ทารกคนหนึ่งจะเกิดได้' }));
+  else out.push(Object.assign(simAs(home.id === 'mulvane' ? RBY.undercity : RBY.mulvane, 4), { why: 'เกิดในที่ที่แย่ที่สุดที่ทารกคนหนึ่งจะเกิดได้' }));
+  // chance
+  while (out.length < 3) out.push(Object.assign(simAs(null, null), { why: 'สุ่มมาจากทารกทั้งเวลมอร์' }));
+  return out;
+}
+// one line on what a life came to, for the end screen
+function lifeBrief(o) {
+  const b = [];
+  b.push(o.age < 1 ? 'ไม่ทันได้ฉลองวันเกิดปีแรก' : o.age < 15 ? `ตายตั้งแต่อายุ ${o.age} ปี` : `อยู่ถึง ${o.age} ปี`);
+  if (o.age >= 15) b.push(o.wealth < 1 ? 'ตายไปมือเปล่า' : `เหลือทรัพย์ ${money(o.wealth)}`);
+  if (o.cls !== o.bornCls) b.push(o.cls < o.bornCls ? `ไต่ขึ้นไปเป็น${CLASSES[o.cls]}` : `ตกลงไปเป็น${CLASSES[o.cls]}`);
+  if (o.lostKids) b.push(`เสียลูกไป ${o.lostKids} คน`);
+  return b.join(' · ');
+}
+// the sharpest difference between you and one of them, said plainly
+function sharpest(me, list) {
+  let best = null, bs = 0;
+  for (const o of list) {
+    if (!o || o.age == null || ((o.race === 'เอลฟ์') !== (me.race === 'เอลฟ์'))) continue;
+    const dy = o.age - me.age, big = Math.abs(o.wealth - me.wealth) >= 10, rw = big ? (o.wealth + 1) / (me.wealth + 1) : 1, s = Math.abs(dy) + Math.abs(Math.log(rw)) * 8;
+    if (s > bs) { bs = s; best = { o, dy, rw }; }
+  }
+  if (!best || bs < 10) return '';
+  const { o, dy, rw } = best;
+  const parts = [];
+  if (Math.abs(dy) >= 5) parts.push(dy > 0 ? `อยู่นานกว่าคุณ ${dy} ปี` : `ตายก่อนคุณ ${-dy} ปี`);
+  if (rw >= 3) parts.push(`ตายไปพร้อมทรัพย์มากกว่าคุณ${rw >= 20 ? 'หลายสิบเท่า' : ` ${Math.round(rw)} เท่า`}`);
+  else if (rw <= 1 / 3) parts.push(`ตายไปพร้อมทรัพย์น้อยกว่าคุณ${1 / rw >= 20 ? 'หลายสิบเท่า' : ` ${Math.round(1 / rw)} เท่า`}`);
+  if (!parts.length) return '';
+  return `${o.name} เกิดเป็นลูกของ${CLASS_OF[o.bornCls]}ที่${o.born.name}ในปีเดียวกับคุณ ${parts.join(' และ')} ทั้งคุณและเขาไม่ได้เลือกที่เกิดเอง`;
+}

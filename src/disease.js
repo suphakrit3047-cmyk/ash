@@ -24,6 +24,14 @@ function addCurse(p, id, why) { if (hasCurse(p, id)) return null; curses(p).push
 function healIll(p, x) { p.ills = ills(p).filter(y => y !== x); p.flags.cured = (p.flags.cured || 0) + 1; }
 function liftCurse(p, id) { p.curses = curses(p).filter(y => y.id !== id); p.flags.liftedCurse = true; }
 
+// a hard life wears the body out sooner, an easy one later (years added to when ageing starts)
+const CLS_AGE = [5, 2, 0, -5, -9];
+modHazards('disease: hard labour ages the body sooner, an easy life later', (p, H) => {
+  const R = ageR(p), sh = CLS_AGE[p.cls] || 0; if (!sh) return;
+  const start = R.agingStart + sh, i = H.findIndex(h => h[2] === 'old');
+  if (i >= 0) { if (p.age > start) H[i][1] *= Math.exp(-sh / R.agingScale); else H.splice(i, 1); }
+  else if (p.age > start) H.push(['จากไปอย่างสงบด้วยวัยชรา', .008 * Math.exp((p.age - start) / R.agingScale), 'old']);
+});
 // sudden death from illness becomes rare: sickness now arrives as a disease you can see and treat
 modHazards('disease: sudden death from illness becomes rare', (p, H) => { for (const h of H) { if (h[2] === 'plague' || (h[2] === 'ill' && p.age >= 15)) h[1] *= .3; } });
 

@@ -363,6 +363,8 @@ input[type=text]:focus-visible,select:focus-visible{outline:2px solid var(--bras
 .cause{font-size:1.15rem;color:#e0a59d}
 .others{display:flex;flex-direction:column;gap:0}
 .other{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;padding:12px 0;border-bottom:1px solid var(--line)}
+.sharp{font-family:var(--display);font-size:1.15rem;line-height:1.6;border-left:3px solid var(--blood);padding:4px 0 4px 14px;max-width:62ch;margin:0}
+.other .why2{font-family:var(--ui);font-size:.8rem;color:var(--brass);margin:2px 0}
 .other .a{font-family:var(--display);font-size:1.4rem;color:var(--brass);text-align:right;font-variant-numeric:tabular-nums}
 .past{font-family:var(--ui);font-size:.88rem;color:var(--muted);display:flex;flex-direction:column;gap:2px}
 hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
@@ -626,6 +628,11 @@ details.minimap .map{margin-top:8px;cursor:default}
     <canvas class="map" id="endMap" role="img" aria-label="แผนที่เส้นทางชีวิต"></canvas>
     <div class="stack" id="eErasWrap" style="gap:8px"><span class="eyebrow">เหตุการณ์ใหญ่ที่เกิดขึ้นในช่วงชีวิตคุณ</span><div class="eras" id="eEras"></div></div>
     <p id="eSummary" style="max-width:62ch"></p>
+    <div class="stack" style="gap:10px">
+      <h3>คนที่เกิดปีเดียวกับคุณ</h3>
+      <p class="sharp" id="eSharp" hidden></p>
+      <div class="others" id="others"></div>
+    </div>
     <div id="eEpitaph"></div>
     <div class="stack" id="eLegWrap">
       <h3>ตำนานที่ได้จากชีวิตนี้</h3>
@@ -643,10 +650,6 @@ details.minimap .map{margin-top:8px;cursor:default}
       <div class="row"><button class="btn" id="heirBtn">เล่นต่อเป็นลูก</button></div>
     </div>
     <hr>
-    <div class="stack">
-      <h3>อีกสามคนที่เกิดในเวลาเดียวกับคุณ</h3>
-      <div class="others" id="others"></div>
-    </div>
     <div class="tablewrap">
       <table id="census2">
         <caption><h3>ถ้าคุณเกิดที่อื่น</h3></caption>
@@ -670,7 +673,7 @@ const $ = id => document.getElementById(id);
 const N_SIM = 300;
 let WS = null;
 // compute one realm per tick so the page stays responsive while the census is built
-const WS_VER = 'r35';
+const WS_VER = 'r36';
 function computeWS(done) {
   // the census only changes when the game or the world changes, so keep the last one
   const key = 'ash-ws', ver = WS_VER + ':' + (typeof WORLD !== 'undefined' ? WORLD.works.length : 0);
@@ -839,7 +842,7 @@ function startBirth(parent, sib) {
   if (fa > 0) { const inh = P.wealth; P.ffNotes = fastForward(P, fa); if (parent) P.wealth = Math.max(P.wealth, inh); P.startWealth = P.wealth; P.ffFrom = fa; }
   $('bEyebrow').textContent = sib ? 'น้องคนถัดไป' : parent ? 'รุ่นถัดไปของตระกูล' : 'กำลังสุ่มที่เกิด';
   setTab('life');
-  others = [0, 1, 2].map(() => simLife());
+  others = bornWith(P);
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let n = 0; const total = (reduce || parent || sib) ? 1 : 18;
   const spin = () => {
@@ -1624,7 +1627,8 @@ function endLife() {
   const top = SKILLS.filter(x => rank(P, x.id) > 0).sort((a, b) => rank(P, b.id) - rank(P, a.id)).slice(0, 3);
   sum += ` · จบชีวิตที่เลเวล ${P.lv}${top.length ? ` ทักษะเด่นคือ ${top.map(x => `${x.n} ขั้น ${rank(P, x.id)}`).join(', ')}` : ' โดยไม่ได้ฝึกทักษะใดเลย'}`;
   $('eSummary').textContent = sum;
-  $('others').innerHTML = others.map(o => `<div class="other"><div><b style="font-weight:600">${o.name}</b> <span class="muted">· ${o.race} · ลูกของ${CLASS_OF[o.bornCls]}ใน${o.born.name}</span><div class="muted" style="font-size:.92rem">${o.cause}</div></div><div class="a">${o.age} ปี</div></div>`).join('');
+  $('others').innerHTML = others.map(o => `<div class="other"><div><b style="font-weight:600">${o.name}</b> <span class="muted">· ${o.race} · ลูกของ${CLASS_OF[o.bornCls]}ใน${o.born.name}</span>${o.why ? `<div class="why2">${o.why}</div>` : ''}<div style="font-size:.92rem">${lifeBrief(o)}</div><div class="muted" style="font-size:.92rem">${o.cause}</div></div><div class="a">${o.age} ปี</div></div>`).join('');
+  const sh = sharpest(P, others); $('eSharp').hidden = !sh; $('eSharp').textContent = sh;
   censusRows(document.querySelector('#census2 tbody'), r.id, 'end');
   const first = !P.ended;
   $('eEpitaph').innerHTML = '<span class="eyebrow" style="font-style:normal">ผู้คนจดจำคุณว่า</span>' + epitaph(P).map(x => `<p>${esc(x)}</p>`).join('');

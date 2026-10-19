@@ -363,6 +363,8 @@ input[type=text]:focus-visible,select:focus-visible{outline:2px solid var(--bras
 .cause{font-size:1.15rem;color:#e0a59d}
 .others{display:flex;flex-direction:column;gap:0}
 .other{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;padding:12px 0;border-bottom:1px solid var(--line)}
+.sharp{font-family:var(--display);font-size:1.15rem;line-height:1.6;border-left:3px solid var(--blood);padding:4px 0 4px 14px;max-width:62ch;margin:0}
+.other .why2{font-family:var(--ui);font-size:.8rem;color:var(--brass);margin:2px 0}
 .other .a{font-family:var(--display);font-size:1.4rem;color:var(--brass);text-align:right;font-variant-numeric:tabular-nums}
 .past{font-family:var(--ui);font-size:.88rem;color:var(--muted);display:flex;flex-direction:column;gap:2px}
 hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
@@ -626,6 +628,11 @@ details.minimap .map{margin-top:8px;cursor:default}
     <canvas class="map" id="endMap" role="img" aria-label="แผนที่เส้นทางชีวิต"></canvas>
     <div class="stack" id="eErasWrap" style="gap:8px"><span class="eyebrow">เหตุการณ์ใหญ่ที่เกิดขึ้นในช่วงชีวิตคุณ</span><div class="eras" id="eEras"></div></div>
     <p id="eSummary" style="max-width:62ch"></p>
+    <div class="stack" style="gap:10px">
+      <h3>คนที่เกิดปีเดียวกับคุณ</h3>
+      <p class="sharp" id="eSharp" hidden></p>
+      <div class="others" id="others"></div>
+    </div>
     <div id="eEpitaph"></div>
     <div class="stack" id="eLegWrap">
       <h3>ตำนานที่ได้จากชีวิตนี้</h3>
@@ -643,10 +650,6 @@ details.minimap .map{margin-top:8px;cursor:default}
       <div class="row"><button class="btn" id="heirBtn">เล่นต่อเป็นลูก</button></div>
     </div>
     <hr>
-    <div class="stack">
-      <h3>อีกสามคนที่เกิดในเวลาเดียวกับคุณ</h3>
-      <div class="others" id="others"></div>
-    </div>
     <div class="tablewrap">
       <table id="census2">
         <caption><h3>ถ้าคุณเกิดที่อื่น</h3></caption>
@@ -3872,6 +3875,14 @@ function addCurse(p, id, why) { if (hasCurse(p, id)) return null; curses(p).push
 function healIll(p, x) { p.ills = ills(p).filter(y => y !== x); p.flags.cured = (p.flags.cured || 0) + 1; }
 function liftCurse(p, id) { p.curses = curses(p).filter(y => y.id !== id); p.flags.liftedCurse = true; }
 
+// a hard life wears the body out sooner, an easy one later (years added to when ageing starts)
+const CLS_AGE = [5, 2, 0, -5, -9];
+modHazards('disease: hard labour ages the body sooner, an easy life later', (p, H) => {
+  const R = ageR(p), sh = CLS_AGE[p.cls] || 0; if (!sh) return;
+  const start = R.agingStart + sh, i = H.findIndex(h => h[2] === 'old');
+  if (i >= 0) { if (p.age > start) H[i][1] *= Math.exp(-sh / R.agingScale); else H.splice(i, 1); }
+  else if (p.age > start) H.push(['จากไปอย่างสงบด้วยวัยชรา', .008 * Math.exp((p.age - start) / R.agingScale), 'old']);
+});
 // sudden death from illness becomes rare: sickness now arrives as a disease you can see and treat
 modHazards('disease: sudden death from illness becomes rare', (p, H) => { for (const h of H) { if (h[2] === 'plague' || (h[2] === 'ill' && p.age >= 15)) h[1] *= .3; } });
 
@@ -5579,6 +5590,64 @@ for (const [rid, P] of Object.entries(PLACE_LINES)) {
 }
 LIFE.realm.forEach(e => { if (e.w === 2) e.w = 3; });
 
+// ---------- born in the same year as you ----------
+// three lives started the same year: someone of the other end of your own realm,
+// someone at the other end of the whole world, and someone picked by chance
+function simAs(realm, cls) {
+  let p = null;
+  for (let i = 0; i < 400; i++) { const q = makePerson(realm); if (cls == null || q.bornCls === cls) { p = q; break; } }
+  if (!p) p = makePerson(realm);
+  p.auto = true;
+  while (p.alive) {
+    if (p.age >= 7 && Math.random() < .15) p.focus = pick(FOCI);
+    const ch = checkChoice(p);
+    if (ch) { resolveChoice(p, autoChoose(p, ch)); if (!p.alive) { p.years.push({ h: p.happy }); break; } }
+    const r = finishYear(p);
+    if (r.fate) { resolveChoice(p, autoChoose(p, r.fate)); afterFate(p); }
+  }
+  return p;
+}
+function bornWith(me) {
+  const poor = me.bornCls >= 2, home = me.born;
+  const ends = home.classW.map((w, i) => w > 0 ? i : -1).filter(i => i >= 0);
+  const out = [];
+  // the other end of your own realm
+  const other = poor ? ends[0] : ends[ends.length - 1];
+  if (other !== me.bornCls) out.push(Object.assign(simAs(home, other), { why: poor ? 'เกิดที่เดียวกับคุณ แต่ในบ้านที่ไม่เคยต้องหิว' : 'เกิดที่เดียวกับคุณ ในบ้านที่ตระกูลคุณไม่เคยเหลียวมอง' }));
+  // the other end of the world
+  if (poor) out.push(Object.assign(simAs(home.id === 'aurelis' ? RBY.serenth : RBY.aurelis, 0), { why: 'เกิดในที่ที่ดีที่สุดที่ทารกคนหนึ่งจะเกิดได้' }));
+  else out.push(Object.assign(simAs(home.id === 'mulvane' ? RBY.undercity : RBY.mulvane, 4), { why: 'เกิดในที่ที่แย่ที่สุดที่ทารกคนหนึ่งจะเกิดได้' }));
+  // chance
+  while (out.length < 3) out.push(Object.assign(simAs(null, null), { why: 'สุ่มมาจากทารกทั้งเวลมอร์' }));
+  return out;
+}
+// one line on what a life came to, for the end screen
+function lifeBrief(o) {
+  const b = [];
+  b.push(o.age < 1 ? 'ไม่ทันได้ฉลองวันเกิดปีแรก' : o.age < 15 ? `ตายตั้งแต่อายุ ${o.age} ปี` : `อยู่ถึง ${o.age} ปี`);
+  if (o.age >= 15) b.push(o.wealth < 1 ? 'ตายไปมือเปล่า' : `เหลือทรัพย์ ${money(o.wealth)}`);
+  if (o.cls !== o.bornCls) b.push(o.cls < o.bornCls ? `ไต่ขึ้นไปเป็น${CLASSES[o.cls]}` : `ตกลงไปเป็น${CLASSES[o.cls]}`);
+  if (o.lostKids) b.push(`เสียลูกไป ${o.lostKids} คน`);
+  return b.join(' · ');
+}
+// the sharpest difference between you and one of them, said plainly
+function sharpest(me, list) {
+  let best = null, bs = 0;
+  for (const o of list) {
+    if (!o || o.age == null || ((o.race === 'เอลฟ์') !== (me.race === 'เอลฟ์'))) continue;
+    const dy = o.age - me.age, big = Math.abs(o.wealth - me.wealth) >= 10, rw = big ? (o.wealth + 1) / (me.wealth + 1) : 1, s = Math.abs(dy) + Math.abs(Math.log(rw)) * 8;
+    if (s > bs) { bs = s; best = { o, dy, rw }; }
+  }
+  if (!best || bs < 10) return '';
+  const { o, dy, rw } = best;
+  const parts = [];
+  if (Math.abs(dy) >= 5) parts.push(dy > 0 ? `อยู่นานกว่าคุณ ${dy} ปี` : `ตายก่อนคุณ ${-dy} ปี`);
+  if (rw >= 3) parts.push(`ตายไปพร้อมทรัพย์มากกว่าคุณ${rw >= 20 ? 'หลายสิบเท่า' : ` ${Math.round(rw)} เท่า`}`);
+  else if (rw <= 1 / 3) parts.push(`ตายไปพร้อมทรัพย์น้อยกว่าคุณ${1 / rw >= 20 ? 'หลายสิบเท่า' : ` ${Math.round(1 / rw)} เท่า`}`);
+  if (!parts.length) return '';
+  return `${o.name} เกิดเป็นลูกของ${CLASS_OF[o.bornCls]}ที่${o.born.name}ในปีเดียวกับคุณ ${parts.join(' และ')} ทั้งคุณและเขาไม่ได้เลือกที่เกิดเอง`;
+}
+
 
 </script>
 <script>
@@ -5775,7 +5844,7 @@ const $ = id => document.getElementById(id);
 const N_SIM = 300;
 let WS = null;
 // compute one realm per tick so the page stays responsive while the census is built
-const WS_VER = 'r35';
+const WS_VER = 'r36';
 function computeWS(done) {
   // the census only changes when the game or the world changes, so keep the last one
   const key = 'ash-ws', ver = WS_VER + ':' + (typeof WORLD !== 'undefined' ? WORLD.works.length : 0);
@@ -5944,7 +6013,7 @@ function startBirth(parent, sib) {
   if (fa > 0) { const inh = P.wealth; P.ffNotes = fastForward(P, fa); if (parent) P.wealth = Math.max(P.wealth, inh); P.startWealth = P.wealth; P.ffFrom = fa; }
   $('bEyebrow').textContent = sib ? 'น้องคนถัดไป' : parent ? 'รุ่นถัดไปของตระกูล' : 'กำลังสุ่มที่เกิด';
   setTab('life');
-  others = [0, 1, 2].map(() => simLife());
+  others = bornWith(P);
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let n = 0; const total = (reduce || parent || sib) ? 1 : 18;
   const spin = () => {
@@ -6729,7 +6798,8 @@ function endLife() {
   const top = SKILLS.filter(x => rank(P, x.id) > 0).sort((a, b) => rank(P, b.id) - rank(P, a.id)).slice(0, 3);
   sum += ` · จบชีวิตที่เลเวล ${P.lv}${top.length ? ` ทักษะเด่นคือ ${top.map(x => `${x.n} ขั้น ${rank(P, x.id)}`).join(', ')}` : ' โดยไม่ได้ฝึกทักษะใดเลย'}`;
   $('eSummary').textContent = sum;
-  $('others').innerHTML = others.map(o => `<div class="other"><div><b style="font-weight:600">${o.name}</b> <span class="muted">· ${o.race} · ลูกของ${CLASS_OF[o.bornCls]}ใน${o.born.name}</span><div class="muted" style="font-size:.92rem">${o.cause}</div></div><div class="a">${o.age} ปี</div></div>`).join('');
+  $('others').innerHTML = others.map(o => `<div class="other"><div><b style="font-weight:600">${o.name}</b> <span class="muted">· ${o.race} · ลูกของ${CLASS_OF[o.bornCls]}ใน${o.born.name}</span>${o.why ? `<div class="why2">${o.why}</div>` : ''}<div style="font-size:.92rem">${lifeBrief(o)}</div><div class="muted" style="font-size:.92rem">${o.cause}</div></div><div class="a">${o.age} ปี</div></div>`).join('');
+  const sh = sharpest(P, others); $('eSharp').hidden = !sh; $('eSharp').textContent = sh;
   censusRows(document.querySelector('#census2 tbody'), r.id, 'end');
   const first = !P.ended;
   $('eEpitaph').innerHTML = '<span class="eyebrow" style="font-style:normal">ผู้คนจดจำคุณว่า</span>' + epitaph(P).map(x => `<p>${esc(x)}</p>`).join('');
