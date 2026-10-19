@@ -32,7 +32,7 @@ const WEAPONS = {
   sword: { n: 'ดาบ', a: 'STR', die: 8, v: 'ฟัน', skill: 'sword', sp: { n: 'ฟันสองครั้ง', d: 'โจมตีสองครั้ง แต่แม่นน้อยลง' } },
   spear: { n: 'หอก', a: 'STR', die: 8, v: 'แทง', skill: 'spear', sp: { n: 'รั้งระยะ', d: 'โจมตี แถมศัตรูตีโดนยากขึ้นในยกนี้' } },
   axe: { n: 'ขวาน', a: 'STR', die: 10, hit: -1, v: 'จาม', skill: 'axe', sp: { n: 'ฟันหนัก', d: 'แม่นน้อยลง แต่แรงเป็นสองเท่า' } },
-  bow: { n: 'ธนู', a: 'DEX', die: 8, v: 'ยิง', skill: 'bow', sp: { n: 'ถอยแล้วยิง', d: 'ยิงจากระยะไกล ศัตรูตีโดนยากมากในยกนี้' } },
+  bow: { n: 'ธนู', a: 'DEX', die: 8, v: 'ยิง', skill: 'bow', sp: { n: 'ถอยแล้วยิง', d: 'ถอยออกไปแล้วยิง แม่นน้อยลง ศัตรูตีโดนยากขึ้นในยกนี้ ใช้ติดกันสองยกไม่ได้' } },
   dagger: { n: 'มีดสั้น', a: 'DEX', die: 4, hit: 1, v: 'แทง', skill: 'dagger', sp: { n: 'แทงจุดตาย', d: 'แม่นน้อยลงมาก แต่แรงเป็นสามเท่า' } },
 };
 const TIER = ['ทำเอง', 'ธรรมดา', 'ช่างฝีมือ'];
@@ -65,8 +65,9 @@ const wtier = p => { const g = gear(p); return g.w === 'none' ? 0 : (g.own[g.w] 
 
 // --- combat numbers ---
 function hpMax(p) { return Math.max(6, 6 + am(p, 'CON') * 2 + Math.floor(p.lv / 2) + Math.floor(p.health / 10)); }
-function pAtk(p) { const W = wpn(p); return am(p, W.a) + (W.skill ? rank(p, W.skill) * 2 : 0) + wtier(p) + (W.hit || 0); }
-function pAC(p) { const g = gear(p); return 10 + am(p, 'DEX') + g.armor * 2 + (g.shield ? 2 + Math.floor(rank(p, 'shield') / 2) : 0); }
+function pAtk(p) { const W = wpn(p); return am(p, W.a) + (W.skill ? rank(p, W.skill) : 0) + wtier(p) + (W.hit || 0); }
+// armour limits how much a quick body helps; a bow needs both hands, so no shield with it
+function pAC(p) { const g = gear(p); return 10 + Math.min(am(p, 'DEX'), [9, 2, 1][g.armor]) + g.armor * 2 + (g.shield && g.w !== 'bow' ? 2 + Math.floor(rank(p, 'shield') / 2) : 0); }
 function pDmg(p) { const W = wpn(p); return 1 + Math.floor(Math.random() * W.die) + Math.max(0, am(p, W.a)) + wtier(p) + (W.skill ? Math.floor(rank(p, W.skill) / 2) : 0); }
 const hitChance = (bonus, ac) => Math.max(.05, Math.min(.95, (21 - (ac - bonus)) / 20));
 
@@ -76,7 +77,7 @@ const FOES = {
   wolf: { n: 'หมาป่าเถ้า', v: 'กัด', hp: 15, ac: 13, atk: 5, die: 6, plus: 2, lethal: .6, flee: 13 },
   swamp: { n: 'สัตว์ร้ายในหนอง', v: 'ฟาด', hp: 24, ac: 12, atk: 5, die: 8, plus: 2, lethal: .7, flee: 10 },
   scorpion: { n: 'แมงป่องแก้วยักษ์', v: 'ต่อย', hp: 18, ac: 15, atk: 5, die: 6, plus: 3, lethal: .6, flee: 12 },
-  soldier: { n: 'ทหารข้าศึก', v: 'ฟัน', hp: 18, ac: 15, atk: 5, die: 8, plus: 1, lethal: .6, flee: 13 },
+  soldier: { n: 'ทหารข้าศึก', v: 'ฟัน', hp: 18, ac: 15, atk: 6, die: 8, plus: 2, lethal: .6, flee: 13 },
   veteran: { n: 'ทหารผ่านศึกของข้าศึก', v: 'ฟัน', hp: 26, ac: 16, atk: 6, die: 8, plus: 3, lethal: .75, flee: 15 },
   duelist: { n: 'นักดาบของตระกูลคู่แข่ง', v: 'ฟัน', hp: 20, ac: 15, atk: 6, die: 8, plus: 2, lethal: .15, flee: 99, yield: true },
   hunter: { n: 'นักล่าค่าหัว', v: 'ฟัน', hp: 22, ac: 15, atk: 6, die: 8, plus: 2, lethal: .5, flee: 14 },
@@ -97,8 +98,8 @@ function fightActions(p, F) {
   const W = wpn(p), atk = pAtk(p), out = [];
   out.push({ id: 'attack', n: `${W.v}`, d: `โจมตีด้วย${W.n}`, ch: hitChance(atk, F.foe.ac) });
   if (W.sp) {
-    const ch = W.sp.n === 'ฟันสองครั้ง' ? hitChance(atk - 3, F.foe.ac) : W.sp.n === 'ฟันหนัก' ? hitChance(atk - 2, F.foe.ac) : W.sp.n === 'แทงจุดตาย' ? hitChance(atk - 4, F.foe.ac) : hitChance(atk, F.foe.ac);
-    out.push({ id: 'special', n: W.sp.n, d: W.sp.d, ch });
+    const ch = W.sp.n === 'ฟันสองครั้ง' ? hitChance(atk - 3, F.foe.ac) : W.sp.n === 'ฟันหนัก' ? hitChance(atk - 2, F.foe.ac) : W.sp.n === 'แทงจุดตาย' ? hitChance(atk - 4, F.foe.ac) : W.sp.n === 'ถอยแล้วยิง' ? hitChance(atk - 1, F.foe.ac) : hitChance(atk, F.foe.ac);
+    out.push({ id: 'special', n: W.sp.n, d: W.sp.d, ch, off: W.sp.n === 'ถอยแล้วยิง' && F.spAt === F.round - 1 ? 'เพิ่งถอยไปเมื่อยกที่แล้ว' : null });
   }
   out.push({ id: 'defend', n: 'ตั้งรับ', d: 'ศัตรูตีโดนยากขึ้นมาก แล้วได้พักหายใจนิดหน่อย' });
   if (rank(p, 'fire') >= 1) out.push({ id: 'fire', n: 'ลูกไฟ', d: 'ใช้มานา 3', ch: hitChance(am(p, 'INT') + rank(p, 'fire') * 2 + 2, F.foe.ac), off: (p.mana || 0) < 3 ? 'มานาไม่พอ' : null });
@@ -122,10 +123,11 @@ function fightAct(p, F, id) {
   const atk = pAtk(p);
   if (id === 'attack') strike(atk, 1);
   if (id === 'special') {
+    F.spAt = F.round;
     if (W.sp.n === 'ฟันสองครั้ง') { strike(atk - 3, 1); if (F.fhp > 0) strike(atk - 3, 1); }
     if (W.sp.n === 'รั้งระยะ') { strike(atk, 1); foeMod -= 3; }
     if (W.sp.n === 'ฟันหนัก') strike(atk - 2, 2);
-    if (W.sp.n === 'ถอยแล้วยิง') { strike(atk, 1); foeMod -= 5; }
+    if (W.sp.n === 'ถอยแล้วยิง') { strike(atk - 1, 1); foeMod -= 4; }
     if (W.sp.n === 'แทงจุดตาย') strike(atk - 4, 3);
   }
   if (id === 'defend') { F.def = 5; F.php = Math.min(F.max, F.php + 1); L.push('ตั้งรับ แล้วพักหายใจ'); }
@@ -253,7 +255,7 @@ CHOICES.push(
     options: p => [
       fightOpt('บุกแนวหน้า', (p.flags.armyRank || 0) >= 1 ? 'veteran' : 'soldier', { intro: 'แตรทัพดังขึ้น วิ่งเข้าหาแนวข้าศึก', death: 'เสียชีวิตในสงครามชายแดน', onEnd: (q, r) => {
         if (r !== 'win') return r === 'lose' ? 'โดนหามกลับค่ายมาในสภาพสาหัส' : r === 'fled' ? 'ถอยกลับมาแนวหลังได้' : '';
-        q.wealth += 6; q.flags.armyWins = (q.flags.armyWins || 0) + 1;
+        q.wealth += 4; q.flags.armyWins = (q.flags.armyWins || 0) + 1;
         const w = q.flags.armyWins, rk = q.flags.armyRank || 0, best = Math.max(...['sword', 'spear', 'axe', 'bow', 'dagger'].map(s => rank(q, s)));
         if (rk === 0 && w >= 3) { q.flags.armyRank = 1; q.wealth += 10; q.happy += 5; return 'ชนะศึกเป็นครั้งที่สาม นายเลื่อนยศให้เป็นนายสิบ'; }
         if (rk === 1 && w >= 7 && best >= 3) { q.flags.armyRank = 2; q.cls = Math.min(q.cls, 1); q.wealth += 20; q.happy += 8; return 'ได้เลื่อนยศเป็นนายร้อย ได้บ้านพักนายทหาร เงินเดือนมากกว่าพ่อค้าบางคนเสียอีก'; }

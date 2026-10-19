@@ -4,9 +4,9 @@ const AGE_SHIFT = { aurelis: 2, undercity: 5, grieve: 5, mulvane: 7, dunes: 4, k
 for (const r of REALMS) { r.agingStart += AGE_SHIFT[r.id] || 0; r.infant *= .4; r.child *= .45; r.adult *= .55; r.war *= .45; r.famine *= .5; }
 
 const ILLS = {
-  ashfever: { n: 'ไข้เถ้าดำ', d: 'ไอออกมาเป็นเถ้าสีดำ ถ้าไม่รักษาจะหนักขึ้นทุกปี', acute: true, doc: 3, cures: { doctor: .8, heal: [1, .7], potion: .45, temple: .35 } },
-  ashlung: { n: 'ปอดเถ้า', d: 'เถ้าสะสมในปอด หายใจไม่เต็มอิ่ม สุขภาพทรุดลงช้าๆ', doc: 10, cures: { doctor: .4, heal: [3, .6], temple: .25 }, suppress: 'potion' },
-  swampfever: { n: 'ไข้หนอง', d: 'ไข้ที่กลับมาเป็นซ้ำทุกฤดูฝน', doc: 4, cures: { doctor: .6, heal: [2, .7], temple: .3 }, suppress: 'potion' },
+  ashfever: { n: 'ไข้เถ้าดำ', d: 'ไอออกมาเป็นเถ้าสีดำ ถ้าไม่รักษาจะหนักขึ้นทุกปี', acute: true, doc: 4, cures: { doctor: .6, heal: [1, .6], potion: .35, temple: .25 } },
+  ashlung: { n: 'ปอดเถ้า', d: 'เถ้าสะสมในปอด หายใจไม่เต็มอิ่ม สุขภาพทรุดลงช้าๆ', doc: 14, cures: { doctor: .3, heal: [3, .5], temple: .2 }, suppress: 'potion' },
+  swampfever: { n: 'ไข้หนอง', d: 'ไข้ที่กลับมาเป็นซ้ำทุกฤดูฝน', doc: 6, cures: { doctor: .45, heal: [2, .6], temple: .25 }, suppress: 'potion' },
   glassskin: { n: 'ผิวแก้ว', d: 'ผิวค่อยๆ แข็งเป็นแก้ว ขยับตัวได้ช้าลงเรื่อยๆ หมอทั่วไปรักษาไม่ได้', doc: 20, cures: { doctor: .08, heal: [4, .6], serenth: .6 } },
   wither: { n: 'อาการเหี่ยวเฉา', d: 'โรคของเอลฟ์ที่อยู่มานานเกินไป ร่างกายไม่ได้ป่วย แต่ใจไม่อยากอยู่ต่อแล้ว', doc: 6, cures: { doctor: .15, temple: .2 } },
 };
@@ -32,11 +32,11 @@ function contractYear(p) {
   const poor = 1.3 - Math.min(p.wealth, 100) / 100 * .8;
   const roof = typeof effTier === 'function' ? HOUSES[effTier(p)].ill : 1;
   const k = a < 15 ? .4 : 1;
-  if (roll(r.plague / .6 * 4 * poor * roof * k * hazardMod(p, 'plague'))) out.push(catchIll(p, 'ashfever', 'เริ่มไอออกมาเป็นเถ้าสีดำ หมอแถวบ้านบอกว่าเป็นไข้เถ้าดำ'));
+  if (roll(r.plague / .6 * 5 * poor * roof * k * hazardMod(p, 'plague'))) out.push(catchIll(p, 'ashfever', 'เริ่มไอออกมาเป็นเถ้าสีดำ หมอแถวบ้านบอกว่าเป็นไข้เถ้าดำ'));
   const dusty = ['laborer', 'farmer', 'serf', 'slave', 'smith', 'soldier'].includes(p.career) || has(p, 'kragmor');
-  if (a >= 16 && has(p, 'kragmor', 'undercity', 'grieve') && dusty && roll(.012)) out.push(catchIll(p, 'ashlung', 'ไอไม่หยุดมาหลายเดือน หมอบอกว่าปอดเต็มไปด้วยเถ้า'));
-  if (a >= 5 && has(p, 'mulvane', 'grieve') && roll(has(p, 'mulvane') ? .04 : .01)) out.push(catchIll(p, 'swampfever', 'ฝนแรกของปีมาพร้อมไข้หนอง นอนหนาวสั่นอยู่บนเสื่อทั้งเดือน'));
-  if (a >= 10 && has(p, 'dunes') && roll(OUTDOOR.includes(p.career) ? .025 : .012)) out.push(catchIll(p, 'glassskin', 'ผิวที่หลังมือเริ่มแข็งและใส เหมือนแก้วที่ยังไม่ทันเย็นตัว'));
+  if (a >= 16 && has(p, 'kragmor', 'undercity', 'grieve') && dusty && roll(.02)) out.push(catchIll(p, 'ashlung', 'ไอไม่หยุดมาหลายเดือน หมอบอกว่าปอดเต็มไปด้วยเถ้า'));
+  if (a >= 5 && has(p, 'mulvane', 'grieve') && roll(has(p, 'mulvane') ? .06 : .02)) out.push(catchIll(p, 'swampfever', 'ฝนแรกของปีมาพร้อมไข้หนอง นอนหนาวสั่นอยู่บนเสื่อทั้งเดือน'));
+  if (a >= 10 && has(p, 'dunes') && roll(OUTDOOR.includes(p.career) ? .035 : .018)) out.push(catchIll(p, 'glassskin', 'ผิวที่หลังมือเริ่มแข็งและใส เหมือนแก้วที่ยังไม่ทันเย็นตัว'));
   if (p.race === 'เอลฟ์' && a >= 120 && roll(.03)) out.push(catchIll(p, 'wither', 'เช้าวันหนึ่งตื่นมาแล้วไม่อยากลุกจากที่นอน วันต่อๆ มาก็เป็นแบบนั้น'));
   // curses
   if ((p.flags.usurper || p.flags.plotted) && !p.flags.bloodChecked) { p.flags.bloodChecked = true; if (roll(.6)) out.push(addCurse(p, 'blood', 'แม่มดแก่คนหนึ่งยืนรออยู่หน้าประตูบ้าน บอกว่าเลือดที่คุณทำให้หลั่งจะตามลูกหลานไปอีกหลายรุ่น')); }
@@ -53,13 +53,13 @@ function illYear(p) {
     if (p.age < 14 && p.cls <= 2 && roll(p.cls <= 1 ? .9 : .5) && (I.cures.doctor || 0) >= .4) { if (roll(I.cures.doctor)) { healIll(p, x); out.push(`พ่อแม่พาไปหาหมอ แล้ว${I.n}ก็หาย`); continue; } }
     switch (x.id) {
       case 'ashfever':
-        if (roll(rest ? .5 : .3)) { healIll(p, x); out.push('ไข้เถ้าดำค่อยๆ หายไปเอง'); break; }
-        if (roll(.35)) x.stage++;
-        p.health -= 5 * x.stage;
-        if (x.stage >= 4) { if (roll(.2)) { die(p, 'เสียชีวิตด้วยไข้เถ้าดำที่ไม่ได้รักษา'); return 'ไข้เถ้าดำลุกลามจนร่างกายรับไม่ไหว'; } x.stage = 3; }
+        if (roll(rest ? .35 : .2)) { healIll(p, x); out.push('ไข้เถ้าดำค่อยๆ หายไปเอง'); break; }
+        if (roll(.45)) x.stage++;
+        p.health -= 6 * x.stage;
+        if (x.stage >= 4) { if (roll(.25)) { die(p, 'เสียชีวิตด้วยไข้เถ้าดำที่ไม่ได้รักษา'); return 'ไข้เถ้าดำลุกลามจนร่างกายรับไม่ไหว'; } x.stage = 3; }
         out.push(['', 'ยังไอเป็นเถ้าอยู่', 'ไข้เถ้าดำหนักขึ้น ไข้สูงอยู่ทั้งฤดู', 'ไข้เถ้าดำเข้าระยะวิกฤตแล้ว ถ้าไม่รักษา ปีหน้าอาจไม่รอด'][x.stage]);
         break;
-      case 'ashlung': p.health -= 2; p.happy -= 1; if (roll(.3)) out.push(pick(['เดินขึ้นเนินทีไรก็หอบทุกที', 'ไอจนซี่โครงร้าว หมอสั่งให้เลิกทำงานหนัก พูดน่ะง่าย แต่ทำจริงไม่ได้', 'หายใจเสียงหวีดทั้งคืนจนคนในบ้านนอนไม่หลับ'])); break;
+      case 'ashlung': p.health -= 3; p.happy -= 1; if (roll(.3)) out.push(pick(['เดินขึ้นเนินทีไรก็หอบทุกที', 'ไอจนซี่โครงร้าว หมอสั่งให้เลิกทำงานหนัก พูดน่ะง่าย แต่ทำจริงไม่ได้', 'หายใจเสียงหวีดทั้งคืนจนคนในบ้านนอนไม่หลับ'])); break;
       case 'swampfever': if (roll(.5)) { p.health -= 6; p.happy -= 2; out.push(pick(['ไข้หนองกำเริบอีกแล้วในฤดูฝนปีนี้', 'ไข้หนองกลับมาตามนัด ห่มผ้าสามผืนก็ยังหนาวสั่นอยู่ทั้งอาทิตย์', 'ไข้หนองขึ้นสูงจนเพ้อ เรียกหาคนที่ตายไปแล้ว', 'ปีนี้ไข้หนองมาเร็วกว่าทุกปี ก่อนฝนแรกจะตกเสียอีก'])); } break;
       case 'glassskin': p.health -= 1; if (roll(.25) && p.attrs.DEX > 6) { p.attrs.DEX--; out.push('ผิวแก้วลามขึ้นไปถึงข้อศอก นิ้วขยับช้าลงอีก (ว่องไว −1)'); } break;
       case 'wither': p.happy -= 5; if (p.focus === 'love' && roll(.3)) { healIll(p, x); out.push('ได้อยู่กับคนที่รัก เลยกลับมาอยากมีชีวิตอยู่ต่ออีกครั้ง'); } break;

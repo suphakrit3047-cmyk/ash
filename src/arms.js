@@ -9,14 +9,14 @@ const ARENA = {
   mulvane: { n: 'บ่อโคลนหลังโรงเหล้า', d: 'ลุยกันในโคลนท่วมเข่าต่อหน้าพวกขี้เมา', pit: true },
 };
 Object.assign(FOES, {
-  arena1: { n: 'นักสู้มือใหม่', v: 'ฟาด', hp: 14, ac: 12, atk: 4, die: 6, plus: 1, lethal: .02, flee: 99, yield: true },
-  arena2: { n: 'นักสู้ประจำลาน', v: 'ฟัน', hp: 20, ac: 14, atk: 6, die: 8, plus: 2, lethal: .05, flee: 99, yield: true },
-  arena3: { n: 'แชมป์ประจำลาน', v: 'ฟัน', hp: 30, ac: 16, atk: 8, die: 10, plus: 3, lethal: .1, flee: 99, yield: true },
+  arena1: { n: 'นักสู้มือใหม่', v: 'ฟาด', hp: 16, ac: 13, atk: 5, die: 6, plus: 1, lethal: .02, flee: 99, yield: true },
+  arena2: { n: 'นักสู้ประจำลาน', v: 'ฟัน', hp: 24, ac: 15, atk: 6, die: 8, plus: 3, lethal: .05, flee: 99, yield: true },
+  arena3: { n: 'แชมป์ประจำลาน', v: 'ฟัน', hp: 34, ac: 17, atk: 8, die: 10, plus: 4, lethal: .1, flee: 99, yield: true },
 });
 const ARENA_T = [
-  { foe: 'arena1', n: 'รอบคัดเลือก', pay: 1.5 },
-  { foe: 'arena2', n: 'คู่ประจำลาน', pay: 4 },
-  { foe: 'arena3', n: 'ท้าชิงแชมป์', pay: 10 },
+  { foe: 'arena1', n: 'รอบคัดเลือก', pay: 1 },
+  { foe: 'arena2', n: 'คู่ประจำลาน', pay: 2.5 },
+  { foe: 'arena3', n: 'ท้าชิงแชมป์', pay: 6 },
 ];
 const ARENA_MAX = 3;
 const arenaLeft = p => ARENA_MAX - (p.flags.arenaAge === p.age ? (p.flags.arenaN || 0) : 0);
@@ -87,7 +87,7 @@ extend('hazards', 'arms: fighters survive war and beasts more often', inner => f
 });
 // 4) fighting careers pay by how well you fight
 const FIGHT_JOBS = ['soldier', 'merc', 'guard', 'hunter', 'knight', 'battlemage'];
-extend('incomeMod', 'arms: fighting careers pay by skill', inner => function (p) { const m = inner(p); return FIGHT_JOBS.includes(p.career) ? m * (1 + Math.min(.4, combatPower(p) * .04)) : m; });
+extend('incomeMod', 'arms: fighting careers pay by skill', inner => function (p) { const m = inner(p); return FIGHT_JOBS.includes(p.career) ? m * (1 + Math.min(.25, combatPower(p) * .03)) : m; });
 LEGENDS.push(
   { id: 'champion', n: 'แชมป์ประจำลาน', d: 'ชนะการท้าชิงแชมป์ในลานประลองหรือบ่อต่อสู้', c: p => p.flags.champion },
   { id: 'biggame', n: 'นายพราน', d: 'ล่าสัตว์ร้ายได้ด้วยมือตัวเอง', c: p => p.flags.bigGame },

@@ -208,7 +208,7 @@ LEGENDS.push(
   const orig = c.options;
   c.options = p => orig(p).map(o => o.label === 'สมัครเป็นทหาร' ? Object.assign({}, o, { act: q => { const t = o.act(q); setCareer(q, 'soldier'); return t; } }) : o);
 })();
-CAREERS.push({ id: 'soldier', base: true, n: ['พลทหาร', 'นายสิบ', 'นายร้อย'], pay: [4, 6, 10], phys: 1.2, d: 'ทหารประจำการ เลื่อนยศจากการชนะศึก',
+CAREERS.push({ id: 'soldier', base: true, n: ['พลทหาร', 'นายสิบ', 'นายร้อย'], pay: [3.5, 5, 8], phys: 1.2, d: 'ทหารประจำการ เลื่อนยศจากการชนะศึก',
   flav: ['ฝึกซ้อมในค่ายทหารทุกเช้า', 'กองโดนส่งไปเฝ้าด่านชายแดน', 'ได้เงินเดือนทหารครบทั้งปี'] });
 CBY.soldier = CAREERS[CAREERS.length - 1];
 // army rank drives soldier title

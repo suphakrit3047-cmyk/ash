@@ -661,7 +661,7 @@ const $ = id => document.getElementById(id);
 const N_SIM = 300;
 let WS = null;
 // compute one realm per tick so the page stays responsive while the census is built
-const WS_VER = 'r34';
+const WS_VER = 'r35';
 function computeWS(done) {
   // the census only changes when the game or the world changes, so keep the last one
   const key = 'ash-ws', ver = WS_VER + ':' + (typeof WORLD !== 'undefined' ? WORLD.works.length : 0);
